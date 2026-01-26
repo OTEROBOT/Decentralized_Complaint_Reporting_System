@@ -18,14 +18,15 @@ function App() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false) // สำหรับแสดง "กำลังส่งเรื่อง..."
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(false)
   const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false)
 
-  // ฟังก์ชันเชื่อมต่อ MetaMask (ใช้ทั้งกดปุ่มและ auto-connect)
-  const connectWallet = async (auto = false) => {
+  // เชื่อมต่อ MetaMask (เฉพาะตอนกดปุ่ม ไม่ auto-connect ตอนเปิดหน้า)
+  const connectWallet = async () => {
     if (!window.ethereum) {
-      if (!auto) setStatusMessage('กรุณาติดตั้ง MetaMask ก่อนครับ!')
+      setStatusMessage('กรุณาติดตั้ง MetaMask ก่อนครับ!')
       return
     }
 
@@ -35,10 +36,10 @@ function App() {
       const signer = await provider.getSigner()
       const address = await signer.getAddress()
       setAccount(address)
-      if (!auto) setStatusMessage('เชื่อมต่อกระเป๋าเงินดิจิทัลเรียบร้อย: ' + address)
+      setStatusMessage('เชื่อมต่อกระเป๋าเงินดิจิทัลเรียบร้อย: ' + address)
     } catch (error) {
       console.error(error)
-      if (!auto) setStatusMessage('ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่อีกครั้ง')
+      setStatusMessage('ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่อีกครั้ง')
     }
   }
 
@@ -99,16 +100,19 @@ function App() {
       return
     }
 
+    setIsSubmitting(true) // เริ่มแสดง "กำลังส่งเรื่อง..."
+    setStatusMessage('')
+
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
 
       const tx = await contract.submitComplaint(title, description)
-      setStatusMessage('กำลังบันทึก... รอ transaction ยืนยัน')
+      setStatusMessage('กำลังส่งเรื่องไปยัง Blockchain...')
 
       await tx.wait()
-      setStatusMessage('ส่งเรื่องสำเร็จ! Tx Hash: ' + tx.hash)
+      setStatusMessage('ส่งเรื่องร้องเรียนสำเร็จ! Transaction Hash: ' + tx.hash)
 
       setTitle('')
       setDescription('')
@@ -116,31 +120,13 @@ function App() {
     } catch (error) {
       console.error(error)
       setStatusMessage('ส่งเรื่องล้มเหลว: ' + (error as Error).message)
+    } finally {
+      setIsSubmitting(false) // ปิด loading เมื่อเสร็จ
     }
   }
 
-  // Auto-connect เมื่อเปิดหน้าเว็บหรือรีเฟรช
+  // โหลดข้อมูลครั้งแรก (ไม่ auto-connect wallet)
   useEffect(() => {
-    const autoConnect = async () => {
-      if (window.ethereum) {
-        try {
-          const provider = new ethers.BrowserProvider(window.ethereum)
-          // เช็คว่ามีบัญชีที่เคยอนุญาตอยู่แล้วหรือไม่
-          const accounts = await provider.listAccounts()
-          if (accounts.length > 0) {
-            const signer = await provider.getSigner()
-            const address = await signer.getAddress()
-            setAccount(address)
-            setStatusMessage('เชื่อมต่ออัตโนมัติสำเร็จ: ' + address)
-          }
-        } catch (error) {
-          console.log('Auto-connect ล้มเหลว (ปกติถ้ายังไม่เคยเชื่อม)', error)
-          // ไม่แสดงข้อความให้ผู้ใช้เห็น เพื่อไม่ให้รบกวน
-        }
-      }
-    }
-
-    autoConnect()
     loadComplaints()
   }, [])
 
@@ -149,111 +135,130 @@ function App() {
     : complaints
 
   return (
-    <div className="container">
-      <h1>ระบบแจ้งร้องเรียนแบบกระจายศูนย์</h1>
-      <h2>Decentralized Complaint Reporting System</h2>
+    <div className="app-wrapper">
+      <div className="container">
+        <h1>ระบบแจ้งร้องเรียนแบบกระจายศูนย์</h1>
+        <h2>Decentralized Complaint Reporting System</h2>
 
-      {!account ? (
-        <button onClick={() => connectWallet(false)} className="connect-btn">
-          เชื่อมต่อ MetaMask
-        </button>
-      ) : (
-        <div className="wallet-info">
-          <p>กระเป๋าที่เชื่อม: <strong>{account}</strong></p>
-          <button onClick={disconnectWallet} className="logout-btn">
-            ออกจากระบบ
-          </button>
-          <label className="filter-toggle">
-            <input
-              type="checkbox"
-              checked={showMyComplaintsOnly}
-              onChange={(e) => setShowMyComplaintsOnly(e.target.checked)}
-            />
-            แสดงเฉพาะเรื่องของฉัน
-          </label>
-          <button onClick={loadComplaints} className="refresh-btn">
-            รีเฟรชรายการ
-          </button>
-        </div>
-      )}
-
-      <div className="form-section">
-        <h3>ยื่นเรื่องร้องเรียนใหม่</h3>
-        <input
-          type="text"
-          placeholder="หัวข้อเรื่องร้องเรียน"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <textarea
-          placeholder="รายละเอียด (โปรดระบุข้อมูลให้ครบถ้วนและชัดเจน)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <button onClick={submitComplaint} disabled={!account}>
-          ส่งเรื่องร้องเรียน
-        </button>
-      </div>
-
-      {statusMessage && <div className="status"><p>{statusMessage}</p></div>}
-
-      <div className="complaints-section">
-        <h3>รายการเรื่องร้องเรียนทั้งหมด</h3>
-        {loading ? (
-          <p>กำลังโหลดข้อมูลจาก Blockchain...</p>
-        ) : filteredComplaints.length === 0 ? (
-          <p>{showMyComplaintsOnly ? 'คุณยังไม่มีเรื่องร้องเรียน' : 'ยังไม่มีเรื่องร้องเรียน'}</p>
+        {!account ? (
+          <div className="login-screen">
+            <h3>ยินดีต้อนรับ</h3>
+            <p>กรุณาเชื่อมต่อกระเป๋าเงินดิจิทัลเพื่อใช้งานระบบ</p>
+            <button onClick={connectWallet} className="connect-btn">
+              เชื่อมต่อ MetaMask
+            </button>
+          </div>
         ) : (
-          <table className="complaints-table">
-            <thead>
-              <tr>
-                <th>ลำดับ</th>
-                <th>หัวข้อ</th>
-                <th>รายละเอียด</th>
-                <th>ผู้ส่ง</th>
-                <th>สถานะ</th>
-                <th>วันที่ส่ง</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredComplaints.map((c) => (
-                <>
-                  <tr 
-                    key={c.id} 
-                    onClick={() => toggleExpand(c.id)}
-                    className="expandable-row"
-                  >
-                    <td>{c.id}</td>
-                    <td>{c.title}</td>
-                    <td>
-                      {c.description.length > 80 
-                        ? c.description.substring(0, 80) + '...' 
-                        : c.description}
-                      {c.description.length > 80 && <span className="expand-hint"> (คลิกเพื่อดูเต็ม)</span>}
-                    </td>
-                    <td>{c.reporter.substring(0, 6) + '...' + c.reporter.substring(38)}</td>
-                    <td className={`status-${c.status.toLowerCase()}`}>
-                      {c.status}
-                    </td>
-                    <td>{c.timestamp}</td>
-                  </tr>
+          <>
+            <div className="wallet-info">
+              <p>กระเป๋าที่เชื่อม: <strong>{account}</strong></p>
+              <button onClick={disconnectWallet} className="logout-btn">
+                ออกจากระบบ
+              </button>
+              <label className="filter-toggle">
+                <input
+                  type="checkbox"
+                  checked={showMyComplaintsOnly}
+                  onChange={(e) => setShowMyComplaintsOnly(e.target.checked)}
+                />
+                แสดงเฉพาะเรื่องของฉัน
+              </label>
+              <button onClick={loadComplaints} className="refresh-btn">
+                รีเฟรชรายการ
+              </button>
+            </div>
 
-                  {c.expanded && (
-                    <tr className="expanded-row">
-                      <td colSpan={6}>
-                        <div className="expanded-content">
-                          <strong>รายละเอียดเต็ม:</strong>
-                          <p>{c.description}</p>
-                        </div>
-                      </td>
+            <div className="form-section">
+              <h3>ยื่นเรื่องร้องเรียนใหม่</h3>
+              <input
+                type="text"
+                placeholder="หัวข้อเรื่องร้องเรียน"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <textarea
+                placeholder="รายละเอียด (โปรดระบุข้อมูลให้ครบถ้วนและชัดเจน)"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <button onClick={submitComplaint} disabled={!account || isSubmitting}>
+                {isSubmitting ? 'กำลังส่ง...' : 'ส่งเรื่องร้องเรียน'}
+              </button>
+            </div>
+
+            {statusMessage && <div className="status"><p>{statusMessage}</p></div>}
+
+            <div className="complaints-section">
+              <h3>รายการเรื่องร้องเรียนทั้งหมด</h3>
+              {loading ? (
+                <p>กำลังโหลดข้อมูลจาก Blockchain...</p>
+              ) : filteredComplaints.length === 0 ? (
+                <p>{showMyComplaintsOnly ? 'คุณยังไม่มีเรื่องร้องเรียน' : 'ยังไม่มีเรื่องร้องเรียน'}</p>
+              ) : (
+                <table className="complaints-table">
+                  <thead>
+                    <tr>
+                      <th>ลำดับ</th>
+                      <th>หัวข้อ</th>
+                      <th>รายละเอียด</th>
+                      <th>ผู้ส่ง</th>
+                      <th>สถานะ</th>
+                      <th>วันที่ส่ง</th>
                     </tr>
-                  )}
-                </>
-              ))}
-            </tbody>
-          </table>
+                  </thead>
+                  <tbody>
+                    {filteredComplaints.map((c) => (
+                      <>
+                        <tr 
+                          key={c.id} 
+                          onClick={() => toggleExpand(c.id)}
+                          className="expandable-row"
+                        >
+                          <td>{c.id}</td>
+                          <td>{c.title}</td>
+                          <td>
+                            {c.description.length > 80 
+                              ? c.description.substring(0, 80) + '...' 
+                              : c.description}
+                            {c.description.length > 80 && <span className="expand-hint"> (คลิกเพื่อดูเต็ม)</span>}
+                          </td>
+                          <td>{c.reporter.substring(0, 6) + '...' + c.reporter.substring(38)}</td>
+                          <td className={`status-${c.status.toLowerCase()}`}>
+                            {c.status}
+                          </td>
+                          <td>{c.timestamp}</td>
+                        </tr>
+
+                        {c.expanded && (
+                          <tr className="expanded-row">
+                            <td colSpan={6}>
+                              <div className="expanded-content">
+                                <strong>รายละเอียดเต็ม:</strong>
+                                <p>{c.description}</p>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </>
         )}
       </div>
+
+      {/* Loading Overlay เมื่อกำลังส่งเรื่อง */}
+      {isSubmitting && (
+        <div className="loading-overlay">
+          <div className="loading-content">
+            <div className="spinner"></div>
+            <p>กำลังส่งเรื่องร้องเรียนไปยัง Blockchain...</p>
+            <p>กรุณารอสักครู่ อย่าปิดหน้าต่าง</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
