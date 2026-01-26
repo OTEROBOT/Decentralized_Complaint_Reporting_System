@@ -251,3 +251,56 @@ button:disabled {
 .complaints-table tr:hover {
   background: rgba(255,255,255,0.03);
 }
+/* สไตล์สำหรับสถานะในตาราง */
+.status-submitted {
+  color: #d97706; /* สีเหลือง */
+  font-weight: 600;
+}
+
+.status-underreview {
+  color: #2563eb; /* สีน้ำเงิน */
+  font-weight: 600;
+}
+
+.status-resolved {
+  color: #16a34a; /* สีเขียว */
+  font-weight: 600;
+}
+
+/* ปุ่มรีเฟรช */
+.refresh-btn {
+  background: #4b5563;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 16px;
+}
+
+.refresh-btn:hover {
+  background: #6b7280;
+}
+
+/* Toggle กรองเรื่องของฉัน */
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 0.95rem;
+}
+
+.filter-toggle input {
+  width: 18px;
+  height: 18px;
+}
+
+/* Wallet info (รวมปุ่มรีเฟรชและ toggle) */
+.wallet-info {
+  margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}

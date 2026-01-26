@@ -8,7 +8,7 @@ interface Complaint {
   title: string;
   description: string;
   reporter: string;
-  status: string; // เปลี่ยนเป็น string ธรรมดาเพื่อหลีกเลี่ยง error
+  status: string;
   timestamp: string;
 }
 
@@ -19,7 +19,9 @@ function App() {
   const [statusMessage, setStatusMessage] = useState('')
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(false)
+  const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false) // toggle กรองเรื่องของฉัน
 
+  // เชื่อม MetaMask
   const connectWallet = async () => {
     if (!window.ethereum) {
       setStatusMessage('กรุณาติดตั้ง MetaMask ก่อนครับ!')
@@ -39,6 +41,7 @@ function App() {
     }
   }
 
+  // โหลดข้อมูลเรื่องร้องเรียน
   const loadComplaints = async () => {
     if (!window.ethereum) return
     setLoading(true)
@@ -70,6 +73,7 @@ function App() {
     }
   }
 
+  // ส่งเรื่องร้องเรียน
   const submitComplaint = async () => {
     if (!account) {
       setStatusMessage('กรุณาเชื่อมต่อกระเป๋าเงินก่อน')
@@ -93,16 +97,22 @@ function App() {
 
       setTitle('')
       setDescription('')
-      loadComplaints()
+      loadComplaints() // รีโหลดรายการใหม่
     } catch (error) {
       console.error(error)
       setStatusMessage('ส่งเรื่องล้มเหลว: ' + (error as Error).message)
     }
   }
 
+  // โหลดข้อมูลครั้งแรก
   useEffect(() => {
     loadComplaints()
   }, [])
+
+  // กรองเฉพาะเรื่องของฉัน (ถ้าเปิด toggle)
+  const filteredComplaints = showMyComplaintsOnly
+    ? complaints.filter((c) => c.reporter.toLowerCase() === account?.toLowerCase())
+    : complaints
 
   return (
     <div className="container">
@@ -114,7 +124,20 @@ function App() {
           เชื่อมต่อ MetaMask
         </button>
       ) : (
-        <p>กระเป๋าที่เชื่อม: <strong>{account}</strong></p>
+        <div className="wallet-info">
+          <p>กระเป๋าที่เชื่อม: <strong>{account}</strong></p>
+          <label className="filter-toggle">
+            <input
+              type="checkbox"
+              checked={showMyComplaintsOnly}
+              onChange={(e) => setShowMyComplaintsOnly(e.target.checked)}
+            />
+            แสดงเฉพาะเรื่องของฉัน
+          </label>
+          <button onClick={loadComplaints} className="refresh-btn">
+            รีเฟรชรายการ
+          </button>
+        </div>
       )}
 
       <div className="form-section">
@@ -141,8 +164,8 @@ function App() {
         <h3>รายการเรื่องร้องเรียนทั้งหมด</h3>
         {loading ? (
           <p>กำลังโหลดข้อมูลจาก Blockchain...</p>
-        ) : complaints.length === 0 ? (
-          <p>ยังไม่มีเรื่องร้องเรียน</p>
+        ) : filteredComplaints.length === 0 ? (
+          <p>{showMyComplaintsOnly ? 'คุณยังไม่มีเรื่องร้องเรียน' : 'ยังไม่มีเรื่องร้องเรียน'}</p>
         ) : (
           <table className="complaints-table">
             <thead>
@@ -156,13 +179,15 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {complaints.map((c) => (
+              {filteredComplaints.map((c) => (
                 <tr key={c.id}>
                   <td>{c.id}</td>
                   <td>{c.title}</td>
                   <td>{c.description.length > 80 ? c.description.substring(0, 80) + '...' : c.description}</td>
                   <td>{c.reporter.substring(0, 6) + '...' + c.reporter.substring(38)}</td>
-                  <td>{c.status}</td>
+                  <td className={`status-${c.status.toLowerCase()}`}>
+                    {c.status}
+                  </td>
                   <td>{c.timestamp}</td>
                 </tr>
               ))}
