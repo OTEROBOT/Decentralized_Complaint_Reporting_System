@@ -18,12 +18,12 @@ function App() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false) // สำหรับแสดง "กำลังส่งเรื่อง..."
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(false)
   const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false)
 
-  // เชื่อมต่อ MetaMask (เฉพาะตอนกดปุ่ม ไม่ auto-connect ตอนเปิดหน้า)
+  // เชื่อมต่อ MetaMask (เฉพาะกดปุ่ม ไม่ auto-connect ตอนเปิดหน้า)
   const connectWallet = async () => {
     if (!window.ethereum) {
       setStatusMessage('กรุณาติดตั้ง MetaMask ก่อนครับ!')
@@ -100,7 +100,7 @@ function App() {
       return
     }
 
-    setIsSubmitting(true) // เริ่มแสดง "กำลังส่งเรื่อง..."
+    setIsSubmitting(true)
     setStatusMessage('')
 
     try {
@@ -121,13 +121,12 @@ function App() {
       console.error(error)
       setStatusMessage('ส่งเรื่องล้มเหลว: ' + (error as Error).message)
     } finally {
-      setIsSubmitting(false) // ปิด loading เมื่อเสร็จ
+      setIsSubmitting(false)
     }
   }
 
-  // โหลดข้อมูลครั้งแรก (ไม่ auto-connect wallet)
   useEffect(() => {
-    loadComplaints()
+    loadComplaints() // โหลดข้อมูลครั้งแรก (ไม่ auto-connect wallet)
   }, [])
 
   const filteredComplaints = showMyComplaintsOnly
@@ -149,7 +148,7 @@ function App() {
             </button>
           </div>
         ) : (
-          <>
+          <div className="main-content">
             <div className="wallet-info">
               <p>กระเป๋าที่เชื่อม: <strong>{account}</strong></p>
               <button onClick={disconnectWallet} className="logout-btn">
@@ -245,7 +244,7 @@ function App() {
                 </table>
               )}
             </div>
-          </>
+          </div>
         )}
       </div>
 
