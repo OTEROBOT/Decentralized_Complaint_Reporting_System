@@ -10,7 +10,7 @@ interface Complaint {
   reporter: string;
   status: string;
   timestamp: string;
-  expanded?: boolean; // เพิ่มเพื่อควบคุมการขยายแถว
+  expanded?: boolean;
 }
 
 function App() {
@@ -22,10 +22,10 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false)
 
-  // เชื่อม MetaMask
-  const connectWallet = async () => {
+  // ฟังก์ชันเชื่อมต่อ MetaMask (ใช้ทั้งกดปุ่มและ auto-connect)
+  const connectWallet = async (auto = false) => {
     if (!window.ethereum) {
-      setStatusMessage('กรุณาติดตั้ง MetaMask ก่อนครับ!')
+      if (!auto) setStatusMessage('กรุณาติดตั้ง MetaMask ก่อนครับ!')
       return
     }
 
@@ -35,10 +35,10 @@ function App() {
       const signer = await provider.getSigner()
       const address = await signer.getAddress()
       setAccount(address)
-      setStatusMessage('เชื่อมต่อกระเป๋าเงินดิจิทัลเรียบร้อย: ' + address)
+      if (!auto) setStatusMessage('เชื่อมต่อกระเป๋าเงินดิจิทัลเรียบร้อย: ' + address)
     } catch (error) {
       console.error(error)
-      setStatusMessage('เชื่อมต่อล้มเหลว กรุณาลองใหม่')
+      if (!auto) setStatusMessage('ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่อีกครั้ง')
     }
   }
 
@@ -88,7 +88,7 @@ function App() {
     )
   }
 
-  // ส่งเรื่องร้องเรียน (เหมือนเดิม)
+  // ส่งเรื่องร้องเรียน
   const submitComplaint = async () => {
     if (!account) {
       setStatusMessage('กรุณาเชื่อมต่อกระเป๋าเงินก่อน')
@@ -119,7 +119,28 @@ function App() {
     }
   }
 
+  // Auto-connect เมื่อเปิดหน้าเว็บหรือรีเฟรช
   useEffect(() => {
+    const autoConnect = async () => {
+      if (window.ethereum) {
+        try {
+          const provider = new ethers.BrowserProvider(window.ethereum)
+          // เช็คว่ามีบัญชีที่เคยอนุญาตอยู่แล้วหรือไม่
+          const accounts = await provider.listAccounts()
+          if (accounts.length > 0) {
+            const signer = await provider.getSigner()
+            const address = await signer.getAddress()
+            setAccount(address)
+            setStatusMessage('เชื่อมต่ออัตโนมัติสำเร็จ: ' + address)
+          }
+        } catch (error) {
+          console.log('Auto-connect ล้มเหลว (ปกติถ้ายังไม่เคยเชื่อม)', error)
+          // ไม่แสดงข้อความให้ผู้ใช้เห็น เพื่อไม่ให้รบกวน
+        }
+      }
+    }
+
+    autoConnect()
     loadComplaints()
   }, [])
 
@@ -133,7 +154,7 @@ function App() {
       <h2>Decentralized Complaint Reporting System</h2>
 
       {!account ? (
-        <button onClick={connectWallet} className="connect-btn">
+        <button onClick={() => connectWallet(false)} className="connect-btn">
           เชื่อมต่อ MetaMask
         </button>
       ) : (
@@ -217,7 +238,6 @@ function App() {
                     <td>{c.timestamp}</td>
                   </tr>
 
-                  {/* แถวขยายรายละเอียด */}
                   {c.expanded && (
                     <tr className="expanded-row">
                       <td colSpan={6}>
