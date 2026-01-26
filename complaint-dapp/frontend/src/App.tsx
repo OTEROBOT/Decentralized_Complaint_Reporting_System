@@ -10,6 +10,7 @@ interface Complaint {
   reporter: string;
   status: string;
   timestamp: string;
+  expanded?: boolean; // เพิ่มเพื่อควบคุมการขยายแถว
 }
 
 function App() {
@@ -19,7 +20,7 @@ function App() {
   const [statusMessage, setStatusMessage] = useState('')
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(false)
-  const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false) // toggle กรองเรื่องของฉัน
+  const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false)
 
   // เชื่อม MetaMask
   const connectWallet = async () => {
@@ -41,6 +42,12 @@ function App() {
     }
   }
 
+  // Logout / Disconnect
+  const disconnectWallet = () => {
+    setAccount(null)
+    setStatusMessage('ออกจากระบบเรียบร้อย')
+  }
+
   // โหลดข้อมูลเรื่องร้องเรียน
   const loadComplaints = async () => {
     if (!window.ethereum) return
@@ -60,7 +67,8 @@ function App() {
           description: c.description,
           reporter: c.reporter,
           status: ['Submitted', 'UnderReview', 'Resolved'][Number(c.status)],
-          timestamp: new Date(Number(c.timestamp) * 1000).toLocaleString('th-TH')
+          timestamp: new Date(Number(c.timestamp) * 1000).toLocaleString('th-TH'),
+          expanded: false
         })
       }
 
@@ -73,7 +81,14 @@ function App() {
     }
   }
 
-  // ส่งเรื่องร้องเรียน
+  // สลับการขยายแถว
+  const toggleExpand = (id: number) => {
+    setComplaints(prev =>
+      prev.map(c => c.id === id ? { ...c, expanded: !c.expanded } : c)
+    )
+  }
+
+  // ส่งเรื่องร้องเรียน (เหมือนเดิม)
   const submitComplaint = async () => {
     if (!account) {
       setStatusMessage('กรุณาเชื่อมต่อกระเป๋าเงินก่อน')
@@ -97,19 +112,17 @@ function App() {
 
       setTitle('')
       setDescription('')
-      loadComplaints() // รีโหลดรายการใหม่
+      loadComplaints()
     } catch (error) {
       console.error(error)
       setStatusMessage('ส่งเรื่องล้มเหลว: ' + (error as Error).message)
     }
   }
 
-  // โหลดข้อมูลครั้งแรก
   useEffect(() => {
     loadComplaints()
   }, [])
 
-  // กรองเฉพาะเรื่องของฉัน (ถ้าเปิด toggle)
   const filteredComplaints = showMyComplaintsOnly
     ? complaints.filter((c) => c.reporter.toLowerCase() === account?.toLowerCase())
     : complaints
@@ -126,6 +139,9 @@ function App() {
       ) : (
         <div className="wallet-info">
           <p>กระเป๋าที่เชื่อม: <strong>{account}</strong></p>
+          <button onClick={disconnectWallet} className="logout-btn">
+            ออกจากระบบ
+          </button>
           <label className="filter-toggle">
             <input
               type="checkbox"
@@ -180,16 +196,39 @@ function App() {
             </thead>
             <tbody>
               {filteredComplaints.map((c) => (
-                <tr key={c.id}>
-                  <td>{c.id}</td>
-                  <td>{c.title}</td>
-                  <td>{c.description.length > 80 ? c.description.substring(0, 80) + '...' : c.description}</td>
-                  <td>{c.reporter.substring(0, 6) + '...' + c.reporter.substring(38)}</td>
-                  <td className={`status-${c.status.toLowerCase()}`}>
-                    {c.status}
-                  </td>
-                  <td>{c.timestamp}</td>
-                </tr>
+                <>
+                  <tr 
+                    key={c.id} 
+                    onClick={() => toggleExpand(c.id)}
+                    className="expandable-row"
+                  >
+                    <td>{c.id}</td>
+                    <td>{c.title}</td>
+                    <td>
+                      {c.description.length > 80 
+                        ? c.description.substring(0, 80) + '...' 
+                        : c.description}
+                      {c.description.length > 80 && <span className="expand-hint"> (คลิกเพื่อดูเต็ม)</span>}
+                    </td>
+                    <td>{c.reporter.substring(0, 6) + '...' + c.reporter.substring(38)}</td>
+                    <td className={`status-${c.status.toLowerCase()}`}>
+                      {c.status}
+                    </td>
+                    <td>{c.timestamp}</td>
+                  </tr>
+
+                  {/* แถวขยายรายละเอียด */}
+                  {c.expanded && (
+                    <tr className="expanded-row">
+                      <td colSpan={6}>
+                        <div className="expanded-content">
+                          <strong>รายละเอียดเต็ม:</strong>
+                          <p>{c.description}</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
               ))}
             </tbody>
           </table>

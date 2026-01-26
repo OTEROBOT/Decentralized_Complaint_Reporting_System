@@ -304,3 +304,52 @@ button:disabled {
   align-items: center;
   gap: 16px;
 }
+/* Logout Button */
+.logout-btn {
+  background: #ef4444;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 16px;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
+}
+
+/* Expandable Row */
+.expandable-row {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.expandable-row:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.expand-hint {
+  color: #60a5fa;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* Expanded Row */
+.expanded-row td {
+  background: rgba(255,255,255,0.03);
+  padding: 16px !important;
+}
+
+.expanded-content {
+  padding: 12px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Status Colors (เหมือนเดิม แต่เพิ่มความชัด) */
+.status-submitted { color: #d97706; font-weight: bold; }
+.status-underreview { color: #2563eb; font-weight: bold; }
+.status-resolved { color: #16a34a; font-weight: bold; }
