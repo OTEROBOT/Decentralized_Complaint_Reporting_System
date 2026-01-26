@@ -220,3 +220,34 @@ button:disabled {
     text-align: center;
   }
 }
+
+/* ตารางเรื่องร้องเรียน */
+.complaints-section {
+  margin-top: 60px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
+  padding: 28px;
+}
+
+.complaints-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.complaints-table th,
+.complaints-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.complaints-table th {
+  background: rgba(255,255,255,0.06);
+  font-weight: 600;
+}
+
+.complaints-table tr:hover {
+  background: rgba(255,255,255,0.03);
+}
