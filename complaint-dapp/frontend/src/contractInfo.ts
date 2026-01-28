@@ -1,6 +1,7 @@
-// contractInfo.ts
-export const CONTRACT_ADDRESS = "0x86439f793615382AC1c866Dc13b042E496fbc058";
+// src/contractInfo.ts
+export const CONTRACT_ADDRESS = "0x3A9F1880c3E6362C1d0f84Bd7886403d36D4Ad6E"; // เปลี่ยนเป็น address ใหม่ที่คุณ deploy ได้ (ตัวอย่าง: 0x1234567890abcdef...)
 
+// ABI ใหม่ทั้งหมด (copy วางจากที่คุณส่งมา)
 export const CONTRACT_ABI = [
   {
     "inputs": [
@@ -19,12 +20,105 @@ export const CONTRACT_ABI = [
     "inputs": [
       {
         "internalType": "string",
+        "name": "_location",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "_officer",
+        "type": "address"
+      }
+    ],
+    "name": "assignOfficerToLocation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "assignToOfficer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "confirmResolution",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "markAsResolved",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "rejectResolution",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_action",
+        "type": "string"
+      }
+    ],
+    "name": "setActionRequired",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
         "name": "_title",
         "type": "string"
       },
       {
         "internalType": "string",
         "name": "_description",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_location",
         "type": "string"
       }
     ],
@@ -37,24 +131,6 @@ export const CONTRACT_ABI = [
     "inputs": [],
     "stateMutability": "nonpayable",
     "type": "constructor"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum ComplaintSystem.Status",
-        "name": "_status",
-        "type": "uint8"
-      }
-    ],
-    "name": "updateStatus",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
   },
   {
     "inputs": [],
@@ -113,6 +189,21 @@ export const CONTRACT_ABI = [
         "type": "string"
       },
       {
+        "internalType": "string",
+        "name": "location",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "officerAssigned",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "actionRequired",
+        "type": "string"
+      },
+      {
         "internalType": "enum ComplaintSystem.Status",
         "name": "status",
         "type": "uint8"
@@ -159,6 +250,21 @@ export const CONTRACT_ABI = [
             "type": "string"
           },
           {
+            "internalType": "string",
+            "name": "location",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "officerAssigned",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "actionRequired",
+            "type": "string"
+          },
+          {
             "internalType": "enum ComplaintSystem.Status",
             "name": "status",
             "type": "uint8"
@@ -172,6 +278,25 @@ export const CONTRACT_ABI = [
         "internalType": "struct ComplaintSystem.Complaint",
         "name": "",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "name": "locationOfficers",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",

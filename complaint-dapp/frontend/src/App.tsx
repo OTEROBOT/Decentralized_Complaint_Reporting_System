@@ -7,7 +7,10 @@ interface Complaint {
   id: number;
   title: string;
   description: string;
+  location: string;
   reporter: string;
+  officerAssigned: string;
+  actionRequired: string;
   status: string;
   timestamp: string;
   expanded?: boolean;
@@ -17,13 +20,51 @@ function App() {
   const [account, setAccount] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [location, setLocation] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(false)
   const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false)
 
-  // เชื่อมต่อ MetaMask (เฉพาะกดปุ่ม ไม่ auto-connect ตอนเปิดหน้า)
+  // รายการหน่วยงาน 33 แห่งในอุดรธานี (ตามที่คุณต้องการ)
+  const locations = [
+    "เทศบาลนครอุดรธานี",
+    "โรงพยาบาลอุดรธานี",
+    "สถานีตำรวจภูธรเมืองอุดรธานี",
+    "สำนักงานสาธารณสุขจังหวัดอุดรธานี",
+    "สำนักงานที่ดินจังหวัดอุดรธานี",
+    "สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1",
+    "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาอุดรธานี เขต 20",
+    "สำนักงานประกันสังคมจังหวัดอุดรธานี",
+    "สำนักงานโยธาธิการและผังเมืองจังหวัดอุดรธานี",
+    "สำนักงานสรรพากรพื้นที่อุดรธานี",
+    "สำนักงานอุตสาหกรรมจังหวัดอุดรธานี",
+    "สำนักงานการท่องเที่ยวและกีฬาจังหวัดอุดรธานี",
+    "สำนักงานพาณิชย์จังหวัดอุดรธานี",
+    "สำนักงานพัฒนาสังคมและความมั่นคงของมนุษย์จังหวัดอุดรธานี",
+    "สำนักงานเกษตรและสหกรณ์จังหวัดอุดรธานี",
+    "สำนักงานทรัพยากรธรรมชาติและสิ่งแวดล้อมจังหวัดอุดรธานี",
+    "สำนักงานแรงงานจังหวัดอุดรธานี",
+    "สำนักงานปศุสัตว์จังหวัดอุดรธานี",
+    "สำนักงานการประมงจังหวัดอุดรธานี",
+    "สำนักงานชลประทานที่ 6",
+    "การไฟฟ้าส่วนภูมิภาคจังหวัดอุดรธานี",
+    "การประปาส่วนภูมิภาคอุดรธานี",
+    "องค์การบริหารส่วนจังหวัดอุดรธานี",
+    "สำนักงานตำรวจแห่งชาติ ภาค 4",
+    "ศาลจังหวัดอุดรธานี",
+    "สำนักงานอัยการสูงสุดจังหวัดอุดรธานี",
+    "สำนักงานพัฒนาชุมชนจังหวัดอุดรธานี",
+    "สำนักงานการคลังจังหวัดอุดรธานี",
+    "สำนักงานการท่องเที่ยวแห่งประเทศไทย สำนักงานอุดรธานี",
+    "สำนักงานการบินพลเรือนแห่งประเทศไทย สนามบินอุดรธานี",
+    "สถานีรถไฟอุดรธานี",
+    "สำนักงานขนส่งจังหวัดอุดรธานี",
+    "สำนักงานการยาสูบจังหวัดอุดรธานี"
+  ];
+
+  // เชื่อมต่อ MetaMask
   const connectWallet = async () => {
     if (!window.ethereum) {
       setStatusMessage('กรุณาติดตั้ง MetaMask ก่อนครับ!')
@@ -36,14 +77,14 @@ function App() {
       const signer = await provider.getSigner()
       const address = await signer.getAddress()
       setAccount(address)
-      setStatusMessage('เชื่อมต่อกระเป๋าเงินดิจิทัลเรียบร้อย: ' + address)
+      setStatusMessage('เชื่อมต่อเรียบร้อย: ' + address)
     } catch (error) {
       console.error(error)
-      setStatusMessage('ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่อีกครั้ง')
+      setStatusMessage('เชื่อมต่อล้มเหลว')
     }
   }
 
-  // Logout / Disconnect
+  // Logout
   const disconnectWallet = () => {
     setAccount(null)
     setStatusMessage('ออกจากระบบเรียบร้อย')
@@ -66,8 +107,11 @@ function App() {
           id: i,
           title: c.title,
           description: c.description,
+          location: c.location,
           reporter: c.reporter,
-          status: ['Submitted', 'UnderReview', 'Resolved'][Number(c.status)],
+          officerAssigned: c.officerAssigned,
+          actionRequired: c.actionRequired,
+          status: ['Submitted', 'UnderReview', 'Resolved', 'Reopened', 'Closed'][Number(c.status)],
           timestamp: new Date(Number(c.timestamp) * 1000).toLocaleString('th-TH'),
           expanded: false
         })
@@ -75,8 +119,8 @@ function App() {
 
       setComplaints(list)
     } catch (error) {
-      console.error(error)
-      setStatusMessage('ไม่สามารถโหลดข้อมูลได้: ' + (error as Error).message)
+      console.error('โหลดข้อมูลล้มเหลว:', error)
+      setStatusMessage('ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่')
     } finally {
       setLoading(false)
     }
@@ -91,12 +135,8 @@ function App() {
 
   // ส่งเรื่องร้องเรียน
   const submitComplaint = async () => {
-    if (!account) {
-      setStatusMessage('กรุณาเชื่อมต่อกระเป๋าเงินก่อน')
-      return
-    }
-    if (!title || !description) {
-      setStatusMessage('กรุณากรอกข้อมูลให้ครบ')
+    if (!account || !location) {
+      setStatusMessage('กรุณาเลือกหน่วยงานและกรอกข้อมูลให้ครบ')
       return
     }
 
@@ -108,7 +148,7 @@ function App() {
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
 
-      const tx = await contract.submitComplaint(title, description)
+      const tx = await contract.submitComplaint(title, description, location)
       setStatusMessage('กำลังส่งเรื่องไปยัง Blockchain...')
 
       await tx.wait()
@@ -116,6 +156,7 @@ function App() {
 
       setTitle('')
       setDescription('')
+      setLocation('')
       loadComplaints()
     } catch (error) {
       console.error(error)
@@ -126,7 +167,7 @@ function App() {
   }
 
   useEffect(() => {
-    loadComplaints() // โหลดข้อมูลครั้งแรก (ไม่ auto-connect wallet)
+    loadComplaints()
   }, [])
 
   const filteredComplaints = showMyComplaintsOnly
@@ -136,7 +177,7 @@ function App() {
   return (
     <div className="app-wrapper">
       <div className="container">
-        <h1>ระบบแจ้งร้องเรียนแบบกระจายศูนย์</h1>
+        <h1>ระบบแจ้งร้องเรียนแบบกระจายศูนย์ จังหวัดอุดรธานี</h1>
         <h2>Decentralized Complaint Reporting System</h2>
 
         {!account ? (
@@ -169,6 +210,15 @@ function App() {
 
             <div className="form-section">
               <h3>ยื่นเรื่องร้องเรียนใหม่</h3>
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              >
+                <option value="">-- เลือกหน่วยงานที่ต้องการร้องเรียน --</option>
+                {locations.map((loc, index) => (
+                  <option key={index} value={loc}>{loc}</option>
+                ))}
+              </select>
               <input
                 type="text"
                 placeholder="หัวข้อเรื่องร้องเรียน"
@@ -180,7 +230,7 @@ function App() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
-              <button onClick={submitComplaint} disabled={!account || isSubmitting}>
+              <button onClick={submitComplaint} disabled={!account || isSubmitting || !location}>
                 {isSubmitting ? 'กำลังส่ง...' : 'ส่งเรื่องร้องเรียน'}
               </button>
             </div>
@@ -198,6 +248,7 @@ function App() {
                   <thead>
                     <tr>
                       <th>ลำดับ</th>
+                      <th>หน่วยงาน</th>
                       <th>หัวข้อ</th>
                       <th>รายละเอียด</th>
                       <th>ผู้ส่ง</th>
@@ -214,6 +265,7 @@ function App() {
                           className="expandable-row"
                         >
                           <td>{c.id}</td>
+                          <td>{c.location}</td>
                           <td>{c.title}</td>
                           <td>
                             {c.description.length > 80 
@@ -230,7 +282,7 @@ function App() {
 
                         {c.expanded && (
                           <tr className="expanded-row">
-                            <td colSpan={6}>
+                            <td colSpan={7}>
                               <div className="expanded-content">
                                 <strong>รายละเอียดเต็ม:</strong>
                                 <p>{c.description}</p>
@@ -248,7 +300,6 @@ function App() {
         )}
       </div>
 
-      {/* Loading Overlay เมื่อกำลังส่งเรื่อง */}
       {isSubmitting && (
         <div className="loading-overlay">
           <div className="loading-content">

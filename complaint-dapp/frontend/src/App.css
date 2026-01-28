@@ -561,3 +561,82 @@ button:disabled {
     gap: 16px;
   }
 }
+/* เพิ่มสไตล์สำหรับ dropdown และปุ่ม Officer/Reporter */
+select {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background-color: #020617;
+  color: #f8fafc;
+  font-size: 0.9rem;
+}
+
+select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
+}
+
+/* ปุ่ม Officer (รับเรื่อง, บันทึก, เสร็จสิ้น) */
+button.officer-btn {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  margin: 4px;
+}
+
+/* ปุ่ม Reporter (ยืนยัน/ไม่รับ) */
+button.reporter-btn-confirm {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  margin: 4px;
+}
+
+button.reporter-btn-reject {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  margin: 4px;
+}
+
+/* ปุ่มในตาราง */
+td button {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  margin: 2px;
+}
+
+/* เพิ่มสไตล์สำหรับ dropdown */
+select {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background-color: #020617;
+  color: #f8fafc;
+  font-size: 0.9rem;
+}
+
+select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
+}
+
+/* ปรับตารางให้ responsive และตรงกลาง */
+.complaints-table {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  table-layout: auto;
+}
+
+/* ทำให้แถวขยายดูสวย */
+.expanded-row td {
+  background: rgba(255,255,255,0.05);
+  padding: 20px !important;
+}
+
+/* ปรับปุ่มให้อยู่ตรงกลางและสวยขึ้น */
+button {
+  min-width: 120px;
+}
