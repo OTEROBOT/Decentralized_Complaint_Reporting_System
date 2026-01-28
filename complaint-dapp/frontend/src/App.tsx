@@ -31,7 +31,7 @@ function App() {
   const [actionInput, setActionInput] = useState('')
   const [newOfficerAddress, setNewOfficerAddress] = useState('')
 
-  // รายการหน่วยงาน 33 แห่งในอุดรธานี
+  // รายการหน่วยงาน 33 แห่ง
   const locations = [
     "เทศบาลนครอุดรธานี",
     "โรงพยาบาลอุดรธานี",
@@ -68,7 +68,6 @@ function App() {
     "สำนักงานการยาสูบจังหวัดอุดรธานี"
   ];
 
-  // เช็คบทบาทหลังเชื่อมต่อ
   const checkRoles = async (address: string, provider: ethers.BrowserProvider) => {
     const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
     const adminAddr = await contract.admin()
@@ -77,7 +76,6 @@ function App() {
     setIsOfficer(isOff)
   }
 
-  // เชื่อมต่อ MetaMask
   const connectWallet = async () => {
     if (!window.ethereum) {
       setStatusMessage('กรุณาติดตั้ง MetaMask ก่อนครับ!')
@@ -94,11 +92,10 @@ function App() {
       checkRoles(address, provider)
     } catch (error) {
       console.error('เชื่อมต่อล้มเหลว:', error)
-      setStatusMessage('เชื่อมต่อล้มเหลว กรุณาลองใหม่')
+      setStatusMessage('เชื่อมต่อล้มเหลว')
     }
   }
 
-  // Logout (ล้าง permission กับ MetaMask จริง ๆ)
   const disconnectWallet = async () => {
     setAccount(null)
     setIsOfficer(false)
@@ -107,20 +104,16 @@ function App() {
 
     if (window.ethereum) {
       try {
-        // ล้าง permission การเชื่อมต่อเว็บนี้
         await window.ethereum.request({
           method: 'wallet_revokePermissions',
           params: [{ eth_accounts: {} }]
         })
-        console.log('ตัดการเชื่อมต่อ MetaMask สำเร็จ')
       } catch (error) {
         console.error('ล้าง permission ล้มเหลว:', error)
-        setStatusMessage('ล้าง permission ล้มเหลว แต่ state ล้างแล้ว')
       }
     }
   }
 
-  // โหลดข้อมูลเรื่องร้องเรียน
   const loadComplaints = async () => {
     if (!window.ethereum) return
     setLoading(true)
@@ -150,20 +143,18 @@ function App() {
       setComplaints(list)
     } catch (error) {
       console.error('โหลดข้อมูลล้มเหลว:', error)
-      setStatusMessage('ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่')
+      setStatusMessage('ไม่สามารถโหลดข้อมูลได้')
     } finally {
       setLoading(false)
     }
   }
 
-  // สลับการขยายแถว
   const toggleExpand = (id: number) => {
     setComplaints(prev =>
       prev.map(c => c.id === id ? { ...c, expanded: !c.expanded } : c)
     )
   }
 
-  // ส่งเรื่องร้องเรียน
   const submitComplaint = async () => {
     if (!account || !location) {
       setStatusMessage('กรุณาเลือกหน่วยงานและกรอกข้อมูลให้ครบ')
@@ -182,7 +173,7 @@ function App() {
       setStatusMessage('กำลังส่งเรื่องไปยัง Blockchain...')
 
       await tx.wait()
-      setStatusMessage('ส่งเรื่องร้องเรียนสำเร็จ! Transaction Hash: ' + tx.hash)
+      setStatusMessage('ส่งเรื่องร้องเรียนสำเร็จ! Tx Hash: ' + tx.hash)
 
       setTitle('')
       setDescription('')
@@ -190,13 +181,12 @@ function App() {
       loadComplaints()
     } catch (error) {
       console.error('ส่งเรื่องล้มเหลว:', error)
-      setStatusMessage('ส่งเรื่องล้มเหลว: ' + (error as Error).message)
+      setStatusMessage('ส่งเรื่องล้มเหลว')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Officer รับเรื่อง
   const assignToOfficer = async (id: number) => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
@@ -208,11 +198,10 @@ function App() {
       loadComplaints()
     } catch (error) {
       console.error('รับเรื่องล้มเหลว:', error)
-      setStatusMessage('รับเรื่องล้มเหลว')
+      setStatusMessage('รับเรื่องล้มเหลว - ตรวจสอบว่าเป็น Officer ของหน่วยงานนี้หรือไม่')
     }
   }
 
-  // Officer ใส่สิ่งที่ต้องแก้ไข
   const setAction = async (id: number) => {
     if (!actionInput) return
     try {
@@ -230,7 +219,6 @@ function App() {
     }
   }
 
-  // Officer mark Resolved
   const markResolved = async (id: number) => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
@@ -246,7 +234,6 @@ function App() {
     }
   }
 
-  // Reporter ยืนยันรับ
   const confirmResolution = async (id: number) => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
@@ -262,7 +249,6 @@ function App() {
     }
   }
 
-  // Reporter ไม่รับและส่งซ้ำ
   const rejectResolution = async (id: number) => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
@@ -278,7 +264,6 @@ function App() {
     }
   }
 
-  // Admin เพิ่ม Officer
   const addOfficer = async () => {
     if (!newOfficerAddress) return
     try {
@@ -287,7 +272,7 @@ function App() {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
       const tx = await contract.addOfficer(newOfficerAddress)
       await tx.wait()
-      setStatusMessage('เพิ่มเจ้าหน้าที่สำเร็จ: ' + newOfficerAddress)
+      setStatusMessage('เพิ่มเจ้าหน้าที่สำเร็จ')
       setNewOfficerAddress('')
     } catch (error) {
       console.error('เพิ่มเจ้าหน้าที่ล้มเหลว:', error)
@@ -352,10 +337,7 @@ function App() {
 
             <div className="form-section">
               <h3>ยื่นเรื่องร้องเรียนใหม่</h3>
-              <select
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              >
+              <select value={location} onChange={(e) => setLocation(e.target.value)}>
                 <option value="">-- เลือกหน่วยงานที่ต้องการร้องเรียน --</option>
                 {locations.map((loc, index) => (
                   <option key={index} value={loc}>{loc}</option>
