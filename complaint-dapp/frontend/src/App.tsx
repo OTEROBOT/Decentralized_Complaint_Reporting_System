@@ -143,7 +143,7 @@ function App() {
       setComplaints(list)
     } catch (error) {
       console.error('โหลดข้อมูลล้มเหลว:', error)
-      setStatusMessage('ไม่สามารถโหลดข้อมูลได้')
+      setStatusMessage('ไม่สามารถโหลดข้อมูลได้ - ตรวจสอบ contract address')
     } finally {
       setLoading(false)
     }
@@ -181,7 +181,7 @@ function App() {
       loadComplaints()
     } catch (error) {
       console.error('ส่งเรื่องล้มเหลว:', error)
-      setStatusMessage('ส่งเรื่องล้มเหลว')
+      setStatusMessage('ส่งเรื่องล้มเหลว - ตรวจสอบ SepoliaETH และ contract address')
     } finally {
       setIsSubmitting(false)
     }
@@ -198,7 +198,7 @@ function App() {
       loadComplaints()
     } catch (error) {
       console.error('รับเรื่องล้มเหลว:', error)
-      setStatusMessage('รับเรื่องล้มเหลว - ตรวจสอบสิทธิ์ Officer และ SepoliaETH')
+      setStatusMessage('รับเรื่องล้มเหลว - ตรวจสอบว่าเป็น Officer ของหน่วยงานนี้หรือไม่ + SepoliaETH')
     }
   }
 
@@ -294,7 +294,7 @@ function App() {
       setStatusMessage('ผูก Officer กับหน่วยงานสำเร็จ')
     } catch (error) {
       console.error('ผูกล้มเหลว:', error)
-      setStatusMessage('ผูกล้มเหลว - ตรวจสอบสิทธิ์ Admin และ SepoliaETH')
+      setStatusMessage('ผูกล้มเหลว')
     }
   }
 
