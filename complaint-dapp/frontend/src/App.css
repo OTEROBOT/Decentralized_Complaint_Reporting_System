@@ -221,3 +221,36 @@ button {
     width: 100%;
   }
 }
+/* =====================================================
+   WELCOME / LOGIN PAGE – PERFECT CENTER
+   ===================================================== */
+.welcome-screen,
+.login-screen {
+  width: 100%;
+  min-height: 70vh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;   /* << ตัวนี้คือหัวใจ */
+
+  margin: 0 auto;
+  text-align: center;
+}
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* << สำคัญมาก */
+}
+header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
