@@ -719,3 +719,75 @@ button.reporter-reject {
   background: rgba(255,255,255,0.05);
   padding: 20px !important;
 }
+/* ปุ่ม Officer */
+button.officer {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  color: white;
+  margin: 4px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ปุ่ม Reporter */
+button.reporter-confirm {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  margin: 4px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button.reporter-reject {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  margin: 4px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ปรับตารางให้ responsive */
+.complaints-table {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+/* ปุ่ม Officer */
+button.officer {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  color: white;
+  margin: 4px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ปุ่ม Reporter */
+button.reporter-confirm {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  margin: 4px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button.reporter-reject {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  margin: 4px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ปรับตารางให้ responsive */
+.complaints-table {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}

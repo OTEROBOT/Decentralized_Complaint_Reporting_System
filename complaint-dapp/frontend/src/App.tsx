@@ -31,7 +31,6 @@ function App() {
   const [actionInput, setActionInput] = useState('')
   const [newOfficerAddress, setNewOfficerAddress] = useState('')
 
-  // รายการหน่วยงาน 33 แห่ง
   const locations = [
     "เทศบาลนครอุดรธานี",
     "โรงพยาบาลอุดรธานี",
@@ -198,7 +197,7 @@ function App() {
       loadComplaints()
     } catch (error) {
       console.error('รับเรื่องล้มเหลว:', error)
-      setStatusMessage('รับเรื่องล้มเหลว - ตรวจสอบว่าเป็น Officer ของหน่วยงานนี้หรือไม่')
+      setStatusMessage('รับเรื่องล้มเหลว - ตรวจสอบสิทธิ์ Officer')
     }
   }
 
@@ -409,7 +408,7 @@ function App() {
                           <td>{c.timestamp}</td>
                           <td>
                             {isOfficer && c.status === 'Submitted' && (
-                              <button className="officer" onClick={() => assignToOfficer(c.id)}>รับเรื่อง</button>
+                              <button onClick={() => assignToOfficer(c.id)}>รับเรื่อง</button>
                             )}
                             {isOfficer && c.status === 'UnderReview' && c.officerAssigned.toLowerCase() === account?.toLowerCase() && (
                               <>
@@ -419,14 +418,14 @@ function App() {
                                   value={actionInput}
                                   onChange={(e) => setActionInput(e.target.value)}
                                 />
-                                <button className="officer" onClick={() => setAction(c.id)}>บันทึก</button>
-                                <button className="officer" onClick={() => markResolved(c.id)}>เสร็จสิ้น</button>
+                                <button onClick={() => setAction(c.id)}>บันทึก</button>
+                                <button onClick={() => markResolved(c.id)}>เสร็จสิ้น</button>
                               </>
                             )}
                             {c.status === 'Resolved' && c.reporter.toLowerCase() === account?.toLowerCase() && (
                               <>
-                                <button className="reporter-confirm" onClick={() => confirmResolution(c.id)}>ยืนยันรับ</button>
-                                <button className="reporter-reject" onClick={() => rejectResolution(c.id)}>ไม่พอใจ ส่งซ้ำ</button>
+                                <button onClick={() => confirmResolution(c.id)}>ยืนยันรับ</button>
+                                <button onClick={() => rejectResolution(c.id)}>ไม่พอใจ ส่งซ้ำ</button>
                               </>
                             )}
                           </td>

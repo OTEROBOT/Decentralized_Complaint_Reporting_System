@@ -1,15 +1,10 @@
 // src/contractInfo.ts
-export const CONTRACT_ADDRESS = "0x3A9F1880c3E6362C1d0f84Bd7886403d36D4Ad6E"; // เปลี่ยนเป็น address ใหม่ที่คุณ deploy ได้ (ตัวอย่าง: 0x1234567890abcdef...)
+export const CONTRACT_ADDRESS = "0x6e52c4b71c2D3C73e2E55a0b9F6e02746C030Da4";
 
-// ABI ใหม่ทั้งหมด (copy วางจากที่คุณส่งมา)
 export const CONTRACT_ABI = [
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "_officer",
-        "type": "address"
-      }
+      { "internalType": "address", "name": "_officer", "type": "address" }
     ],
     "name": "addOfficer",
     "outputs": [],
@@ -18,16 +13,8 @@ export const CONTRACT_ABI = [
   },
   {
     "inputs": [
-      {
-        "internalType": "string",
-        "name": "_location",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "_officer",
-        "type": "address"
-      }
+      { "internalType": "string", "name": "_location", "type": "string" },
+      { "internalType": "address", "name": "_officer", "type": "address" }
     ],
     "name": "assignOfficerToLocation",
     "outputs": [],
@@ -36,11 +23,7 @@ export const CONTRACT_ABI = [
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "_id", "type": "uint256" }
     ],
     "name": "assignToOfficer",
     "outputs": [],
@@ -49,11 +32,7 @@ export const CONTRACT_ABI = [
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "_id", "type": "uint256" }
     ],
     "name": "confirmResolution",
     "outputs": [],
@@ -62,11 +41,7 @@ export const CONTRACT_ABI = [
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "_id", "type": "uint256" }
     ],
     "name": "markAsResolved",
     "outputs": [],
@@ -75,11 +50,7 @@ export const CONTRACT_ABI = [
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "_id", "type": "uint256" }
     ],
     "name": "rejectResolution",
     "outputs": [],
@@ -88,16 +59,8 @@ export const CONTRACT_ABI = [
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "_action",
-        "type": "string"
-      }
+      { "internalType": "uint256", "name": "_id", "type": "uint256" },
+      { "internalType": "string", "name": "_action", "type": "string" }
     ],
     "name": "setActionRequired",
     "outputs": [],
@@ -106,21 +69,9 @@ export const CONTRACT_ABI = [
   },
   {
     "inputs": [
-      {
-        "internalType": "string",
-        "name": "_title",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_description",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_location",
-        "type": "string"
-      }
+      { "internalType": "string", "name": "_title", "type": "string" },
+      { "internalType": "string", "name": "_description", "type": "string" },
+      { "internalType": "string", "name": "_location", "type": "string" }
     ],
     "name": "submitComplaint",
     "outputs": [],
@@ -135,145 +86,49 @@ export const CONTRACT_ABI = [
   {
     "inputs": [],
     "name": "admin",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "complaintCount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "name": "complaints",
     "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "reporter",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "title",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "description",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "location",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "officerAssigned",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "actionRequired",
-        "type": "string"
-      },
-      {
-        "internalType": "enum ComplaintSystem.Status",
-        "name": "status",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "internalType": "address", "name": "reporter", "type": "address" },
+      { "internalType": "string", "name": "title", "type": "string" },
+      { "internalType": "string", "name": "description", "type": "string" },
+      { "internalType": "string", "name": "location", "type": "string" },
+      { "internalType": "address", "name": "officerAssigned", "type": "address" },
+      { "internalType": "string", "name": "actionRequired", "type": "string" },
+      { "internalType": "enum ComplaintSystem.Status", "name": "status", "type": "uint8" },
+      { "internalType": "uint256", "name": "timestamp", "type": "uint256" }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
     "name": "getComplaint",
     "outputs": [
       {
         "components": [
-          {
-            "internalType": "uint256",
-            "name": "id",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "reporter",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "title",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "description",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "location",
-            "type": "string"
-          },
-          {
-            "internalType": "address",
-            "name": "officerAssigned",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "actionRequired",
-            "type": "string"
-          },
-          {
-            "internalType": "enum ComplaintSystem.Status",
-            "name": "status",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          }
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "reporter", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "string", "name": "location", "type": "string" },
+          { "internalType": "address", "name": "officerAssigned", "type": "address" },
+          { "internalType": "string", "name": "actionRequired", "type": "string" },
+          { "internalType": "enum ComplaintSystem.Status", "name": "status", "type": "uint8" },
+          { "internalType": "uint256", "name": "timestamp", "type": "uint256" }
         ],
         "internalType": "struct ComplaintSystem.Complaint",
         "name": "",
@@ -284,40 +139,16 @@ export const CONTRACT_ABI = [
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
+    "inputs": [{ "internalType": "string", "name": "", "type": "string" }],
     "name": "locationOfficers",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "name": "officers",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
     "stateMutability": "view",
     "type": "function"
   }
