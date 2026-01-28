@@ -18,6 +18,8 @@ interface Complaint {
 
 function App() {
   const [account, setAccount] = useState<string | null>(null)
+  const [isOfficer, setIsOfficer] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [location, setLocation] = useState('')
@@ -26,8 +28,10 @@ function App() {
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(false)
   const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false)
+  const [actionInput, setActionInput] = useState('') // สำหรับ Officer ใส่สิ่งที่ต้องแก้
+  const [newOfficerAddress, setNewOfficerAddress] = useState('') // สำหรับ Admin เพิ่ม Officer
 
-  // รายการหน่วยงาน 33 แห่งในอุดรธานี (ตามที่คุณต้องการ)
+  // รายการหน่วยงาน 33 แห่งในอุดรธานี
   const locations = [
     "เทศบาลนครอุดรธานี",
     "โรงพยาบาลอุดรธานี",
@@ -64,6 +68,15 @@ function App() {
     "สำนักงานการยาสูบจังหวัดอุดรธานี"
   ];
 
+  // เช็คบทบาทหลังเชื่อมต่อ
+  const checkRoles = async (address: string, provider: ethers.BrowserProvider) => {
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
+    const adminAddr = await contract.admin()
+    setIsAdmin(address.toLowerCase() === adminAddr.toLowerCase())
+    const isOff = await contract.officers(address)
+    setIsOfficer(isOff)
+  }
+
   // เชื่อมต่อ MetaMask
   const connectWallet = async () => {
     if (!window.ethereum) {
@@ -78,15 +91,18 @@ function App() {
       const address = await signer.getAddress()
       setAccount(address)
       setStatusMessage('เชื่อมต่อเรียบร้อย: ' + address)
+      checkRoles(address, provider)
     } catch (error) {
-      console.error(error)
-      setStatusMessage('เชื่อมต่อล้มเหลว')
+      console.error('เชื่อมต่อล้มเหลว:', error)
+      setStatusMessage('เชื่อมต่อล้มเหลว กรุณาลองใหม่')
     }
   }
 
   // Logout
   const disconnectWallet = () => {
     setAccount(null)
+    setIsOfficer(false)
+    setIsAdmin(false)
     setStatusMessage('ออกจากระบบเรียบร้อย')
   }
 
@@ -159,10 +175,109 @@ function App() {
       setLocation('')
       loadComplaints()
     } catch (error) {
-      console.error(error)
+      console.error('ส่งเรื่องล้มเหลว:', error)
       setStatusMessage('ส่งเรื่องล้มเหลว: ' + (error as Error).message)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  // Officer รับเรื่อง
+  const assignToOfficer = async (id: number) => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum!)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      const tx = await contract.assignToOfficer(id)
+      await tx.wait()
+      setStatusMessage('รับเรื่องสำเร็จ')
+      loadComplaints()
+    } catch (error) {
+      console.error('รับเรื่องล้มเหลว:', error)
+      setStatusMessage('รับเรื่องล้มเหลว')
+    }
+  }
+
+  // Officer ใส่สิ่งที่ต้องแก้ไข
+  const setAction = async (id: number) => {
+    if (!actionInput) return
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum!)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      const tx = await contract.setActionRequired(id, actionInput)
+      await tx.wait()
+      setStatusMessage('บันทึกสิ่งที่ต้องแก้ไขสำเร็จ')
+      setActionInput('')
+      loadComplaints()
+    } catch (error) {
+      console.error('บันทึกล้มเหลว:', error)
+      setStatusMessage('บันทึกล้มเหลว')
+    }
+  }
+
+  // Officer mark Resolved
+  const markResolved = async (id: number) => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum!)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      const tx = await contract.markAsResolved(id)
+      await tx.wait()
+      setStatusMessage('อัปเดตเป็น Resolved สำเร็จ')
+      loadComplaints()
+    } catch (error) {
+      console.error('อัปเดตล้มเหลว:', error)
+      setStatusMessage('อัปเดตล้มเหลว')
+    }
+  }
+
+  // Reporter ยืนยันรับ
+  const confirmResolution = async (id: number) => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum!)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      const tx = await contract.confirmResolution(id)
+      await tx.wait()
+      setStatusMessage('ยืนยันรับการแก้ไขสำเร็จ')
+      loadComplaints()
+    } catch (error) {
+      console.error('ยืนยันล้มเหลว:', error)
+      setStatusMessage('ยืนยันล้มเหลว')
+    }
+  }
+
+  // Reporter ไม่รับและส่งซ้ำ
+  const rejectResolution = async (id: number) => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum!)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      const tx = await contract.rejectResolution(id)
+      await tx.wait()
+      setStatusMessage('ขอแก้ไขต่อ ส่งเรื่องซ้ำสำเร็จ')
+      loadComplaints()
+    } catch (error) {
+      console.error('ส่งซ้ำล้มเหลว:', error)
+      setStatusMessage('ส่งซ้ำล้มเหลว')
+    }
+  }
+
+  // Admin เพิ่ม Officer
+  const addOfficer = async () => {
+    if (!newOfficerAddress) return
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum!)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      const tx = await contract.addOfficer(newOfficerAddress)
+      await tx.wait()
+      setStatusMessage('เพิ่มเจ้าหน้าที่สำเร็จ: ' + newOfficerAddress)
+      setNewOfficerAddress('')
+    } catch (error) {
+      console.error('เพิ่มเจ้าหน้าที่ล้มเหลว:', error)
+      setStatusMessage('เพิ่มเจ้าหน้าที่ล้มเหลว')
     }
   }
 
@@ -208,6 +323,20 @@ function App() {
               </button>
             </div>
 
+            {/* ส่วนสำหรับ Admin */}
+            {isAdmin && (
+              <div className="admin-section">
+                <h3>ส่วนผู้ดูแลระบบ: จัดการเจ้าหน้าที่</h3>
+                <input
+                  type="text"
+                  placeholder="ใส่ address ของเจ้าหน้าที่ใหม่"
+                  value={newOfficerAddress}
+                  onChange={(e) => setNewOfficerAddress(e.target.value)}
+                />
+                <button onClick={addOfficer}>เพิ่มเจ้าหน้าที่</button>
+              </div>
+            )}
+
             <div className="form-section">
               <h3>ยื่นเรื่องร้องเรียนใหม่</h3>
               <select
@@ -252,8 +381,11 @@ function App() {
                       <th>หัวข้อ</th>
                       <th>รายละเอียด</th>
                       <th>ผู้ส่ง</th>
+                      <th>Officer</th>
+                      <th>สิ่งที่ต้องแก้</th>
                       <th>สถานะ</th>
                       <th>วันที่ส่ง</th>
+                      <th>การดำเนินการ</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -274,18 +406,45 @@ function App() {
                             {c.description.length > 80 && <span className="expand-hint"> (คลิกเพื่อดูเต็ม)</span>}
                           </td>
                           <td>{c.reporter.substring(0, 6) + '...' + c.reporter.substring(38)}</td>
+                          <td>{c.officerAssigned === '0x0000000000000000000000000000000000000000' ? '-' : c.officerAssigned.substring(0, 6) + '...' + c.officerAssigned.substring(38)}</td>
+                          <td>{c.actionRequired || '-'}</td>
                           <td className={`status-${c.status.toLowerCase()}`}>
                             {c.status}
                           </td>
                           <td>{c.timestamp}</td>
+                          <td>
+                            {isOfficer && c.status === 'Submitted' && (
+                              <button className="officer" onClick={() => assignToOfficer(c.id)}>รับเรื่อง</button>
+                            )}
+                            {isOfficer && c.status === 'UnderReview' && c.officerAssigned.toLowerCase() === account?.toLowerCase() && (
+                              <>
+                                <input
+                                  type="text"
+                                  placeholder="สิ่งที่ต้องแก้ไข"
+                                  value={actionInput}
+                                  onChange={(e) => setActionInput(e.target.value)}
+                                />
+                                <button className="officer" onClick={() => setAction(c.id)}>บันทึก</button>
+                                <button className="officer" onClick={() => markResolved(c.id)}>เสร็จสิ้น</button>
+                              </>
+                            )}
+                            {c.status === 'Resolved' && c.reporter.toLowerCase() === account?.toLowerCase() && (
+                              <>
+                                <button className="reporter-confirm" onClick={() => confirmResolution(c.id)}>ยืนยันรับ</button>
+                                <button className="reporter-reject" onClick={() => rejectResolution(c.id)}>ไม่พอใจ ส่งซ้ำ</button>
+                              </>
+                            )}
+                          </td>
                         </tr>
 
                         {c.expanded && (
                           <tr className="expanded-row">
-                            <td colSpan={7}>
+                            <td colSpan={10}>
                               <div className="expanded-content">
                                 <strong>รายละเอียดเต็ม:</strong>
                                 <p>{c.description}</p>
+                                <strong>สิ่งที่ต้องแก้ไข (จาก Officer):</strong>
+                                <p>{c.actionRequired || 'ยังไม่ได้ระบุ'}</p>
                               </div>
                             </td>
                           </tr>
