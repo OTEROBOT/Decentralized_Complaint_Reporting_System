@@ -8,7 +8,7 @@
 }
 
 body {
-  background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
   color: #e2e8f0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
@@ -28,159 +28,117 @@ body {
 
 .container {
   width: 100%;
-  max-width: 1100px;
-  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* =====================================================
    TYPOGRAPHY – Clean & Professional
    ===================================================== */
 h1 {
-  font-size: clamp(1.8rem, 5vw, 2.8rem);
-  font-weight: 700;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 800;
   letter-spacing: -0.02em;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   color: #f8fafc;
+  text-align: center;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 h2 {
-  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-size: clamp(1rem, 3vw, 1.35rem);
   font-weight: 400;
   color: #94a3b8;
   margin-bottom: 3rem;
+  text-align: center;
 }
 
 h3 {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(96,165,250,0.3);
+  text-align: center;
+}
+
+h4 {
+  font-size: 1.35rem;
   font-weight: 600;
-  color: #e2e8f0;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: #cbd5e1;
+  margin: 2rem 0 1.25rem;
+  text-align: center;
 }
 
 /* =====================================================
    LOGIN SCREEN – Hero Section
    ===================================================== */
 .login-screen {
-  background: rgba(30,41,59,0.6);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 24px;
-  padding: 4rem 2.5rem;
-  max-width: 520px;
-  width: 100%;
-  box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+  background: rgba(30,41,59,0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(96,165,250,0.2);
+  border-radius: 28px;
+  padding: 5rem 3rem;
+  max-width: 580px;
+  margin: 0 auto;
+  box-shadow: 0 30px 90px rgba(0,0,0,0.7), 0 0 0 1px rgba(96,165,250,0.1);
   text-align: center;
 }
 
 .login-screen h3 {
-  font-size: 2.2rem;
-  margin-bottom: 1.25rem;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  border: none;
 }
 
 .login-screen p {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: #cbd5e1;
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
+  line-height: 1.7;
 }
 
 /* =====================================================
    PRIMARY BUTTON – Connect Wallet
    ===================================================== */
 .connect-btn {
-  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  background: linear-gradient(135deg, #2563eb, #3b82f6, #60a5fa);
   color: white;
-  padding: 1rem 2.5rem;
-  font-size: 1.05rem;
-  font-weight: 600;
+  padding: 1.25rem 3rem;
+  font-size: 1.1rem;
+  font-weight: 700;
   border: none;
   border-radius: 999px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+  position: relative;
+  overflow: hidden;
 }
 
 .connect-btn:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 50px rgba(59, 130, 246, 0.6);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 25px 60px rgba(59, 130, 246, 0.7);
+}
+
+.connect-btn:active {
+  transform: translateY(-2px) scale(0.98);
 }
 
 /* =====================================================
-   FORM & INPUT – Clean & Modern
+   MAIN CONTENT
    ===================================================== */
-.form-section {
-  background: rgba(30,41,59,0.4);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin: 2rem auto;
-  max-width: 700px;
-}
-
-input, textarea, select {
-  width: 100%;
-  background: rgba(15,23,42,0.7);
-  border: 1px solid #334155;
-  color: #f1f5f9;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
-  border-radius: 12px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 4px rgba(96,165,250,0.25);
-}
-
-textarea {
-  min-height: 160px;
-  resize: vertical;
-}
-
-/* =====================================================
-   SUBMIT BUTTON
-   ===================================================== */
-button:not(.logout-btn, .refresh-btn) {
-  background: linear-gradient(135deg, #15803d, #22c55e);
-  color: white;
-  padding: 1rem 2rem;
-  font-size: 1.05rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.4s;
-  box-shadow: 0 10px 30px rgba(34,197,94,0.4);
-}
-
-button:not(.logout-btn, .refresh-btn):hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(34,197,94,0.6);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* =====================================================
-   STATUS MESSAGE
-   ===================================================== */
-.status {
-  margin: 2rem 0;
-  padding: 1.25rem 1.5rem;
-  background: rgba(30,41,59,0.6);
-  border-left: 5px solid #3b82f6;
-  border-radius: 12px;
-  color: #e2e8f0;
-  font-size: 1rem;
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* =====================================================
@@ -192,154 +150,411 @@ button:disabled {
   justify-content: center;
   align-items: center;
   gap: 1.5rem;
-  margin: 2rem 0;
-  padding: 1rem;
-  background: rgba(30,41,59,0.4);
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.08);
+  margin: 2.5rem auto;
+  padding: 1.75rem 2rem;
+  background: rgba(30,41,59,0.6);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 1px solid rgba(96,165,250,0.15);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
 
 .wallet-info p {
   font-size: 1rem;
   margin: 0;
+  color: #cbd5e1;
 }
 
+.wallet-info strong {
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.filter-toggle input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+  transform: scale(1.2);
+}
+
+/* =====================================================
+   BUTTONS
+   ===================================================== */
 .logout-btn {
-  background: #ef4444;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: 0.85rem 1.75rem;
+  border: none;
   border-radius: 12px;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
 }
 
 .logout-btn:hover {
-  background: #dc2626;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
 }
 
 .refresh-btn {
-  background: #475569;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: 0.85rem 1.75rem;
+  border: none;
   border-radius: 12px;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 .refresh-btn:hover {
-  background: #64748b;
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
 }
 
 /* =====================================================
-   ADMIN SECTION – Card Style
+   FORM SECTIONS
    ===================================================== */
-.admin-section {
-  background: rgba(30,41,59,0.45);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
-  padding: 2rem;
+.form-section, .admin-section {
+  background: rgba(30,41,59,0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(96,165,250,0.15);
+  border-radius: 24px;
+  padding: 3rem;
   margin: 2.5rem auto;
-  max-width: 700px;
-}
-
-.admin-section h4 {
-  font-size: 1.25rem;
-  margin: 1.5rem 0 1rem;
-  color: #cbd5e1;
-}
-
-.admin-section select, .admin-section input {
-  margin-bottom: 1rem;
+  max-width: 800px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.5);
 }
 
 /* =====================================================
-   COMPLAINTS TABLE – Clean & Modern
+   INPUTS
+   ===================================================== */
+input:not([type="checkbox"]), textarea, select {
+  width: 100%;
+  background: rgba(15,23,42,0.8);
+  border: 2px solid rgba(96,165,250,0.2);
+  color: #f1f5f9;
+  padding: 1.1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 14px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+input:not([type="checkbox"]):focus, 
+textarea:focus, 
+select:focus {
+  outline: none;
+  border-color: #60a5fa;
+  background: rgba(15,23,42,0.95);
+  box-shadow: 0 0 0 4px rgba(96,165,250,0.15), 0 8px 24px rgba(96,165,250,0.2);
+  transform: translateY(-2px);
+}
+
+textarea {
+  min-height: 180px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2360a5fa' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.25rem center;
+  padding-right: 3rem;
+}
+
+/* =====================================================
+   SUBMIT BUTTONS
+   ===================================================== */
+button:not(.logout-btn):not(.refresh-btn):not(.connect-btn) {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 1.1rem 2.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 35px rgba(16, 185, 129, 0.4);
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+button:not(.logout-btn):not(.refresh-btn):not(.connect-btn):hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 45px rgba(16, 185, 129, 0.6);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* =====================================================
+   STATUS MESSAGE
+   ===================================================== */
+.status {
+  margin: 2.5rem auto;
+  padding: 1.5rem 2rem;
+  max-width: 800px;
+  background: rgba(30,41,59,0.8);
+  backdrop-filter: blur(12px);
+  border-left: 6px solid #3b82f6;
+  border-radius: 14px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3);
+  text-align: center;
+}
+
+.status p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* =====================================================
+   COMPLAINTS SECTION
    ===================================================== */
 .complaints-section {
-  background: rgba(30,41,59,0.4);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
-  padding: 2rem;
-  margin-top: 2.5rem;
+  background: rgba(30,41,59,0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(96,165,250,0.15);
+  border-radius: 24px;
+  padding: 3rem;
+  margin: 3rem auto;
+  max-width: 1200px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.5);
 }
 
+.complaints-section > p {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 1.1rem;
+  padding: 2rem;
+}
+
+/* =====================================================
+   TABLE STYLING
+   ===================================================== */
 .complaints-table {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 2rem;
+  overflow: hidden;
+  border-radius: 16px;
 }
 
-.complaints-table th,
-.complaints-table td {
-  padding: 1rem 1.25rem;
-  text-align: left;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+.complaints-table thead {
+  background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(99,102,241,0.3));
+  backdrop-filter: blur(10px);
 }
 
 .complaints-table th {
-  background: rgba(15,23,42,0.5);
-  font-weight: 600;
-  color: #cbd5e1;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  font-weight: 700;
+  color: #f1f5f9;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid rgba(96,165,250,0.4);
 }
 
-.complaints-table tr:hover {
-  background: rgba(255,255,255,0.04);
+.complaints-table td {
+  padding: 1.25rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+.complaints-table tbody tr {
+  background: rgba(15,23,42,0.4);
+  transition: all 0.3s ease;
+}
+
+.complaints-table tbody tr:hover {
+  background: rgba(30,41,59,0.7);
+  transform: scale(1.005);
+  box-shadow: 0 4px 20px rgba(96,165,250,0.15);
+}
+
+.complaints-table tbody tr:nth-child(even) {
+  background: rgba(15,23,42,0.5);
+}
+
+/* =====================================================
+   TABLE BUTTONS
+   ===================================================== */
+.complaints-table button {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
+  margin: 0.25rem;
+  width: auto;
+  display: inline-block;
+  border-radius: 10px;
+}
+
+.complaints-table input[type="text"] {
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  margin: 0.25rem;
+  border-radius: 10px;
 }
 
 /* Status Colors */
-.status-submitted { color: #fbbf24; font-weight: 600; }
-.status-underreview { color: #60a5fa; font-weight: 600; }
-.status-resolved { color: #34d399; font-weight: 600; }
+.status-submitted { 
+  color: #fbbf24; 
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  background: rgba(251, 191, 36, 0.15);
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.status-underreview { 
+  color: #60a5fa; 
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  background: rgba(96, 165, 250, 0.15);
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.status-resolved { 
+  color: #34d399; 
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  background: rgba(52, 211, 153, 0.15);
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.status-reopened { 
+  color: #fb923c; 
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  background: rgba(251, 146, 60, 0.15);
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.status-closed { 
+  color: #94a3b8; 
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 8px;
+  display: inline-block;
+}
 
 /* Expandable Row */
 .expandable-row {
   cursor: pointer;
 }
 
-.expandable-row:hover {
-  background: rgba(255,255,255,0.05);
-}
-
 .expand-hint {
   color: #93c5fd;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-style: italic;
+  margin-left: 0.5rem;
 }
 
 .expanded-row td {
-  background: rgba(15,23,42,0.6);
-  padding: 1.5rem !important;
+  background: rgba(15,23,42,0.85) !important;
+  padding: 2rem !important;
+  text-align: left;
 }
 
-/* Loading Overlay */
+.expanded-content {
+  line-height: 1.8;
+}
+
+.expanded-content strong {
+  display: block;
+  color: #60a5fa;
+  font-size: 1.05rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.expanded-content p {
+  color: #cbd5e1;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid rgba(96,165,250,0.3);
+}
+
+/* =====================================================
+   LOADING OVERLAY
+   ===================================================== */
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.75);
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .loading-content {
-  background: #1e293b;
-  padding: 3rem 4rem;
-  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(30,41,59,0.95), rgba(15,23,42,0.95));
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(96,165,250,0.3);
+  padding: 3.5rem 4.5rem;
+  border-radius: 28px;
   text-align: center;
-  max-width: 420px;
+  max-width: 480px;
   width: 90%;
-  box-shadow: 0 25px 80px rgba(0,0,0,0.7);
+  box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+}
+
+.loading-content p {
+  color: #cbd5e1;
+  font-size: 1.05rem;
+  margin: 0.5rem 0;
+  line-height: 1.6;
 }
 
 .spinner {
-  width: 70px;
-  height: 70px;
-  border: 8px solid #334155;
-  border-top: 8px solid #3b82f6;
+  width: 80px;
+  height: 80px;
+  border: 8px solid rgba(96,165,250,0.2);
+  border-top: 8px solid #60a5fa;
   border-radius: 50%;
-  animation: spin 1.2s linear infinite;
-  margin: 0 auto 1.5rem;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 2rem;
 }
 
 @keyframes spin {
@@ -347,11 +562,84 @@ button:disabled {
   100% { transform: rotate(360deg); }
 }
 
-/* Responsive Adjustments */
+/* =====================================================
+   RESPONSIVE DESIGN
+   ===================================================== */
+@media (max-width: 1024px) {
+  .container { 
+    padding: 0 20px; 
+  }
+  
+  .complaints-table th,
+  .complaints-table td {
+    padding: 1rem 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
 @media (max-width: 768px) {
-  .container { padding: 0 16px; }
-  .form-section, .admin-section, .complaints-section { padding: 1.5rem; }
-  .login-screen { padding: 3rem 1.5rem; }
-  .wallet-info { flex-direction: column; gap: 1rem; }
-  .complaints-table th, .complaints-table td { padding: 0.75rem; font-size: 0.9rem; }
+  .app-wrapper {
+    padding: 20px 10px;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  h2 {
+    font-size: 1rem;
+  }
+  
+  .form-section, 
+  .admin-section, 
+  .complaints-section {
+    padding: 2rem 1.5rem;
+    margin: 1.5rem auto;
+  }
+  
+  .login-screen {
+    padding: 3rem 2rem;
+  }
+  
+  .wallet-info {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .complaints-table {
+    font-size: 0.85rem;
+  }
+  
+  .complaints-table th,
+  .complaints-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .complaints-table button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .loading-content {
+    padding: 2.5rem 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .complaints-table th,
+  .complaints-table td {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.8rem;
+  }
+  
+  h3 {
+    font-size: 1.35rem;
+  }
+  
+  .wallet-info p {
+    font-size: 0.9rem;
+    word-break: break-all;
+  }
 }

@@ -352,7 +352,7 @@ function App() {
                 <button onClick={addOfficer}>เพิ่มเจ้าหน้าที่</button>
 
                 <h4>ผูก Officer กับหน่วยงาน</h4>
-                <select onChange={(e) => setSelectedLocation(e.target.value)}>
+                <select onChange={(e) => setSelectedLocation(e.target.value)} value={selectedLocation}>
                   <option value="">-- เลือกหน่วยงาน --</option>
                   {locations.map((loc, index) => (
                     <option key={index} value={loc}>{loc}</option>
@@ -442,7 +442,7 @@ function App() {
                           <td>{c.timestamp}</td>
                           <td>
                             {isOfficer && c.status === 'Submitted' && (
-                              <button onClick={() => assignToOfficer(c.id)}>รับเรื่อง</button>
+                              <button onClick={(e) => { e.stopPropagation(); assignToOfficer(c.id); }}>รับเรื่อง</button>
                             )}
                             {isOfficer && c.status === 'UnderReview' && c.officerAssigned.toLowerCase() === account?.toLowerCase() && (
                               <>
@@ -451,22 +451,23 @@ function App() {
                                   placeholder="สิ่งที่ต้องแก้ไข"
                                   value={actionInput}
                                   onChange={(e) => setActionInput(e.target.value)}
+                                  onClick={(e) => e.stopPropagation()}
                                 />
-                                <button onClick={() => setAction(c.id)}>บันทึก</button>
-                                <button onClick={() => markResolved(c.id)}>เสร็จสิ้น</button>
+                                <button onClick={(e) => { e.stopPropagation(); setAction(c.id); }}>บันทึก</button>
+                                <button onClick={(e) => { e.stopPropagation(); markResolved(c.id); }}>เสร็จสิ้น</button>
                               </>
                             )}
                             {c.status === 'Resolved' && c.reporter.toLowerCase() === account?.toLowerCase() && (
                               <>
-                                <button onClick={() => confirmResolution(c.id)}>ยืนยันรับ</button>
-                                <button onClick={() => rejectResolution(c.id)}>ไม่พอใจ ส่งซ้ำ</button>
+                                <button onClick={(e) => { e.stopPropagation(); confirmResolution(c.id); }}>ยืนยันรับ</button>
+                                <button onClick={(e) => { e.stopPropagation(); rejectResolution(c.id); }}>ไม่พอใจ ส่งซ้ำ</button>
                               </>
                             )}
                           </td>
                         </tr>
 
                         {c.expanded && (
-                          <tr className="expanded-row">
+                          <tr className="expanded-row" key={`expanded-${c.id}`}>
                             <td colSpan={10}>
                               <div className="expanded-content">
                                 <strong>รายละเอียดเต็ม:</strong>
