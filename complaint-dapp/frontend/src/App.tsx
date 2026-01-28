@@ -23,13 +23,14 @@ function App() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [location, setLocation] = useState('')
+  const [selectedLocation, setSelectedLocation] = useState('')
+  const [newOfficerAddress, setNewOfficerAddress] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(false)
   const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false)
   const [actionInput, setActionInput] = useState('')
-  const [newOfficerAddress, setNewOfficerAddress] = useState('')
 
   const locations = [
     "เทศบาลนครอุดรธานี",
@@ -197,7 +198,7 @@ function App() {
       loadComplaints()
     } catch (error) {
       console.error('รับเรื่องล้มเหลว:', error)
-      setStatusMessage('รับเรื่องล้มเหลว - ตรวจสอบสิทธิ์ Officer')
+      setStatusMessage('รับเรื่องล้มเหลว - ตรวจสอบสิทธิ์ Officer และ SepoliaETH')
     }
   }
 
@@ -279,6 +280,24 @@ function App() {
     }
   }
 
+  const assignOfficerToLocationFunc = async () => {
+    if (!selectedLocation || !newOfficerAddress) {
+      setStatusMessage('กรุณาเลือกหน่วยงานและใส่ address Officer')
+      return
+    }
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum!)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      const tx = await contract.assignOfficerToLocation(selectedLocation, newOfficerAddress)
+      await tx.wait()
+      setStatusMessage('ผูก Officer กับหน่วยงานสำเร็จ')
+    } catch (error) {
+      console.error('ผูกล้มเหลว:', error)
+      setStatusMessage('ผูกล้มเหลว - ตรวจสอบสิทธิ์ Admin และ SepoliaETH')
+    }
+  }
+
   useEffect(() => {
     loadComplaints()
   }, [])
@@ -326,11 +345,26 @@ function App() {
                 <h3>ส่วนผู้ดูแลระบบ: จัดการเจ้าหน้าที่</h3>
                 <input
                   type="text"
-                  placeholder="ใส่ address ของเจ้าหน้าที่ใหม่"
+                  placeholder="address ของเจ้าหน้าที่ใหม่"
                   value={newOfficerAddress}
                   onChange={(e) => setNewOfficerAddress(e.target.value)}
                 />
                 <button onClick={addOfficer}>เพิ่มเจ้าหน้าที่</button>
+
+                <h4>ผูก Officer กับหน่วยงาน</h4>
+                <select onChange={(e) => setSelectedLocation(e.target.value)}>
+                  <option value="">-- เลือกหน่วยงาน --</option>
+                  {locations.map((loc, index) => (
+                    <option key={index} value={loc}>{loc}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  placeholder="address ของ Officer"
+                  value={newOfficerAddress}
+                  onChange={(e) => setNewOfficerAddress(e.target.value)}
+                />
+                <button onClick={assignOfficerToLocationFunc}>ผูกหน่วยงาน</button>
               </div>
             )}
 
