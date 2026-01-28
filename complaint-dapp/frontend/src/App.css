@@ -16,7 +16,7 @@ body {
 }
 
 /* =====================================================
-   CENTER EVERYTHING – Core Layout
+   APP WRAPPER – CENTER REAL CONTENT
    ===================================================== */
 .app-wrapper {
   min-height: 100vh;
@@ -24,107 +24,48 @@ body {
   justify-content: center;
   align-items: flex-start;
   padding: 40px 20px;
-  background: radial-gradient(circle at center, rgba(30,41,59,0.3), transparent);
 }
 
+/* =====================================================
+   CONTAINER – CENTER EVERYTHING
+   ===================================================== */
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;      /* ขยายความกว้าง */
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;    /* << สำคัญ */
   text-align: center;
 }
 
 /* =====================================================
-   TYPOGRAPHY – Clean & Official
+   TYPOGRAPHY
    ===================================================== */
 h1 {
   font-size: clamp(2rem, 5vw, 3.2rem);
   font-weight: 800;
-  letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
   background: linear-gradient(135deg, #60a5fa, #a78bfa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 h2 {
-  font-size: clamp(1.1rem, 3vw, 1.4rem);
-  font-weight: 400;
+  font-size: 1.3rem;
   color: #94a3b8;
   margin-bottom: 3rem;
 }
 
 h3 {
   font-size: 1.75rem;
-  font-weight: 700;
-  color: #f1f5f9;
   margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
   border-bottom: 2px solid rgba(96,165,250,0.3);
-}
-
-h4 {
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: #cbd5e1;
-  margin: 2rem 0 1rem;
+  padding-bottom: 0.75rem;
 }
 
 /* =====================================================
-   LOGIN SCREEN – Centered Hero
-   ===================================================== */
-.login-screen {
-  background: rgba(30,41,59,0.75);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(96,165,250,0.2);
-  border-radius: 28px;
-  padding: 5rem 3rem;
-  max-width: 580px;
-  width: 100%;
-  margin: 0 auto;
-  box-shadow: 0 30px 90px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(96,165,250,0.1);
-  text-align: center;
-}
-
-.login-screen h3 {
-  font-size: 2.8rem;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #60a5fa, #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.login-screen p {
-  font-size: 1.2rem;
-  color: #cbd5e1;
-  margin-bottom: 3rem;
-  line-height: 1.7;
-}
-
-/* =====================================================
-   PRIMARY BUTTON – Connect Wallet
-   ===================================================== */
-.connect-btn {
-  background: linear-gradient(135deg, #1d4ed8, #3b82f6, #60a5fa);
-  color: white;
-  padding: 1.25rem 3.5rem;
-  font-size: 1.15rem;
-  font-weight: 700;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 12px 40px rgba(59,130,246,0.5);
-}
-
-.connect-btn:hover {
-  transform: translateY(-5px) scale(1.03);
-  box-shadow: 0 25px 60px rgba(59,130,246,0.7);
-}
-
-/* =====================================================
-   WALLET INFO BAR – Centered & Balanced
+   WALLET INFO BAR – CENTER & WIDE
    ===================================================== */
 .wallet-info {
   display: flex;
@@ -133,89 +74,41 @@ h4 {
   align-items: center;
   gap: 1.5rem 2.5rem;
   margin: 3rem auto;
-  padding: 1.5rem 2.5rem;
+  padding: 1.75rem 2.5rem;
   background: rgba(30,41,59,0.6);
-  backdrop-filter: blur(12px);
   border-radius: 20px;
-  border: 1px solid rgba(96,165,250,0.15);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-  max-width: 1000px;
+  max-width: 1200px;
+  width: 100%;
 }
 
 .wallet-info p {
-  font-size: 1.1rem;
-  margin: 0;
-  color: #cbd5e1;
+  font-size: 1.05rem;
 }
 
 .wallet-info strong {
   color: #60a5fa;
-  font-weight: 700;
 }
-
-/* Filter Toggle */
-.filter-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  color: #cbd5e1;
-  font-size: 1rem;
-}
-
-.filter-toggle input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  accent-color: #60a5fa;
-}
-
-/* Logout & Refresh Buttons */
-.logout-btn, .refresh-btn {
-  padding: 0.9rem 2rem;
-  font-weight: 600;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.logout-btn {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-}
-
-.logout-btn:hover { background: #b91c1c; }
-
-.refresh-btn {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-}
-
-.refresh-btn:hover { background: #a78bfa; }
 
 /* =====================================================
-   FORM & ADMIN SECTION – Centered Card
+   FORM & ADMIN SECTION – WIDER
    ===================================================== */
-.form-section, .admin-section {
+.form-section,
+.admin-section {
   background: rgba(30,41,59,0.55);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(96,165,250,0.15);
   border-radius: 24px;
   padding: 3rem;
   margin: 3rem auto;
-  max-width: 900px;
+  max-width: 1100px;     /* ขยายจากเดิม */
+  width: 100%;
   box-shadow: 0 20px 70px rgba(0,0,0,0.6);
 }
 
-.admin-section h4 {
-  font-size: 1.4rem;
-  margin: 2rem 0 1.25rem;
-  color: #cbd5e1;
-  text-align: center;
-}
-
-/* Inputs & Select */
-input, textarea, select {
+/* =====================================================
+   INPUTS
+   ===================================================== */
+input,
+textarea,
+select {
   width: 100%;
   background: rgba(15,23,42,0.85);
   border: 2px solid rgba(96,165,250,0.2);
@@ -224,35 +117,16 @@ input, textarea, select {
   margin-bottom: 1.5rem;
   border-radius: 14px;
   font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: #60a5fa;
-  background: rgba(15,23,42,0.95);
-  box-shadow: 0 0 0 5px rgba(96,165,250,0.2);
-  transform: translateY(-2px);
 }
 
 textarea {
   min-height: 180px;
-  resize: vertical;
-}
-
-select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2360a5fa' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1.5rem center;
-  padding-right: 3rem;
 }
 
 /* =====================================================
-   ACTION BUTTONS (Submit, Add Officer, etc.)
+   BUTTONS
    ===================================================== */
-button:not(.logout-btn, .refresh-btn) {
+button {
   background: linear-gradient(135deg, #10b981, #059669);
   color: white;
   padding: 1.1rem 2.5rem;
@@ -261,220 +135,89 @@ button:not(.logout-btn, .refresh-btn) {
   border: none;
   border-radius: 14px;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 10px 35px rgba(16,185,129,0.4);
-  min-width: 180px;
-  margin: 0.5rem;
 }
 
-button:not(.logout-btn, .refresh-btn):hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 50px rgba(16,185,129,0.6);
+.logout-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
-/* Officer & Reporter Buttons */
-button.officer {
-  background: linear-gradient(135deg, #1e40af, #3b82f6);
-  box-shadow: 0 10px 35px rgba(59,130,246,0.4);
-}
-
-button.reporter-confirm {
-  background: linear-gradient(135deg, #16a34a, #22c55e);
-}
-
-button.reporter-reject {
-  background: linear-gradient(135deg, #ef4444, #f87171);
+.refresh-btn {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
 }
 
 /* =====================================================
-   STATUS MESSAGE – Centered Panel
-   ===================================================== */
-.status {
-  margin: 3rem auto;
-  padding: 1.75rem 2.5rem;
-  max-width: 900px;
-  background: rgba(30,41,59,0.7);
-  backdrop-filter: blur(12px);
-  border-left: 6px solid #3b82f6;
-  border-radius: 16px;
-  color: #e2e8f0;
-  font-size: 1.1rem;
-  box-shadow: 0 10px 40px rgba(59,130,246,0.3);
-  text-align: center;
-}
-
-/* =====================================================
-   COMPLAINTS SECTION – Centered & Responsive Table
+   COMPLAINTS SECTION – FULL & CENTER
    ===================================================== */
 .complaints-section {
   background: rgba(30,41,59,0.55);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(96,165,250,0.15);
   border-radius: 24px;
   padding: 3rem;
   margin: 3rem auto;
-  max-width: 1200px;
-  box-shadow: 0 20px 70px rgba(0,0,0,0.6);
+  max-width: 1600px;     /* << ตารางกว้าง */
+  width: 100%;
+  overflow-x: auto;
 }
 
-.complaints-section h3 {
-  text-align: center;
-}
-
+/* =====================================================
+   TABLE – FULL WIDTH
+   ===================================================== */
 .complaints-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0 0.75rem;
-  margin-top: 2rem;
-}
-
-.complaints-table thead {
-  background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(99,102,241,0.25));
-  backdrop-filter: blur(10px);
 }
 
 .complaints-table th {
-  padding: 1.25rem 1.5rem;
+  padding: 1.25rem;
+  background: rgba(59,130,246,0.25);
   text-align: center;
   font-weight: 700;
-  color: #f1f5f9;
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 2px solid rgba(96,165,250,0.4);
 }
 
 .complaints-table td {
-  padding: 1.25rem 1.5rem;
-  text-align: center;
-  background: rgba(15,23,42,0.5);
+  padding: 1.25rem;
+  background: rgba(15,23,42,0.6);
   border-radius: 12px;
-  color: #cbd5e1;
-  font-size: 0.95rem;
-  vertical-align: middle;
-}
-
-.complaints-table tbody tr:hover {
-  background: rgba(30,41,59,0.75);
-  transform: scale(1.01);
-  box-shadow: 0 8px 30px rgba(96,165,250,0.15);
-}
-
-/* Status Colors with Background */
-.status-submitted { 
-  color: #fbbf24; 
-  background: rgba(251,191,36,0.15);
-  padding: 0.5rem 1rem;
-  border-radius: 10px;
-  font-weight: 700;
-}
-
-.status-underreview { 
-  color: #60a5fa; 
-  background: rgba(96,165,250,0.15);
-  padding: 0.5rem 1rem;
-  border-radius: 10px;
-  font-weight: 700;
-}
-
-.status-resolved { 
-  color: #34d399; 
-  background: rgba(52,211,153,0.15);
-  padding: 0.5rem 1rem;
-  border-radius: 10px;
-  font-weight: 700;
-}
-
-/* Expandable Row */
-.expandable-row {
-  cursor: pointer;
-}
-
-.expandable-row:hover td {
-  background: rgba(30,41,59,0.7);
-}
-
-.expand-hint {
-  color: #93c5fd;
-  font-size: 0.9rem;
-  font-style: italic;
-  margin-left: 0.5rem;
-}
-
-.expanded-row td {
-  background: rgba(15,23,42,0.85) !important;
-  padding: 2rem !important;
-  border-radius: 0 0 16px 16px;
-  text-align: left;
-}
-
-.expanded-content strong {
-  display: block;
-  color: #60a5fa;
-  font-size: 1.1rem;
-  margin: 1.5rem 0 0.75rem;
-}
-
-.expanded-content p {
-  color: #cbd5e1;
-  margin-bottom: 1.25rem;
-  padding-left: 1rem;
-  border-left: 4px solid rgba(96,165,250,0.3);
-}
-
-/* Loading Overlay */
-.loading-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-
-.loading-content {
-  background: linear-gradient(135deg, rgba(30,41,59,0.95), rgba(15,23,42,0.95));
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(96,165,250,0.3);
-  padding: 4rem 5rem;
-  border-radius: 28px;
   text-align: center;
-  max-width: 520px;
-  width: 90%;
-  box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+  word-wrap: break-word;
 }
 
-.spinner {
-  width: 90px;
-  height: 90px;
-  border: 10px solid rgba(96,165,250,0.2);
-  border-top: 10px solid #60a5fa;
-  border-radius: 50%;
-  animation: spin 1.2s linear infinite;
-  margin: 0 auto 2rem;
+.complaints-table tbody tr:hover td {
+  background: rgba(30,41,59,0.8);
 }
 
-/* Responsive */
+/* =====================================================
+   STATUS COLORS
+   ===================================================== */
+.status-submitted {
+  color: #fbbf24;
+}
+
+.status-underreview {
+  color: #60a5fa;
+}
+
+.status-resolved {
+  color: #34d399;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
 @media (max-width: 1024px) {
-  .container { padding: 0 20px; max-width: 95%; }
-  .form-section, .admin-section, .complaints-section { padding: 2.5rem 2rem; }
+  .container {
+    max-width: 95%;
+  }
 }
 
 @media (max-width: 768px) {
-  .app-wrapper { padding: 30px 15px; }
-  h1 { font-size: 2.2rem; }
-  .login-screen { padding: 3.5rem 2rem; }
-  .wallet-info { flex-direction: column; gap: 1.25rem; padding: 1.5rem; }
-  button { width: 100%; padding: 1rem; min-width: unset; }
-  .complaints-table { font-size: 0.9rem; }
-  .complaints-table th, .complaints-table td { padding: 1rem 0.75rem; }
-  .loading-content { padding: 3rem 2.5rem; }
-}
+  .wallet-info {
+    flex-direction: column;
+  }
 
-@media (max-width: 480px) {
-  h1 { font-size: 1.8rem; }
-  h3 { font-size: 1.4rem; }
-  .complaints-table th, .complaints-table td { padding: 0.75rem 0.5rem; font-size: 0.85rem; }
+  button {
+    width: 100%;
+  }
 }
