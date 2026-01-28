@@ -28,8 +28,8 @@ function App() {
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(false)
   const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false)
-  const [actionInput, setActionInput] = useState('') // สำหรับ Officer ใส่สิ่งที่ต้องแก้
-  const [newOfficerAddress, setNewOfficerAddress] = useState('') // สำหรับ Admin เพิ่ม Officer
+  const [actionInput, setActionInput] = useState('')
+  const [newOfficerAddress, setNewOfficerAddress] = useState('')
 
   // รายการหน่วยงาน 33 แห่งในอุดรธานี
   const locations = [
@@ -98,12 +98,26 @@ function App() {
     }
   }
 
-  // Logout
-  const disconnectWallet = () => {
+  // Logout (ล้าง permission กับ MetaMask จริง ๆ)
+  const disconnectWallet = async () => {
     setAccount(null)
     setIsOfficer(false)
     setIsAdmin(false)
     setStatusMessage('ออกจากระบบเรียบร้อย')
+
+    if (window.ethereum) {
+      try {
+        // ล้าง permission การเชื่อมต่อเว็บนี้
+        await window.ethereum.request({
+          method: 'wallet_revokePermissions',
+          params: [{ eth_accounts: {} }]
+        })
+        console.log('ตัดการเชื่อมต่อ MetaMask สำเร็จ')
+      } catch (error) {
+        console.error('ล้าง permission ล้มเหลว:', error)
+        setStatusMessage('ล้าง permission ล้มเหลว แต่ state ล้างแล้ว')
+      }
+    }
   }
 
   // โหลดข้อมูลเรื่องร้องเรียน
@@ -323,7 +337,6 @@ function App() {
               </button>
             </div>
 
-            {/* ส่วนสำหรับ Admin */}
             {isAdmin && (
               <div className="admin-section">
                 <h3>ส่วนผู้ดูแลระบบ: จัดการเจ้าหน้าที่</h3>
