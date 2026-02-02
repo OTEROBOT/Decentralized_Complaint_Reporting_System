@@ -32,8 +32,10 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [showMyComplaintsOnly, setShowMyComplaintsOnly] = useState(false)
   const [actionInput, setActionInput] = useState('')
-  const [searchQuery, setSearchQuery] = useState('') // เพิ่ม state สำหรับค้นหา
-  const [officerLocations, setOfficerLocations] = useState<string[]>([]) // เพื่อแสดงหน่วยงานที่ Officer รับผิดชอบ
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterType, setFilterType] = useState<'all' | 'my' | 'my-location' | 'selected-location'>('all')
+  const [selectedFilterLocation, setSelectedFilterLocation] = useState('')
+  const [officerLocations, setOfficerLocations] = useState<string[]>([])
 
   const locations = [
     "เทศบาลนครอุดรธานี",
@@ -78,8 +80,7 @@ function App() {
     const isOff = await contract.officers(address)
     setIsOfficer(isOff)
     if (isOff) {
-      // หาหน่วยงานที่ Officer คนนี้รับผิดชอบ
-      const officerLocs: string[] = [];
+      const officerLocs: string[] = []
       for (const loc of locations) {
         const isOfLoc = await contract.isOfficerOfLocation(address, loc)
         if (isOfLoc) officerLocs.push(loc)
@@ -154,7 +155,6 @@ function App() {
       }
 
       setComplaints(list)
-      setFilteredComplaints(list)
     } catch (error) {
       console.error('โหลดข้อมูลล้มเหลว:', error)
       setStatusMessage('ไม่สามารถโหลดข้อมูลได้ - ตรวจสอบ contract address')
@@ -318,21 +318,27 @@ function App() {
 
   useEffect(() => {
     let filtered = complaints
-    if (showMyComplaintsOnly) {
-      filtered = filtered.filter((c) => c.reporter.toLowerCase() === account?.toLowerCase())
+
+    // กรองตามประเภทสำหรับ Officer
+    if (filterType === 'my') {
+      filtered = filtered.filter(c => c.reporter.toLowerCase() === account?.toLowerCase())
+    } else if (filterType === 'my-location' && isOfficer && officerLocations.length > 0) {
+      filtered = filtered.filter(c => officerLocations.includes(c.location))
+    } else if (filterType === 'selected-location' && selectedFilterLocation) {
+      filtered = filtered.filter(c => c.location === selectedFilterLocation)
     }
+
+    // กรองค้นหา (ทุกคนใช้ได้)
     if (searchQuery) {
-      filtered = filtered.filter((c) =>
+      filtered = filtered.filter(c =>
         c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.location.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
-    if (isOfficer && officerLocations.length > 0) {
-      filtered = filtered.filter((c) => officerLocations.includes(c.location))
-    }
+
     setFilteredComplaints(filtered)
-  }, [complaints, showMyComplaintsOnly, searchQuery, isOfficer, officerLocations, account])
+  }, [complaints, filterType, selectedFilterLocation, searchQuery, isOfficer, officerLocations, account])
 
   return (
     <div className="app-wrapper">
@@ -369,8 +375,9 @@ function App() {
             </div>
 
             {isOfficer && officerLocations.length > 0 && (
-              <div className="status">
-                <p>คุณรับผิดชอบหน่วยงาน: {officerLocations.join(', ')}<br />คุณรับเรื่องได้เฉพาะของหน่วยงานตัวเองเท่านั้น</p>
+              <div className="officer-info">
+                <p>คุณรับผิดชอบหน่วยงาน: <strong>{officerLocations.join(', ')}</strong></p>
+                <p className="small-note">คุณสามารถรับเรื่อง/จัดการได้เฉพาะเรื่องของหน่วยงานตัวเองเท่านั้น</p>
               </div>
             )}
 
@@ -430,17 +437,56 @@ function App() {
 
             <div className="complaints-section">
               <h3>รายการเรื่องร้องเรียนทั้งหมด</h3>
-              <input
-                type="text"
-                placeholder="ค้นหาตามหัวข้อ, รายละเอียด, หรือหน่วยงาน"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
+
+              <div className="table-controls">
+                <input
+                  type="text"
+                  placeholder="ค้นหาตามหัวข้อ, รายละเอียด, หน่วยงาน..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="search-input"
+                />
+
+                {isOfficer && (
+                  <div className="officer-filters">
+                    <button
+                      className={filterType === 'all' ? 'active' : ''}
+                      onClick={() => setFilterType('all')}
+                    >
+                      แสดงทั้งหมด
+                    </button>
+                    <button
+                      className={filterType === 'my' ? 'active' : ''}
+                      onClick={() => setFilterType('my')}
+                    >
+                      เฉพาะเรื่องของฉัน
+                    </button>
+                    <button
+                      className={filterType === 'my-location' ? 'active' : ''}
+                      onClick={() => setFilterType('my-location')}
+                    >
+                      เฉพาะหน่วยงานของฉัน
+                    </button>
+                    <select
+                      value={selectedFilterLocation}
+                      onChange={(e) => {
+                        setSelectedFilterLocation(e.target.value)
+                        setFilterType('selected-location')
+                      }}
+                    >
+                      <option value="">เลือกหน่วยงาน...</option>
+                      {locations.map((loc) => (
+                        <option key={loc} value={loc}>{loc}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
               {loading ? (
                 <p>กำลังโหลดข้อมูลจาก Blockchain...</p>
               ) : filteredComplaints.length === 0 ? (
-                <p>{showMyComplaintsOnly ? 'คุณยังไม่มีเรื่องร้องเรียน' : 'ยังไม่มีเรื่องร้องเรียน'}</p>
+                <p>ไม่พบเรื่องร้องเรียน</p>
               ) : (
                 <table className="complaints-table">
                   <thead>
@@ -483,7 +529,7 @@ function App() {
                           <td>{c.timestamp}</td>
                           <td>
                             {isOfficer && c.status === 'Submitted' && officerLocations.includes(c.location) && (
-                              <button onClick={() => assignToOfficer(c.id)}>รับเรื่อง</button>
+                              <button onClick={(e) => { e.stopPropagation(); assignToOfficer(c.id); }}>รับเรื่อง</button>
                             )}
                             {isOfficer && c.status === 'UnderReview' && c.officerAssigned.toLowerCase() === account?.toLowerCase() && (
                               <>
@@ -492,15 +538,16 @@ function App() {
                                   placeholder="สิ่งที่ต้องแก้ไข"
                                   value={actionInput}
                                   onChange={(e) => setActionInput(e.target.value)}
+                                  onClick={(e) => e.stopPropagation()}
                                 />
-                                <button onClick={() => setAction(c.id)}>บันทึก</button>
-                                <button onClick={() => markResolved(c.id)}>เสร็จสิ้น</button>
+                                <button onClick={(e) => { e.stopPropagation(); setAction(c.id); }}>บันทึก</button>
+                                <button onClick={(e) => { e.stopPropagation(); markResolved(c.id); }}>เสร็จสิ้น</button>
                               </>
                             )}
                             {c.status === 'Resolved' && c.reporter.toLowerCase() === account?.toLowerCase() && (
                               <>
-                                <button onClick={() => confirmResolution(c.id)}>ยืนยันรับ</button>
-                                <button onClick={() => rejectResolution(c.id)}>ไม่พอใจ ส่งซ้ำ</button>
+                                <button onClick={(e) => { e.stopPropagation(); confirmResolution(c.id); }}>ยืนยันรับ</button>
+                                <button onClick={(e) => { e.stopPropagation(); rejectResolution(c.id); }}>ไม่พอใจ ส่งซ้ำ</button>
                               </>
                             )}
                           </td>
@@ -532,8 +579,9 @@ function App() {
         <div className="loading-overlay">
           <div className="loading-content">
             <div className="spinner"></div>
-            <p>กำลังส่งเรื่องร้องเรียนไปยัง Blockchain...</p>
-            <p>กรุณารอสักครู่ อย่าปิดหน้าต่าง</p>
+            <h3>กำลังส่งเรื่องไปยัง Blockchain</h3>
+            <p>ข้อมูลกำลังถูกบันทึกอย่างปลอดภัยและถาวร</p>
+            <p className="small-note">กรุณารอสักครู่ อย่าปิดหน้าต่างนี้</p>
           </div>
         </div>
       )}
