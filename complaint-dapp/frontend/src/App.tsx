@@ -981,10 +981,15 @@ function App() {
         <div className="loading-overlay">
           <div className="loading-content">
             <div className="loading-animation">
-              <div className="blockchain-blocks">
-                <div className="block"></div>
-                <div className="block"></div>
-                <div className="block"></div>
+              <div className="circular-spinner">
+                <div className="spinner-segment segment-1"></div>
+                <div className="spinner-segment segment-2"></div>
+                <div className="spinner-segment segment-3"></div>
+                <div className="spinner-segment segment-4"></div>
+                <div className="spinner-segment segment-5"></div>
+                <div className="spinner-segment segment-6"></div>
+                <div className="spinner-segment segment-7"></div>
+                <div className="spinner-segment segment-8"></div>
               </div>
             </div>
             <h3>กำลังดำเนินการ...</h3>

@@ -1,6 +1,17 @@
 /* =====================================================
    MODERN GLOBAL RESET & VARIABLES
    ===================================================== */
+/*
+  Viewport Configuration (Add to HTML):
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  
+  This ensures:
+  - Responsive scaling on all devices
+  - Support for notched devices (iPhone X+)
+  - Proper rendering on all platforms
+  - Allows zoom for accessibility
+*/
+
 :root {
   --primary: #3b82f6;
   --primary-dark: #2563eb;
@@ -48,26 +59,34 @@ body {
   color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
+  min-height: 100dvh;
   line-height: 1.6;
   overflow-x: hidden;
+  /* Support for devices with notches (iPhone X+, etc.) */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+  -webkit-touch-callout: none; /* Prevent callout on long press */
 }
 
 /* =====================================================
-   LAYOUT
+   LAYOUT - Universal Platform Support
    ===================================================== */
 .app-wrapper {
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 40px 20px;
+  align-items: center; /* Center vertically for all content */
+  padding: clamp(20px, 4vw, 40px);
   background: radial-gradient(circle at top, rgba(59, 130, 246, 0.1), transparent 50%),
               radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.1), transparent 50%);
+  overflow-x: hidden;
 }
 
 .container {
   width: 100%;
-  max-width: 1400px;
+  max-width: min(1400px, 95vw); /* Responsive max-width */
   margin: 0 auto;
 }
 
@@ -192,20 +211,21 @@ h3 {
 }
 
 /* =====================================================
-   LOGIN SCREEN
+   LOGIN SCREEN - Perfectly Centered
    ===================================================== */
 .login-screen {
   background: var(--bg-card);
   backdrop-filter: blur(24px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
-  padding: 5rem 4rem;
-  max-width: 700px;
+  padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem);
+  max-width: min(700px, 90vw);
   width: 100%;
-  margin: 0 auto;
+  margin: auto;
   box-shadow: var(--shadow-lg), inset 0 0 0 1px rgba(96, 165, 250, 0.1);
   text-align: center;
   animation: fadeInUp 0.6s ease;
+  position: relative;
 }
 
 @keyframes fadeInUp {
@@ -1372,49 +1392,124 @@ button:not(.help-btn):not(.refresh-btn):not(.logout-btn):not(.submit-btn):not(.t
   backdrop-filter: blur(24px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
-  padding: 4.5rem 5.5rem;
+  padding: clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 5.5rem);
   text-align: center;
-  max-width: 600px;
+  max-width: min(600px, 90vw);
   width: 90%;
   box-shadow: var(--shadow-lg);
   animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin: auto;
 }
 
 .loading-animation {
   margin-bottom: 3rem;
-}
-
-.blockchain-blocks {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  align-items: center;
 }
 
-.block {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  border-radius: var(--radius-sm);
-  animation: blockPulse 1.5s ease-in-out infinite;
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+.circular-spinner {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  animation: rotate 2s linear infinite;
 }
 
-.block:nth-child(2) {
-  animation-delay: 0.3s;
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.block:nth-child(3) {
+.spinner-segment {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.spinner-segment::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: segmentPulse 1.5s ease-in-out infinite;
+}
+
+/* Colorful segments with different delays */
+.segment-1::before {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  box-shadow: 0 0 20px #ef4444;
+  animation-delay: 0s;
+}
+
+.segment-2::before {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  box-shadow: 0 0 20px #f59e0b;
+  animation-delay: 0.2s;
+  transform: translateX(-50%) rotate(45deg);
+  transform-origin: center 60px;
+}
+
+.segment-3::before {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  box-shadow: 0 0 20px #10b981;
+  animation-delay: 0.4s;
+  transform: translateX(-50%) rotate(90deg);
+  transform-origin: center 60px;
+}
+
+.segment-4::before {
+  background: linear-gradient(135deg, #06b6d4, #22d3ee);
+  box-shadow: 0 0 20px #06b6d4;
   animation-delay: 0.6s;
+  transform: translateX(-50%) rotate(135deg);
+  transform-origin: center 60px;
 }
 
-@keyframes blockPulse {
+.segment-5::before {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  box-shadow: 0 0 20px #3b82f6;
+  animation-delay: 0.8s;
+  transform: translateX(-50%) rotate(180deg);
+  transform-origin: center 60px;
+}
+
+.segment-6::before {
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  box-shadow: 0 0 20px #6366f1;
+  animation-delay: 1s;
+  transform: translateX(-50%) rotate(225deg);
+  transform-origin: center 60px;
+}
+
+.segment-7::before {
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  box-shadow: 0 0 20px #8b5cf6;
+  animation-delay: 1.2s;
+  transform: translateX(-50%) rotate(270deg);
+  transform-origin: center 60px;
+}
+
+.segment-8::before {
+  background: linear-gradient(135deg, #ec4899, #f472b6);
+  box-shadow: 0 0 20px #ec4899;
+  animation-delay: 1.4s;
+  transform: translateX(-50%) rotate(315deg);
+  transform-origin: center 60px;
+}
+
+@keyframes segmentPulse {
   0%, 100% {
-    transform: scale(1);
+    transform: translateX(-50%) scale(1);
     opacity: 1;
   }
   50% {
-    transform: scale(1.2);
-    opacity: 0.7;
+    transform: translateX(-50%) scale(1.5);
+    opacity: 0.6;
   }
 }
 
@@ -1456,8 +1551,28 @@ button:not(.help-btn):not(.refresh-btn):not(.logout-btn):not(.submit-btn):not(.t
 }
 
 /* =====================================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN - Universal Platform Support
    ===================================================== */
+
+/* Extra Large Screens (4K, Large Monitors) */
+@media (min-width: 2560px) {
+  html {
+    font-size: 18px;
+  }
+  
+  .container {
+    max-width: 1600px;
+  }
+}
+
+/* Large Screens (Desktop, TV) */
+@media (min-width: 1920px) and (max-width: 2559px) {
+  html {
+    font-size: 17px;
+  }
+}
+
+/* Desktop & Laptop */
 @media (max-width: 1200px) {
   .container {
     max-width: 95%;
@@ -1466,13 +1581,22 @@ button:not(.help-btn):not(.refresh-btn):not(.logout-btn):not(.submit-btn):not(.t
   .admin-grid {
     grid-template-columns: 1fr;
   }
+  
+  .feature-cards {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
 }
 
+/* Tablet Landscape & Small Desktop */
 @media (max-width: 1024px) {
+  html {
+    font-size: 15px;
+  }
+  
   .form-section,
   .admin-section,
   .complaints-section {
-    padding: 3rem 2.5rem;
+    padding: 3rem 2rem;
   }
   
   .complaints-table {
@@ -1483,33 +1607,53 @@ button:not(.help-btn):not(.refresh-btn):not(.logout-btn):not(.submit-btn):not(.t
   .complaints-table td {
     padding: 1rem 0.75rem;
   }
+  
+  .wallet-info {
+    gap: 1rem 1.5rem;
+  }
 }
 
+/* Tablet Portrait & iPad */
 @media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
   .app-wrapper {
-    padding: 30px 15px;
+    padding: 20px 15px;
+    align-items: flex-start;
   }
   
   h1 {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 8vw, 2.5rem);
+  }
+  
+  .header-icon {
+    font-size: 3rem;
   }
   
   .login-screen {
-    padding: 4rem 2.5rem;
+    padding: 3rem 2rem;
+  }
+  
+  .login-icon {
+    font-size: 4rem;
   }
   
   .feature-cards {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .wallet-info {
     flex-direction: column;
     gap: 1.5rem;
-    padding: 2rem;
+    padding: 1.5rem 2rem;
   }
   
   .wallet-address {
     flex-direction: column;
+    gap: 0.5rem;
   }
   
   .help-btn,
@@ -1554,16 +1698,23 @@ button:not(.help-btn):not(.refresh-btn):not(.logout-btn):not(.submit-btn):not(.t
     width: 100%;
   }
   
+  /* Make table scrollable on tablets */
   .table-wrapper {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   .complaints-table {
-    min-width: 1200px;
+    min-width: 1000px;
   }
   
   .loading-content {
-    padding: 3.5rem 3rem;
+    padding: 3rem 2.5rem;
+  }
+  
+  .circular-spinner {
+    width: 100px;
+    height: 100px;
   }
   
   .tour-modal {
@@ -1571,22 +1722,75 @@ button:not(.help-btn):not(.refresh-btn):not(.logout-btn):not(.submit-btn):not(.t
   }
 }
 
+/* Mobile Landscape & Small Tablets */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .admin-card {
+    padding: 1.5rem;
+  }
+  
+  .tour-modal {
+    padding: 2.5rem 2rem;
+    max-width: 95vw;
+  }
+  
+  .tour-icon {
+    font-size: 4rem;
+  }
+}
+
+/* Mobile Portrait */
 @media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+  
+  .app-wrapper {
+    padding: 15px 10px;
+  }
+  
   h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
+  }
+  
+  h2 {
+    font-size: 1rem;
   }
   
   h3 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+  }
+  
+  .header-icon {
+    font-size: 2.5rem;
   }
   
   .login-screen {
-    padding: 3rem 2rem;
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .login-icon {
+    font-size: 3.5rem;
+  }
+  
+  .login-screen h3 {
+    font-size: 2rem;
   }
   
   .connect-btn {
-    padding: 1.2rem 3rem;
-    font-size: 1.1rem;
+    padding: 1.2rem 2.5rem;
+    font-size: 1rem;
+  }
+  
+  .feature-card {
+    padding: 1.5rem 1rem;
+  }
+  
+  .feature-icon {
+    font-size: 2.5rem;
   }
   
   .form-section,
@@ -1595,13 +1799,170 @@ button:not(.help-btn):not(.refresh-btn):not(.logout-btn):not(.submit-btn):not(.t
     padding: 2rem 1.25rem;
   }
   
-  .loading-content {
-    padding: 3rem 2rem;
+  .wallet-info {
+    padding: 1.25rem 1.5rem;
   }
   
-  .blockchain-blocks .block {
-    width: 50px;
-    height: 50px;
+  .wallet-code {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .loading-content {
+    padding: 2.5rem 1.75rem;
+    max-width: 95vw;
+  }
+  
+  .loading-content h3 {
+    font-size: 1.5rem;
+  }
+  
+  .circular-spinner {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .spinner-segment::before {
+    width: 16px;
+    height: 16px;
+  }
+  
+  input,
+  textarea,
+  select {
+    padding: 1rem 1.2rem;
+    font-size: 1rem;
+  }
+  
+  .submit-btn {
+    padding: 1.2rem 2rem;
+    font-size: 1rem;
+  }
+  
+  .status {
+    padding: 1.25rem 1.5rem;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .complaints-table {
+    min-width: 900px;
+  }
+}
+
+/* Small Mobile (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  html {
+    font-size: 12px;
+  }
+  
+  .app-wrapper {
+    padding: 10px 8px;
+  }
+  
+  .login-screen {
+    padding: 2rem 1.25rem;
+  }
+  
+  .form-section,
+  .admin-section,
+  .complaints-section {
+    padding: 1.75rem 1rem;
+  }
+  
+  .circular-spinner {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .spinner-segment::before {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Landscape Mode for Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .app-wrapper {
+    align-items: flex-start;
+    padding: 20px 15px;
+  }
+  
+  .login-screen {
+    padding: 2rem;
+  }
+  
+  .header-icon,
+  .login-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .feature-cards {
+    display: none;
+  }
+  
+  .tour-modal {
+    padding: 2rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .loading-content {
+    padding: 2rem;
+  }
+  
+  .circular-spinner {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* TV and Large Displays */
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1600px;
+  }
+  
+  .complaints-table th,
+  .complaints-table td {
+    padding: 1.75rem 1.5rem;
+  }
+}
+
+/* High DPI Displays (Retina) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets for mobile */
+  button,
+  input,
+  select,
+  .filter-btn,
+  .btn-action {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .complaints-table tbody tr {
+    cursor: default;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .complaints-table tbody tr:hover td {
+    background: rgba(15, 23, 42, 0.4);
+  }
+  
+  /* Improve scrolling on mobile */
+  .table-wrapper {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 }
 
