@@ -1,28 +1,35 @@
+// นำเข้า React hooks สำหรับจัดการ state และ side effects
 import { useState, useEffect } from 'react'
+// นำเข้า ethers.js สำหรับเชื่อมต่อกับ Ethereum blockchain
 import { ethers } from 'ethers'
+// นำเข้าข้อมูล contract address และ ABI จากไฟล์ config
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from './contractInfo'
+// นำเข้าไฟล์ CSS สำหรับตกแต่ง UI
 import './App.css'
 
 // ไฟล์ชื่อ: App.tsx
 
+// Interface กำหนดโครงสร้างข้อมูลของเรื่องร้องเรียน 1 เรื่อง
 interface Complaint {
-  id: number;
-  title: string;
-  description: string;
-  location: string;
-  reporter: string;
-  officerAssigned: string;
-  actionRequired: string;
-  status: string;
-  timestamp: string;
-  expanded?: boolean;
+  id: number;                    // รหัสเรื่องร้องเรียน
+  title: string;                 // หัวข้อเรื่องร้องเรียน
+  description: string;           // รายละเอียดเรื่องร้องเรียน
+  location: string;              // หน่วยงานที่ร้องเรียน
+  reporter: string;              // address ของผู้ร้องเรียน
+  officerAssigned: string;       // address ของเจ้าหน้าที่ที่รับเรื่อง
+  actionRequired: string;        // สิ่งที่ต้องแก้ไข/ดำเนินการ
+  status: string;                // สถานะปัจจุบัน (Submitted, UnderReview, Resolved, etc.)
+  timestamp: string;             // เวลาที่ส่งเรื่อง
+  expanded?: boolean;            // สถานะการขยายรายละเอียด (ใช้ใน UI)
 }
 
+// Interface สำหรับ component Tooltip (แสดงคำอธิบายเมื่อชี้เมาส์)
 interface TooltipProps {
-  text: string;
-  children: React.ReactNode;
+  text: string;                  // ข้อความที่จะแสดงใน tooltip
+  children: React.ReactNode;     // element ลูกที่จะมี tooltip
 }
 
+// Component Tooltip - แสดงคำอธิบายเมื่อชี้เมาส์ไปที่ element
 function Tooltip({ text, children }: TooltipProps) {
   return (
     <div className="tooltip-wrapper">
@@ -32,30 +39,80 @@ function Tooltip({ text, children }: TooltipProps) {
   )
 }
 
+// Component หลักของแอปพลิเคชัน
 function App() {
+  // ===== State สำหรับจัดการข้อมูลผู้ใช้และบทบาท =====
+  
+  // เก็บ address ของ wallet ที่เชื่อมต่อ (null = ยังไม่ได้เชื่อมต่อ)
   const [account, setAccount] = useState<string | null>(null)
+  // เช็คว่าผู้ใช้เป็นเจ้าหน้าที่หรือไม่
   const [isOfficer, setIsOfficer] = useState(false)
+  // เช็คว่าผู้ใช้เป็น admin หรือไม่
   const [isAdmin, setIsAdmin] = useState(false)
+  
+  // ===== State สำหรับฟอร์มส่งเรื่องร้องเรียน =====
+  
+  // หัวข้อเรื่องร้องเรียน
   const [title, setTitle] = useState('')
+  // รายละเอียดเรื่องร้องเรียน
   const [description, setDescription] = useState('')
+  // หน่วยงานที่เลือกสำหรับร้องเรียน
   const [location, setLocation] = useState('')
+  
+  // ===== State สำหรับฟังก์ชันของ Admin =====
+  
+  // หน่วยงานที่เลือกสำหรับผูกเจ้าหน้าที่
   const [selectedLocation, setSelectedLocation] = useState('')
+  // address ของเจ้าหน้าที่ที่จะเพิ่มหรือผูกกับหน่วยงาน
   const [newOfficerAddress, setNewOfficerAddress] = useState('')
+  
+  // ===== State สำหรับแสดงสถานะและข้อความ =====
+  
+  // ข้อความแจ้งเตือนที่แสดงให้ผู้ใช้เห็น
   const [statusMessage, setStatusMessage] = useState('')
+  // ประเภทของข้อความ (success=สำเร็จ, error=ผิดพลาด, info=ข้อมูลทั่วไป)
   const [statusType, setStatusType] = useState<'success' | 'error' | 'info'>('info')
+  // สถานะการส่งเรื่อง (true = กำลังส่ง, ปิดปุ่มไม่ให้กดซ้ำ)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // ===== State สำหรับจัดการข้อมูลเรื่องร้องเรียน =====
+  
+  // อาร์เรย์เก็บเรื่องร้องเรียนทั้งหมดที่โหลดมาจาก blockchain
   const [complaints, setComplaints] = useState<Complaint[]>([])
+  // อาร์เรย์เก็บเรื่องร้องเรียนหลังกรอง/ค้นหา
   const [filteredComplaints, setFilteredComplaints] = useState<Complaint[]>([])
+  // สถานะการโหลดข้อมูล (true = กำลังโหลด, แสดง loading indicator)
   const [loading, setLoading] = useState(false)
+  
+  // ===== State สำหรับฟังก์ชันของเจ้าหน้าที่ =====
+  
+  // input สำหรับกรอกสิ่งที่ต้องแก้ไข
   const [actionInput, setActionInput] = useState('')
+  
+  // ===== State สำหรับการค้นหาและกรองข้อมูล =====
+  
+  // คำค้นหา (ค้นจากหัวข้อ, รายละเอียด, หน่วยงาน)
   const [searchQuery, setSearchQuery] = useState('')
+  // ประเภทการกรอง: all=ทั้งหมด, my=ของฉัน, my-location=หน่วยงานของฉัน, selected-location=หน่วยงานที่เลือก
   const [filterType, setFilterType] = useState<'all' | 'my' | 'my-location' | 'selected-location'>('all')
+  // หน่วยงานที่เลือกสำหรับกรอง
   const [selectedFilterLocation, setSelectedFilterLocation] = useState('')
+  // รายการหน่วยงานที่เจ้าหน้าที่คนนี้ดูแล
   const [officerLocations, setOfficerLocations] = useState<string[]>([])
+  
+  // ===== State สำหรับ Welcome Tour (แนะนำการใช้งาน) =====
+  
+  // แสดง tour หรือไม่
   const [showWelcomeTour, setShowWelcomeTour] = useState(false)
+  // ขั้นตอนปัจจุบันของ tour (0, 1, 2, ...)
   const [currentTourStep, setCurrentTourStep] = useState(0)
+  
+  // ===== State สำหรับแสดงข้อความ Loading =====
+  
+  // ข้อความที่แสดงระหว่างรอ transaction หรือโหลดข้อมูล
   const [loadingMessage, setLoadingMessage] = useState('')
 
+  // อาร์เรย์เก็บรายชื่อหน่วยงานทั้งหมดในระบบ
   const locations = [
     "เทศบาลนครอุดรธานี",
     "โรงพยาบาลอุดรธานี",
@@ -92,6 +149,7 @@ function App() {
     "สำนักงานการยาสูบจังหวัดอุดรธานี"
   ];
 
+  // ขั้นตอนต่างๆ ของ Welcome Tour (คู่มือการใช้งานครั้งแรก)
   const tourSteps = [
     {
       title: "ยินดีต้อนรับสู่ระบบร้องเรียนแบบ Blockchain",
@@ -110,25 +168,42 @@ function App() {
     }
   ];
 
+  // ฟังก์ชันแสดงข้อความสถานะให้ผู้ใช้เห็น
+  // message = ข้อความที่จะแสดง
+  // type = ประเภท (success/error/info) สำหรับกำหนดสี
   const showStatus = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     setStatusMessage(message)
     setStatusType(type)
+    // ตั้งเวลาให้ข้อความหายไปอัตโนมัติหลัง 8 วินาที
     setTimeout(() => setStatusMessage(''), 8000)
   }
 
+  // ฟังก์ชันตรวจสอบบทบาทของผู้ใช้ (admin หรือ officer หรือไม่)
+  // address = wallet address ที่จะตรวจสอบ
+  // provider = ตัวเชื่อมต่อกับ blockchain
   const checkRoles = async (address: string, provider: ethers.BrowserProvider) => {
     try {
+      // สร้าง instance ของ smart contract
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
+      
+      // เรียกดู admin address จาก contract
       const adminAddr = await contract.admin()
+      // เช็คว่า address ที่ login ตรงกับ admin หรือไม่ (ไม่สนใจตัวพิมพ์เล็ก-ใหญ่)
       setIsAdmin(address.toLowerCase() === adminAddr.toLowerCase())
+      
+      // เช็คว่า address นี้เป็น officer หรือไม่
       const isOff = await contract.officers(address)
       setIsOfficer(isOff)
+      
+      // ถ้าเป็น officer ให้หาว่าดูแลหน่วยงานไหนบ้าง
       if (isOff) {
         const officerLocs: string[] = []
+        // วนลูปทุกหน่วยงานเพื่อเช็คว่า officer คนนี้ดูแลหน่วยงานไหนบ้าง
         for (const loc of locations) {
           const isOfLoc = await contract.isOfficerOfLocation(address, loc)
           if (isOfLoc) officerLocs.push(loc)
         }
+        // เก็บรายการหน่วยงานที่ดูแล
         setOfficerLocations(officerLocs)
       }
     } catch (error) {
@@ -136,28 +211,44 @@ function App() {
     }
   }
 
+  // ฟังก์ชันเชื่อมต่อ MetaMask wallet
   const connectWallet = async () => {
+    // เช็คว่ามี MetaMask ติดตั้งหรือไม่
     if (!window.ethereum) {
       showStatus('กรุณาติดตั้ง MetaMask Extension ในเบราว์เซอร์ของคุณก่อนใช้งาน', 'error')
+      // เปิดหน้า download MetaMask ในแท็บใหม่
       window.open('https://metamask.io/download/', '_blank')
       return
     }
 
     try {
+      // แสดงข้อความกำลังเชื่อมต่อ
       setLoadingMessage('กำลังเชื่อมต่อกับ MetaMask...')
+      
+      // สร้าง provider เชื่อมต่อกับ MetaMask
       const provider = new ethers.BrowserProvider(window.ethereum)
+      // ขอ permission เข้าถึง accounts จากผู้ใช้
       await provider.send("eth_requestAccounts", [])
+      // ดึง signer (ผู้ที่จะลงนาม transaction)
       const signer = await provider.getSigner()
+      // ดึง address ของ wallet
       const address = await signer.getAddress()
+      
+      // เก็บ address ลง state
       setAccount(address)
       showStatus('✅ เชื่อมต่อสำเร็จ! ยินดีต้อนรับเข้าสู่ระบบ', 'success')
+      
+      // ตรวจสอบบทบาท (admin/officer)
       checkRoles(address, provider)
       
-      // Show welcome tour for first-time users
+      // ตรวจสอบว่าผู้ใช้เคยดู tour แล้วหรือยัง (เก็บไว้ใน localStorage)
       const hasSeenTour = localStorage.getItem('hasSeenTour')
       if (!hasSeenTour) {
+        // ถ้ายังไม่เคยดู ให้แสดง tour
         setShowWelcomeTour(true)
       }
+      
+      // ล้างข้อความ loading
       setLoadingMessage('')
     } catch (error) {
       console.error('เชื่อมต่อล้มเหลว:', error)
@@ -166,13 +257,16 @@ function App() {
     }
   }
 
+  // ฟังก์ชันตัดการเชื่อมต่อ wallet (ออกจากระบบ)
   const disconnectWallet = async () => {
+    // รีเซ็ต state ทั้งหมดกลับเป็นค่าเริ่มต้น
     setAccount(null)
     setIsOfficer(false)
     setIsAdmin(false)
     setOfficerLocations([])
     showStatus('ออกจากระบบเรียบร้อย ขอบคุณที่ใช้บริการ', 'info')
 
+    // พยายามลบ permission ของ MetaMask (ไม่ได้ผลทุก browser)
     if (window.ethereum) {
       try {
         await window.ethereum.request({
@@ -185,20 +279,32 @@ function App() {
     }
   }
 
+  // ฟังก์ชันโหลดเรื่องร้องเรียนทั้งหมดจาก blockchain
   const loadComplaints = async () => {
+    // ถ้าไม่มี MetaMask ไม่ต้องทำอะไร
     if (!window.ethereum) return
+    
     setLoading(true)
     setLoadingMessage('กำลังโหลดข้อมูลจาก Blockchain...')
+    
     try {
+      // สร้าง provider และ contract instance
       const provider = new ethers.BrowserProvider(window.ethereum)
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
 
+      // อ่านจำนวนเรื่องร้องเรียนทั้งหมด
       const count = await contract.complaintCount()
       const list: Complaint[] = []
 
+      // วนลูปโหลดแต่ละเรื่อง (เริ่มที่ 1 เพราะ ID เริ่มจาก 1 ใน contract)
       for (let i = 1; i <= Number(count); i++) {
+        // แสดงความคืบหน้า
         setLoadingMessage(`กำลังโหลดเรื่องที่ ${i} จาก ${count}...`)
+        
+        // เรียกข้อมูลเรื่องร้องเรียนที่ i
         const c = await contract.getComplaint(i)
+        
+        // แปลงข้อมูลและเก็บลงในอาร์เรย์
         list.push({
           id: i,
           title: c.title,
@@ -207,77 +313,100 @@ function App() {
           reporter: c.reporter,
           officerAssigned: c.officerAssigned,
           actionRequired: c.actionRequired,
+          // แปลง status จากตัวเลข (0,1,2,3,4) เป็นชื่อสถานะ
           status: ['Submitted', 'UnderReview', 'Resolved', 'Reopened', 'Closed'][Number(c.status)],
+          // แปลง timestamp (UNIX timestamp) เป็นรูปแบบวันที่ไทย
           timestamp: new Date(Number(c.timestamp) * 1000).toLocaleString('th-TH'),
-          expanded: false
+          expanded: false // ค่าเริ่มต้นไม่ขยายรายละเอียด
         })
       }
 
+      // เก็บข้อมูลลง state
       setComplaints(list)
       showStatus(`โหลดข้อมูลสำเร็จ พบเรื่องร้องเรียนทั้งหมด ${count} เรื่อง`, 'success')
     } catch (error) {
       console.error('โหลดข้อมูลล้มเหลว:', error)
       showStatus('❌ ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่อ', 'error')
     } finally {
+      // ล้างสถานะ loading ไม่ว่าจะสำเร็จหรือไม่
       setLoading(false)
       setLoadingMessage('')
     }
   }
 
+  // ฟังก์ชันสลับการขยาย/ย่อรายละเอียดของเรื่องร้องเรียน
+  // id = รหัสเรื่องที่จะสลับ
   const toggleExpand = (id: number) => {
     setComplaints(prev =>
+      // map ทุกเรื่อง ถ้าเจอ id ที่ตรง ให้สลับค่า expanded
       prev.map(c => c.id === id ? { ...c, expanded: !c.expanded } : c)
     )
   }
 
+  // ฟังก์ชันส่งเรื่องร้องเรียนใหม่
   const submitComplaint = async () => {
+    // ตรวจสอบว่า login และเลือกหน่วยงานแล้วหรือยัง
     if (!account || !location) {
       showStatus('⚠️ กรุณาเลือกหน่วยงานและกรอกข้อมูลให้ครบถ้วน', 'error')
       return
     }
 
+    // ตรวจสอบว่ากรอกหัวข้อและรายละเอียดหรือยัง
     if (!title.trim() || !description.trim()) {
       showStatus('⚠️ กรุณากรอกหัวข้อและรายละเอียดเรื่องร้องเรียน', 'error')
       return
     }
 
+    // ตั้งสถานะกำลังส่ง (ปิดปุ่มไม่ให้กดซ้ำ)
     setIsSubmitting(true)
     setLoadingMessage('กำลังเตรียมข้อมูล...')
 
     try {
+      // สร้าง provider, signer และ contract instance
       const provider = new ethers.BrowserProvider(window.ethereum!)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
 
       setLoadingMessage('กำลังส่งเรื่องไปยัง Blockchain...')
+      // เรียกฟังก์ชัน submitComplaint ใน smart contract
       const tx = await contract.submitComplaint(title, description, location)
       
       setLoadingMessage('กำลังรอการยืนยันจาก Network...')
+      // รอให้ transaction ถูก mine (ยืนยันลงบน blockchain)
       await tx.wait()
       
       showStatus('✅ ส่งเรื่องร้องเรียนสำเร็จ! ข้อมูลได้ถูกบันทึกลง Blockchain แล้ว', 'success')
 
+      // ล้างฟอร์ม
       setTitle('')
       setDescription('')
       setLocation('')
+      
+      // โหลดข้อมูลใหม่เพื่อแสดงเรื่องที่เพิ่งส่ง
       loadComplaints()
     } catch (error) {
       console.error('ส่งเรื่องล้มเหลว:', error)
       showStatus('❌ ส่งเรื่องล้มเหลว กรุณาตรวจสอบ Gas Fee และลองใหม่อีกครั้ง', 'error')
     } finally {
+      // ปลดล็อคปุ่มส่ง
       setIsSubmitting(false)
       setLoadingMessage('')
     }
   }
 
+  // ฟังก์ชันสำหรับเจ้าหน้าที่รับเรื่อง
+  // id = รหัสเรื่องที่จะรับ
   const assignToOfficer = async (id: number) => {
     setLoadingMessage('กำลังรับเรื่อง...')
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      
+      // เรียกฟังก์ชันรับเรื่อง (contract จะเช็คว่า officer คนนี้ดูแลหน่วยงานนั้นจริงหรือไม่)
       const tx = await contract.assignToOfficer(id)
       await tx.wait()
+      
       showStatus('✅ รับเรื่องสำเร็จ! เรื่องนี้ถูกมอบหมายให้คุณแล้ว', 'success')
       loadComplaints()
     } catch (error) {
@@ -288,19 +417,27 @@ function App() {
     }
   }
 
+  // ฟังก์ชันสำหรับเจ้าหน้าที่บันทึกสิ่งที่ต้องแก้ไข
+  // id = รหัสเรื่อง
   const setAction = async (id: number) => {
+    // เช็คว่ากรอกข้อมูลหรือยัง
     if (!actionInput) {
       showStatus('⚠️ กรุณากรอกสิ่งที่ต้องแก้ไข', 'error')
       return
     }
+    
     setLoadingMessage('กำลังบันทึกข้อมูล...')
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      
+      // เรียกฟังก์ชันบันทึกสิ่งที่ต้องแก้ไข
       const tx = await contract.setActionRequired(id, actionInput)
       await tx.wait()
+      
       showStatus('✅ บันทึกสิ่งที่ต้องแก้ไขสำเร็จ', 'success')
+      // ล้าง input
       setActionInput('')
       loadComplaints()
     } catch (error) {
@@ -311,14 +448,19 @@ function App() {
     }
   }
 
+  // ฟังก์ชันสำหรับเจ้าหน้าที่เปลี่ยนสถานะเป็น Resolved (แก้ไขแล้ว)
+  // id = รหัสเรื่อง
   const markResolved = async (id: number) => {
     setLoadingMessage('กำลังอัปเดตสถานะ...')
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      
+      // เรียกฟังก์ชันเปลี่ยนสถานะเป็น Resolved
       const tx = await contract.markAsResolved(id)
       await tx.wait()
+      
       showStatus('✅ อัปเดตเป็น Resolved สำเร็จ รอการยืนยันจากผู้ร้องเรียน', 'success')
       loadComplaints()
     } catch (error) {
@@ -329,14 +471,19 @@ function App() {
     }
   }
 
+  // ฟังก์ชันสำหรับผู้ร้องเรียนยืนยันรับการแก้ไข (เปลี่ยนเป็น Closed)
+  // id = รหัสเรื่อง
   const confirmResolution = async (id: number) => {
     setLoadingMessage('กำลังยืนยัน...')
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      
+      // เรียกฟังก์ชันยืนยัน (เปลี่ยนสถานะเป็น Closed)
       const tx = await contract.confirmResolution(id)
       await tx.wait()
+      
       showStatus('✅ ยืนยันรับการแก้ไขสำเร็จ ขอบคุณที่ใช้บริการ', 'success')
       loadComplaints()
     } catch (error) {
@@ -347,14 +494,19 @@ function App() {
     }
   }
 
+  // ฟังก์ชันสำหรับผู้ร้องเรียนปฏิเสธการแก้ไข (เปลี่ยนเป็น Reopened - ส่งซ้ำ)
+  // id = รหัสเรื่อง
   const rejectResolution = async (id: number) => {
     setLoadingMessage('กำลังส่งเรื่องซ้ำ...')
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      
+      // เรียกฟังก์ชันปฏิเสธ (เปลี่ยนสถานะเป็น Reopened)
       const tx = await contract.rejectResolution(id)
       await tx.wait()
+      
       showStatus('✅ ขอแก้ไขต่อ ส่งเรื่องซ้ำสำเร็จ', 'success')
       loadComplaints()
     } catch (error) {
@@ -365,19 +517,26 @@ function App() {
     }
   }
 
+  // ฟังก์ชันสำหรับ Admin เพิ่มเจ้าหน้าที่ใหม่
   const addOfficer = async () => {
+    // เช็คว่ากรอก address หรือยัง
     if (!newOfficerAddress) {
       showStatus('⚠️ กรุณาใส่ Address ของเจ้าหน้าที่', 'error')
       return
     }
+    
     setLoadingMessage('กำลังเพิ่มเจ้าหน้าที่...')
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      
+      // เรียกฟังก์ชันเพิ่ม officer (เฉพาะ admin เท่านั้น)
       const tx = await contract.addOfficer(newOfficerAddress)
       await tx.wait()
+      
       showStatus('✅ เพิ่มเจ้าหน้าที่สำเร็จ', 'success')
+      // ล้าง input
       setNewOfficerAddress('')
     } catch (error) {
       console.error('เพิ่มเจ้าหน้าที่ล้มเหลว:', error)
@@ -387,18 +546,24 @@ function App() {
     }
   }
 
+  // ฟังก์ชันสำหรับ Admin ผูก Officer กับหน่วยงาน
   const assignOfficerToLocationFunc = async () => {
+    // เช็คว่าเลือกหน่วยงานและกรอก address หรือยัง
     if (!selectedLocation || !newOfficerAddress) {
       showStatus('⚠️ กรุณาเลือกหน่วยงานและใส่ address Officer', 'error')
       return
     }
+    
     setLoadingMessage('กำลังผูก Officer กับหน่วยงาน...')
     try {
       const provider = new ethers.BrowserProvider(window.ethereum!)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      
+      // เรียกฟังก์ชันผูก officer กับหน่วยงาน (เฉพาะ admin)
       const tx = await contract.assignOfficerToLocation(selectedLocation, newOfficerAddress)
       await tx.wait()
+      
       showStatus('✅ ผูก Officer กับหน่วยงานสำเร็จ', 'success')
     } catch (error) {
       console.error('ผูกล้มเหลว:', error)
@@ -408,40 +573,57 @@ function App() {
     }
   }
 
+  // ฟังก์ชันปิด Welcome Tour
   const closeTour = () => {
     setShowWelcomeTour(false)
+    // บันทึกว่าดู tour แล้ว เพื่อไม่แสดงอีก
     localStorage.setItem('hasSeenTour', 'true')
   }
 
+  // ฟังก์ชันไปขั้นตอนถัดไปของ Tour
   const nextTourStep = () => {
+    // ถ้ายังไม่ถึงขั้นตอนสุดท้าย ให้เพิ่มขั้นตอน
     if (currentTourStep < tourSteps.length - 1) {
       setCurrentTourStep(prev => prev + 1)
     } else {
+      // ถ้าถึงขั้นตอนสุดท้ายแล้ว ให้ปิด tour
       closeTour()
     }
   }
 
+  // ฟังก์ชันย้อนกลับขั้นตอนก่อนหน้าของ Tour
   const prevTourStep = () => {
+    // ถ้าไม่ใช่ขั้นตอนแรก ให้ลดขั้นตอน
     if (currentTourStep > 0) {
       setCurrentTourStep(prev => prev - 1)
     }
   }
 
+  // useEffect ที่รันครั้งเดียวตอน component mount
+  // ใช้โหลดข้อมูลเรื่องร้องเรียนทั้งหมดตอนเปิดแอป
   useEffect(() => {
     loadComplaints()
   }, [])
 
+  // useEffect ที่รันทุกครั้งที่ค่าใน dependencies เปลี่ยน
+  // ใช้กรองและค้นหาเรื่องร้องเรียนตามเงื่อนไขต่างๆ
   useEffect(() => {
+    // เริ่มจากข้อมูลทั้งหมด
     let filtered = complaints
 
+    // กรองตามประเภท
     if (filterType === 'my') {
+      // แสดงเฉพาะเรื่องที่ฉันร้องเรียน
       filtered = filtered.filter(c => c.reporter.toLowerCase() === account?.toLowerCase())
     } else if (filterType === 'my-location' && isOfficer && officerLocations.length > 0) {
+      // แสดงเฉพาะเรื่องของหน่วยงานที่ฉันดูแล
       filtered = filtered.filter(c => officerLocations.includes(c.location))
     } else if (filterType === 'selected-location' && selectedFilterLocation) {
+      // แสดงเฉพาะเรื่องของหน่วยงานที่เลือก
       filtered = filtered.filter(c => c.location === selectedFilterLocation)
     }
 
+    // ค้นหาจากคำค้นหา (ค้นจาก title, description, location)
     if (searchQuery) {
       filtered = filtered.filter(c =>
         c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -450,41 +632,69 @@ function App() {
       )
     }
 
+    // อัปเดตรายการที่กรองแล้ว
     setFilteredComplaints(filtered)
   }, [complaints, filterType, selectedFilterLocation, searchQuery, isOfficer, officerLocations, account])
 
   return (
+    // Wrapper หลักของทั้งแอป - ครอบคลุมทุกอย่าง
     <div className="app-wrapper">
+      {/* Container หลัก - จัด layout และ spacing */}
       <div className="container">
-        {/* Header */}
+        
+        {/* ===== ส่วนหัวของแอป (Header) ===== */}
         <div className="app-header">
+          {/* ไอคอนตึกราชการ */}
           <div className="header-icon">🏛️</div>
+          {/* ชื่อระบบหลัก */}
           <h1>ระบบแจ้งร้องเรียนแบบกระจายศูนย์</h1>
+          {/* ชื่อจังหวัด */}
           <h2>จังหวัดอุดรธานี</h2>
+          {/* คำบรรยายเพิ่มเติมเป็นภาษาอังกฤษ */}
           <p className="header-subtitle">Blockchain-Powered Transparent Complaint System</p>
         </div>
 
-        {/* Welcome Tour Modal */}
+        {/* ===== Modal แนะนำการใช้งาน (Welcome Tour) ===== */}
+        {/* แสดงเฉพาะเมื่อ showWelcomeTour เป็น true */}
         {showWelcomeTour && (
+          // พื้นหลังทึบสำหรับ modal
           <div className="tour-overlay">
+            {/* กล่อง modal หลัก */}
             <div className="tour-modal">
+              {/* ปุ่มปิด tour ที่มุมขวาบน */}
               <button className="tour-close" onClick={closeTour}>✕</button>
+              
+              {/* ไอคอนของแต่ละขั้นตอน (🔐, 📝, 📊) */}
               <div className="tour-icon">{tourSteps[currentTourStep].icon}</div>
+              
+              {/* หัวข้อของขั้นตอนปัจจุบัน */}
               <h3>{tourSteps[currentTourStep].title}</h3>
+              
+              {/* เนื้อหา/คำอธิบายของขั้นตอนปัจจุบัน */}
               <p>{tourSteps[currentTourStep].content}</p>
+              
+              {/* แถบแสดงความคืบหน้า (จุดบอกว่าอยู่ขั้นตอนไหน) */}
               <div className="tour-progress">
+                {/* วนลูปสร้างจุดตามจำนวนขั้นตอน */}
                 {tourSteps.map((_, index) => (
                   <span 
                     key={index} 
+                    // จุดที่เป็นขั้นตอนปัจจุบันจะมี class 'active' (สีต่าง)
                     className={`tour-dot ${index === currentTourStep ? 'active' : ''}`}
                   />
                 ))}
               </div>
+              
+              {/* กลุ่มปุ่มควบคุม tour */}
               <div className="tour-buttons">
+                {/* ปุ่มย้อนกลับ - แสดงเฉพาะเมื่อไม่ใช่ขั้นตอนแรก */}
                 {currentTourStep > 0 && (
                   <button onClick={prevTourStep} className="tour-btn-secondary">ก่อนหน้า</button>
                 )}
+                
+                {/* ปุ่มถัดไป/เริ่มใช้งาน - ข้อความเปลี่ยนตามขั้นตอน */}
                 <button onClick={nextTourStep} className="tour-btn-primary">
+                  {/* ถ้าเป็นขั้นตอนสุดท้ายแสดง "เริ่มใช้งาน" ไม่งั้นแสดง "ถัดไป" */}
                   {currentTourStep === tourSteps.length - 1 ? 'เริ่มใช้งาน' : 'ถัดไป'}
                 </button>
               </div>
@@ -492,26 +702,39 @@ function App() {
           </div>
         )}
 
+        {/* ===== เงื่อนไขแสดงผล: ยังไม่ได้ login (ไม่มี account) ===== */}
         {!account ? (
+          // หน้า Login Screen
           <div className="login-screen">
+            {/* ไอคอนล็อค */}
             <div className="login-icon">🔐</div>
+            
+            {/* ข้อความต้อนรับ */}
             <h3>ยินดีต้อนรับ</h3>
+            
+            {/* คำอธิบายระบบ */}
             <p className="login-description">
               เข้าสู่ระบบร้องเรียนที่โปร่งใส ปลอดภัย และไม่สามารถแก้ไขข้อมูลย้อนหลังได้
               <br/>ด้วยเทคโนโลยี Blockchain
             </p>
             
+            {/* ===== การ์ดแสดงจุดเด่น 3 อย่าง ===== */}
             <div className="feature-cards">
+              {/* การ์ดที่ 1: โปร่งใส */}
               <div className="feature-card">
                 <div className="feature-icon">✅</div>
                 <h4>โปร่งใส</h4>
                 <p>ตรวจสอบได้ทุกขั้นตอน</p>
               </div>
+              
+              {/* การ์ดที่ 2: ปลอดภัย */}
               <div className="feature-card">
                 <div className="feature-icon">🔒</div>
                 <h4>ปลอดภัย</h4>
                 <p>ข้อมูลเข้ารหัสแบบ Blockchain</p>
               </div>
+              
+              {/* การ์ดที่ 3: รวดเร็ว */}
               <div className="feature-card">
                 <div className="feature-icon">⚡</div>
                 <h4>รวดเร็ว</h4>
@@ -519,71 +742,96 @@ function App() {
               </div>
             </div>
 
+            {/* ปุ่มเชื่อมต่อ MetaMask */}
             <button onClick={connectWallet} className="connect-btn">
+              {/* ไอคอนหมา MetaMask */}
               <span className="btn-icon">🦊</span>
               เชื่อมต่อ MetaMask
             </button>
             
+            {/* ส่วนช่วยเหลือและลิงก์ดาวน์โหลด */}
             <div className="help-section">
               <p className="help-text">
                 <strong>💡 คำแนะนำ:</strong> หากยังไม่มี MetaMask 
+                {/* ลิงก์ไปหน้าดาวน์โหลด MetaMask (เปิดแท็บใหม่) */}
                 <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer"> คลิกที่นี่เพื่อติดตั้ง</a>
               </p>
             </div>
           </div>
         ) : (
+          // ===== ส่วนหลักของแอป (แสดงเมื่อ login แล้ว) =====
           <div className="main-content">
-            {/* Wallet Info Bar */}
+            
+            {/* ===== แถบข้อมูล Wallet ด้านบน ===== */}
             <div className="wallet-info">
+              {/* แสดง address ของ wallet ที่เชื่อมต่อ */}
               <div className="wallet-address">
                 <span className="wallet-label">กระเป๋าที่เชื่อม:</span>
+                {/* Tooltip คำใบ้ "คลิกเพื่อคัดลอก" */}
                 <Tooltip text="คลิกเพื่อคัดลอก Address">
                   <code 
                     className="wallet-code"
+                    // เมื่อคลิกให้คัดลอก address เต็มไปที่ clipboard
                     onClick={() => {
                       navigator.clipboard.writeText(account)
                       showStatus('✅ คัดลอก Address สำเร็จ', 'success')
                     }}
                   >
+                    {/* แสดง address แบบย่อ (6 ตัวแรก ... 4 ตัวท้าย) */}
                     {account.substring(0, 6)}...{account.substring(38)}
                   </code>
                 </Tooltip>
               </div>
               
+              {/* ปุ่มเปิด tour อีกครั้ง (ดูคู่มือการใช้งาน) */}
               <button onClick={() => setShowWelcomeTour(true)} className="help-btn">
                 <span>❓</span> คู่มือการใช้งาน
               </button>
               
+              {/* ปุ่มรีเฟรชข้อมูล (โหลดเรื่องร้องเรียนใหม่) */}
               <button onClick={loadComplaints} className="refresh-btn" disabled={loading}>
+                {/* ไอคอนเปลี่ยนตามสถานะ: กำลังโหลด=⏳ ปกติ=🔄 */}
                 <span>{loading ? '⏳' : '🔄'}</span>
+                {/* ข้อความเปลี่ยนตามสถานะ */}
                 {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
               </button>
               
+              {/* ปุ่มออกจากระบบ */}
               <button onClick={disconnectWallet} className="logout-btn">
                 <span>🚪</span> ออกจากระบบ
               </button>
             </div>
 
-            {/* Officer Info */}
+            {/* ===== แสดงข้อมูลเจ้าหน้าที่ (ถ้าเป็น Officer) ===== */}
+            {/* แสดงเฉพาะเมื่อเป็น officer และมีหน่วยงานที่ดูแล */}
             {isOfficer && officerLocations.length > 0 && (
               <div className="officer-info">
+                {/* ป้ายแสดงสถานะเจ้าหน้าที่ */}
                 <div className="officer-badge">👮 เจ้าหน้าที่</div>
+                {/* แสดงรายชื่อหน่วยงานที่รับผิดชอบ (คั่นด้วยจุลภาค) */}
                 <p>คุณรับผิดชอบหน่วยงาน: <strong>{officerLocations.join(', ')}</strong></p>
+                {/* หมายเหตุเตือนความจำ */}
                 <p className="small-note">💡 คุณสามารถรับเรื่อง/จัดการได้เฉพาะเรื่องของหน่วยงานตัวเองเท่านั้น</p>
               </div>
             )}
 
-            {/* Admin Section */}
+            {/* ===== ส่วน Admin: จัดการเจ้าหน้าที่ (เฉพาะ Admin) ===== */}
+            {/* แสดงเฉพาะเมื่อเป็น admin */}
             {isAdmin && (
               <div className="admin-section">
+                {/* หัวข้อส่วน Admin */}
                 <h3>
                   <span className="section-icon">⚙️</span>
                   ส่วนผู้ดูแลระบบ: จัดการเจ้าหน้าที่
                 </h3>
                 
+                {/* Grid แสดง 2 การ์ดแบบเรียงข้าง */}
                 <div className="admin-grid">
+                  
+                  {/* การ์ดที่ 1: เพิ่มเจ้าหน้าที่ใหม่ */}
                   <div className="admin-card">
                     <h4>เพิ่มเจ้าหน้าที่ใหม่</h4>
+                    {/* Input กรอก address พร้อม tooltip คำใบ้ */}
                     <Tooltip text="ใส่ Ethereum Address ของเจ้าหน้าที่ที่ต้องการเพิ่ม">
                       <input
                         type="text"
@@ -592,28 +840,38 @@ function App() {
                         onChange={(e) => setNewOfficerAddress(e.target.value)}
                       />
                     </Tooltip>
+                    {/* ปุ่มเพิ่มเจ้าหน้าที่ */}
                     <button onClick={addOfficer}>
                       <span>➕</span> เพิ่มเจ้าหน้าที่
                     </button>
                   </div>
 
+                  {/* การ์ดที่ 2: ผูก Officer กับหน่วยงาน */}
                   <div className="admin-card">
                     <h4>ผูก Officer กับหน่วยงาน</h4>
+                    
+                    {/* Dropdown เลือกหน่วยงาน */}
                     <select 
                       value={selectedLocation}
                       onChange={(e) => setSelectedLocation(e.target.value)}
                     >
+                      {/* ตัวเลือกเริ่มต้น */}
                       <option value="">-- เลือกหน่วยงาน --</option>
+                      {/* วนลูปแสดงหน่วยงานทั้งหมดจากอาร์เรย์ locations */}
                       {locations.map((loc, index) => (
                         <option key={index} value={loc}>{loc}</option>
                       ))}
                     </select>
+                    
+                    {/* Input กรอก address ของ officer ที่จะผูก */}
                     <input
                       type="text"
                       placeholder="0x... (Officer Address)"
                       value={newOfficerAddress}
                       onChange={(e) => setNewOfficerAddress(e.target.value)}
                     />
+                    
+                    {/* ปุ่มผูกหน่วยงาน */}
                     <button onClick={assignOfficerToLocationFunc}>
                       <span>🔗</span> ผูกหน่วยงาน
                     </button>
@@ -622,25 +880,35 @@ function App() {
               </div>
             )}
 
-            {/* Submit Complaint Form */}
+            {/* ===== ฟอร์มส่งเรื่องร้องเรียนใหม่ ===== */}
             <div className="form-section">
+              {/* หัวข้อส่วนฟอร์ม */}
               <h3>
                 <span className="section-icon">📝</span>
                 ยื่นเรื่องร้องเรียนใหม่
               </h3>
               
+              {/* กลุ่มขั้นตอนการกรอกฟอร์ม (3 ขั้นตอน) */}
               <div className="form-steps">
+                
+                {/* ขั้นตอนที่ 1: เลือกหน่วยงาน */}
                 <div className="step">
+                  {/* เลขขั้นตอน */}
                   <div className="step-number">1</div>
+                  {/* เนื้อหาขั้นตอน */}
                   <div className="step-content">
                     <label>เลือกหน่วยงานที่ต้องการร้องเรียน</label>
+                    {/* Dropdown เลือกหน่วยงาน พร้อม tooltip */}
                     <Tooltip text="เลือกหน่วยงานที่เกี่ยวข้องกับเรื่องร้องเรียนของคุณ">
                       <select 
                         value={location} 
                         onChange={(e) => setLocation(e.target.value)}
+                        // เพิ่ม class 'filled' ถ้าเลือกแล้ว (เปลี่ยนสี)
                         className={location ? 'filled' : ''}
                       >
+                        {/* ตัวเลือกเริ่มต้น */}
                         <option value="">-- กรุณาเลือกหน่วยงาน --</option>
+                        {/* วนลูปแสดงหน่วยงานทั้งหมด */}
                         {locations.map((loc, index) => (
                           <option key={index} value={loc}>{loc}</option>
                         ))}
@@ -649,35 +917,41 @@ function App() {
                   </div>
                 </div>
 
+                {/* ขั้นตอนที่ 2: กรอกหัวข้อ */}
                 <div className="step">
                   <div className="step-number">2</div>
                   <div className="step-content">
                     <label>กรอกหัวข้อเรื่องร้องเรียน</label>
+                    {/* Input กรอกหัวข้อ พร้อม tooltip */}
                     <Tooltip text="ระบุหัวข้อสั้นๆ ที่สรุปเรื่องร้องเรียน">
                       <input
                         type="text"
                         placeholder="เช่น: ถนนชำรุด, ไฟฟ้าดับบ่อย, เจ้าหน้าที่ให้บริการไม่ดี"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
+                        // เพิ่ม class 'filled' ถ้ากรอกแล้ว
                         className={title ? 'filled' : ''}
                       />
                     </Tooltip>
                   </div>
                 </div>
 
+                {/* ขั้นตอนที่ 3: กรอกรายละเอียด */}
                 <div className="step">
                   <div className="step-number">3</div>
                   <div className="step-content">
                     <label>รายละเอียดเรื่องร้องเรียน</label>
+                    {/* Textarea กรอกรายละเอียดยาวๆ พร้อม tooltip */}
                     <Tooltip text="โปรดระบุรายละเอียดให้ครบถ้วนและชัดเจนเพื่อให้เจ้าหน้าที่สามารถดำเนินการได้อย่างถูกต้อง">
                       <textarea
                         placeholder="กรุณาระบุรายละเอียดให้ครบถ้วน เช่น สถานที่, วันเวลาที่เกิดเหตุ, ผลกระทบที่ได้รับ และสิ่งที่ต้องการให้แก้ไข"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         className={description ? 'filled' : ''}
-                        rows={6}
+                        rows={6} // ความสูง 6 บรรทัด
                       />
                     </Tooltip>
+                    {/* นับจำนวนตัวอักษร */}
                     <div className="char-count">
                       {description.length} ตัวอักษร
                     </div>
@@ -685,52 +959,65 @@ function App() {
                 </div>
               </div>
 
+              {/* ปุ่มส่งเรื่องร้องเรียน */}
               <button 
                 onClick={submitComplaint} 
+                // ปิดปุ่มถ้า: ไม่ได้ login, กำลังส่งอยู่, ไม่ได้เลือกหน่วยงาน, ไม่ได้กรอกหัวข้อหรือรายละเอียด
                 disabled={!account || isSubmitting || !location || !title || !description}
                 className="submit-btn"
               >
+                {/* ข้อความและไอคอนเปลี่ยนตามสถานะการส่ง */}
                 {isSubmitting ? (
                   <>
+                    {/* แสดง spinner เมื่อกำลังส่ง */}
                     <span className="spinner-small"></span>
                     กำลังส่งไปยัง Blockchain...
                   </>
                 ) : (
                   <>
+                    {/* แสดงไอคอนปกติเมื่อไม่ได้ส่ง */}
                     <span>📤</span>
                     ส่งเรื่องร้องเรียน
                   </>
                 )}
               </button>
               
+              {/* คำแนะนำ - แสดงเฉพาะเมื่อยังไม่ได้เลือกหน่วยงาน */}
               {!location && (
                 <p className="form-hint">💡 เริ่มต้นโดยเลือกหน่วยงานที่ต้องการร้องเรียน</p>
               )}
             </div>
 
-            {/* Status Message */}
+            {/* ===== แถบแสดงสถานะ (Success/Error/Info) ===== */}
+            {/* แสดงเฉพาะเมื่อมีข้อความสถานะ */}
             {statusMessage && (
               <div className={`status status-${statusType}`}>
+                {/* ไอคอนเปลี่ยนตามประเภทสถานะ */}
                 <div className="status-icon">
                   {statusType === 'success' && '✅'}
                   {statusType === 'error' && '❌'}
                   {statusType === 'info' && 'ℹ️'}
                 </div>
+                {/* ข้อความสถานะ */}
                 <p>{statusMessage}</p>
               </div>
             )}
 
-            {/* Complaints Section */}
+            {/* ===== ส่วนแสดงรายการเรื่องร้องเรียนทั้งหมด ===== */}
             <div className="complaints-section">
+              {/* หัวข้อส่วนตาราง */}
               <h3>
                 <span className="section-icon">📊</span>
                 รายการเรื่องร้องเรียนทั้งหมด
               </h3>
 
-              {/* Table Controls */}
+              {/* ===== ส่วนควบคุมตาราง (ค้นหาและกรอง) ===== */}
               <div className="table-controls">
+                {/* กล่องค้นหา */}
                 <div className="search-wrapper">
+                  {/* ไอคอนแว่นขยาย */}
                   <span className="search-icon">🔍</span>
+                  {/* Input สำหรับพิมพ์ค้นหา */}
                   <input
                     type="text"
                     placeholder="ค้นหาตามหัวข้อ, รายละเอียด, หน่วยงาน..."
@@ -740,35 +1027,49 @@ function App() {
                   />
                 </div>
 
+                {/* ===== ปุ่มกรองสำหรับเจ้าหน้าที่ (แสดงเฉพาะ Officer) ===== */}
                 {isOfficer && (
                   <div className="officer-filters">
+                    {/* ปุ่มแสดงทั้งหมด */}
                     <button
+                      // เพิ่ม class 'active' ถ้าเลือกตัวกรองนี้อยู่
                       className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
+                      // คลิกเพื่อเปลี่ยนเป็นแสดงทั้งหมด
                       onClick={() => setFilterType('all')}
                     >
                       📋 แสดงทั้งหมด
                     </button>
+                    
+                    {/* ปุ่มแสดงเฉพาะเรื่องที่ฉันร้องเรียน */}
                     <button
                       className={`filter-btn ${filterType === 'my' ? 'active' : ''}`}
                       onClick={() => setFilterType('my')}
                     >
                       👤 เรื่องของฉัน
                     </button>
+                    
+                    {/* ปุ่มแสดงเฉพาะเรื่องของหน่วยงานที่ฉันดูแล */}
                     <button
                       className={`filter-btn ${filterType === 'my-location' ? 'active' : ''}`}
                       onClick={() => setFilterType('my-location')}
                     >
                       🏢 หน่วยงานของฉัน
                     </button>
+                    
+                    {/* Dropdown เลือกหน่วยงานเฉพาะ */}
                     <select
                       value={selectedFilterLocation}
                       onChange={(e) => {
+                        // เก็บหน่วยงานที่เลือก
                         setSelectedFilterLocation(e.target.value)
+                        // เปลี่ยนประเภทการกรองเป็น selected-location
                         setFilterType('selected-location')
                       }}
                       className="location-filter"
                     >
+                      {/* ตัวเลือกเริ่มต้น */}
                       <option value="">🔽 เลือกหน่วยงาน...</option>
+                      {/* วนลูปแสดงหน่วยงานทั้งหมด */}
                       {locations.map((loc) => (
                         <option key={loc} value={loc}>{loc}</option>
                       ))}
@@ -777,34 +1078,46 @@ function App() {
                 )}
               </div>
 
-              {/* Results Summary */}
+              {/* ===== แถบสรุปผลการค้นหา ===== */}
+              {/* แสดงเฉพาะเมื่อไม่ได้กำลังโหลด */}
               {!loading && (
                 <div className="results-summary">
+                  {/* แสดงจำนวนเรื่องที่พบ */}
                   พบทั้งหมด <strong>{filteredComplaints.length}</strong> เรื่อง
+                  {/* ถ้ามีการค้นหา แสดงคำค้นหาด้วย */}
                   {searchQuery && ` จากการค้นหา "${searchQuery}"`}
                 </div>
               )}
 
-              {/* Table */}
+              {/* ===== ส่วนแสดงตาราง (มี 3 สถานะ: loading, empty, table) ===== */}
               {loading ? (
+                // สถานะที่ 1: กำลังโหลด
                 <div className="table-loading">
+                  {/* Spinner ขนาดใหญ่ */}
                   <div className="spinner-large"></div>
+                  {/* ข้อความหลัก */}
                   <p>กำลังโหลดข้อมูลจาก Blockchain...</p>
+                  {/* ข้อความรายละเอียด (เช่น "กำลังโหลดเรื่องที่ 3 จาก 10...") */}
                   <p className="loading-detail">{loadingMessage}</p>
                 </div>
               ) : filteredComplaints.length === 0 ? (
+                // สถานะที่ 2: ไม่มีข้อมูล (Empty State)
                 <div className="empty-state">
+                  {/* ไอคอนกล่องจดหมายเปล่า */}
                   <div className="empty-icon">📭</div>
                   <h4>ไม่พบเรื่องร้องเรียน</h4>
                   <p>
+                    {/* ข้อความเปลี่ยนตามว่ามีการค้นหาหรือไม่ */}
                     {searchQuery 
                       ? 'ลองค้นหาด้วยคำอื่น หรือเปลี่ยนตัวกรอง' 
                       : 'เริ่มต้นโดยส่งเรื่องร้องเรียนของคุณ'}
                   </p>
                 </div>
               ) : (
+                // สถานะที่ 3: แสดงตาราง
                 <div className="table-wrapper">
                   <table className="complaints-table">
+                    {/* ===== ส่วนหัวตาราง ===== */}
                     <thead>
                       <tr>
                         <th>ลำดับ</th>
@@ -819,39 +1132,59 @@ function App() {
                         <th>การดำเนินการ</th>
                       </tr>
                     </thead>
+                    
+                    {/* ===== ส่วนเนื้อหาตาราง ===== */}
                     <tbody>
+                      {/* วนลูปแสดงแต่ละเรื่องร้องเรียน */}
                       {filteredComplaints.map((c) => (
                         <>
+                          {/* ===== แถวหลัก (สามารถคลิกขยายได้) ===== */}
                           <tr 
                             key={c.id} 
+                            // คลิกเพื่อขยาย/ย่อรายละเอียด
                             onClick={() => toggleExpand(c.id)}
                             className="expandable-row"
                           >
+                            {/* คอลัมน์ ID */}
                             <td>
                               <div className="id-badge">#{c.id}</div>
                             </td>
+                            
+                            {/* คอลัมน์หน่วยงาน */}
                             <td>
                               <div className="location-cell">{c.location}</div>
                             </td>
+                            
+                            {/* คอลัมน์หัวข้อ */}
                             <td>
                               <strong>{c.title}</strong>
                             </td>
+                            
+                            {/* คอลัมน์รายละเอียด (แสดงแบบย่อถ้ายาวกว่า 80 ตัวอักษร) */}
                             <td>
                               <div className="description-cell">
+                                {/* ถ้ายาวกว่า 80 ตัวอักษร ตัดและแสดง ... */}
                                 {c.description.length > 80 
                                   ? c.description.substring(0, 80) + '...' 
                                   : c.description}
+                                {/* ถ้าถูกตัด แสดงคำใบ้ให้คลิกดูเต็ม */}
                                 {c.description.length > 80 && (
                                   <span className="expand-hint">👁️ คลิกเพื่อดูเต็ม</span>
                                 )}
                               </div>
                             </td>
+                            
+                            {/* คอลัมน์ผู้ส่ง (แสดง address แบบย่อ) */}
                             <td>
                               <code className="address-short">
+                                {/* 6 ตัวแรก ... 4 ตัวท้าย */}
                                 {c.reporter.substring(0, 6)}...{c.reporter.substring(38)}
                               </code>
                             </td>
+                            
+                            {/* คอลัมน์ Officer (แสดง address แบบย่อ หรือ - ถ้ายังไม่มี) */}
                             <td>
+                              {/* เช็คว่าเป็น zero address หรือไม่ */}
                               {c.officerAssigned === '0x0000000000000000000000000000000000000000' ? (
                                 <span className="not-assigned">-</span>
                               ) : (
@@ -860,6 +1193,8 @@ function App() {
                                 </code>
                               )}
                             </td>
+                            
+                            {/* คอลัมน์สิ่งที่ต้องแก้ไข (แสดงข้อความ หรือ - ถ้ายังไม่มี) */}
                             <td>
                               {c.actionRequired ? (
                                 <div className="action-required">{c.actionRequired}</div>
@@ -867,8 +1202,12 @@ function App() {
                                 <span className="not-assigned">-</span>
                               )}
                             </td>
+                            
+                            {/* คอลัมน์สถานะ (badge สีต่างกันตามสถานะ) */}
                             <td>
+                              {/* class จะเป็น status-submitted, status-underreview, etc. */}
                               <span className={`status-badge status-${c.status.toLowerCase()}`}>
+                                {/* แสดงไอคอนและชื่อสถานะ */}
                                 {c.status === 'Submitted' && '📝 Submitted'}
                                 {c.status === 'UnderReview' && '🔍 Under Review'}
                                 {c.status === 'Resolved' && '✅ Resolved'}
@@ -876,13 +1215,21 @@ function App() {
                                 {c.status === 'Closed' && '🔒 Closed'}
                               </span>
                             </td>
+                            
+                            {/* คอลัมน์วันที่ส่ง */}
                             <td>
                               <div className="timestamp">{c.timestamp}</div>
                             </td>
+                            
+                            {/* ===== คอลัมน์การดำเนินการ (ปุ่มต่างๆ ตามบทบาทและสถานะ) ===== */}
                             <td className="action-cell">
+                              
+                              {/* กรณีที่ 1: Officer สามารถรับเรื่องได้ */}
+                              {/* เงื่อนไข: ต้องเป็น officer, สถานะ Submitted, เป็นหน่วยงานที่ดูแล */}
                               {isOfficer && c.status === 'Submitted' && officerLocations.includes(c.location) && (
                                 <Tooltip text="คลิกเพื่อรับเรื่องนี้มาดำเนินการ">
                                   <button 
+                                    // stopPropagation ป้องกันไม่ให้คลิกปุ่มแล้วขยายแถว
                                     onClick={(e) => { e.stopPropagation(); assignToOfficer(c.id); }}
                                     className="btn-action btn-primary"
                                   >
@@ -890,8 +1237,12 @@ function App() {
                                   </button>
                                 </Tooltip>
                               )}
+                              
+                              {/* กรณีที่ 2: Officer กำลังดูแลเรื่องนี้อยู่ (Under Review) */}
+                              {/* เงื่อนไข: ต้องเป็น officer, สถานะ UnderReview, เป็น officer ที่รับเรื่องนี้ */}
                               {isOfficer && c.status === 'UnderReview' && c.officerAssigned.toLowerCase() === account?.toLowerCase() && (
                                 <div className="action-group" onClick={(e) => e.stopPropagation()}>
+                                  {/* Input กรอกสิ่งที่ต้องแก้ไข */}
                                   <input
                                     type="text"
                                     placeholder="ระบุสิ่งที่ต้องแก้ไข..."
@@ -899,12 +1250,16 @@ function App() {
                                     onChange={(e) => setActionInput(e.target.value)}
                                     className="action-input"
                                   />
+                                  
+                                  {/* ปุ่มบันทึกสิ่งที่ต้องแก้ไข */}
                                   <button 
                                     onClick={() => setAction(c.id)}
                                     className="btn-action btn-secondary"
                                   >
                                     <span>💾</span> บันทึก
                                   </button>
+                                  
+                                  {/* ปุ่มทำเครื่องหมายว่าแก้ไขเสร็จแล้ว */}
                                   <button 
                                     onClick={() => markResolved(c.id)}
                                     className="btn-action btn-success"
@@ -913,8 +1268,12 @@ function App() {
                                   </button>
                                 </div>
                               )}
+                              
+                              {/* กรณีที่ 3: ผู้ร้องเรียนสามารถยืนยัน/ปฏิเสธการแก้ไขได้ */}
+                              {/* เงื่อนไข: สถานะ Resolved, เป็นผู้ร้องเรียนคนนี้ */}
                               {c.status === 'Resolved' && c.reporter.toLowerCase() === account?.toLowerCase() && (
                                 <div className="action-group" onClick={(e) => e.stopPropagation()}>
+                                  {/* ปุ่มยืนยันรับการแก้ไข (เปลี่ยนสถานะเป็น Closed) */}
                                   <Tooltip text="ยืนยันว่าพอใจกับการแก้ไข">
                                     <button 
                                       onClick={() => confirmResolution(c.id)}
@@ -923,6 +1282,8 @@ function App() {
                                       <span>👍</span> ยืนยันรับ
                                     </button>
                                   </Tooltip>
+                                  
+                                  {/* ปุ่มปฏิเสธการแก้ไข (ส่งซ้ำ เปลี่ยนเป็น Reopened) */}
                                   <Tooltip text="ไม่พอใจกับการแก้ไข ส่งเรื่องซ้ำ">
                                     <button 
                                       onClick={() => rejectResolution(c.id)}
@@ -936,25 +1297,38 @@ function App() {
                             </td>
                           </tr>
 
+                          {/* ===== แถวขยายรายละเอียด (แสดงเฉพาะเมื่อ expanded = true) ===== */}
                           {c.expanded && (
                             <tr className="expanded-row">
+                              {/* ใช้ colSpan={10} ให้ครอบคลุมทุกคอลัมน์ */}
                               <td colSpan={10}>
                                 <div className="expanded-content">
+                                  
+                                  {/* ส่วนที่ 1: รายละเอียดเต็ม */}
                                   <div className="expanded-section">
                                     <strong>📄 รายละเอียดเต็ม:</strong>
                                     <p>{c.description}</p>
                                   </div>
+                                  
+                                  {/* ส่วนที่ 2: สิ่งที่ต้องแก้ไข (จาก Officer) */}
                                   <div className="expanded-section">
                                     <strong>🔧 สิ่งที่ต้องแก้ไข (จาก Officer):</strong>
+                                    {/* ถ้ายังไม่มี แสดง "ยังไม่ได้ระบุ" */}
                                     <p>{c.actionRequired || 'ยังไม่ได้ระบุ'}</p>
                                   </div>
+                                  
+                                  {/* ส่วนที่ 3: ข้อมูลเพิ่มเติม (address เต็ม) */}
                                   <div className="expanded-section">
                                     <strong>ℹ️ ข้อมูลเพิ่มเติม:</strong>
                                     <div className="info-grid">
+                                      
+                                      {/* แสดง address ผู้ส่งแบบเต็ม */}
                                       <div className="info-item">
                                         <span className="info-label">ผู้ส่ง:</span>
                                         <code>{c.reporter}</code>
                                       </div>
+                                      
+                                      {/* แสดง address officer แบบเต็ม (ถ้ามี) */}
                                       {c.officerAssigned !== '0x0000000000000000000000000000000000000000' && (
                                         <div className="info-item">
                                           <span className="info-label">Officer:</span>
@@ -978,12 +1352,18 @@ function App() {
         )}
       </div>
 
-      {/* Global Loading Overlay */}
+      {/* ===== Overlay แสดงสถานะกำลังโหลด (ทั่วทั้งหน้าจอ) ===== */}
+      {/* แสดงเฉพาะเมื่อกำลังส่งเรื่อง หรือมี loadingMessage */}
       {(isSubmitting || loadingMessage) && (
+        // พื้นหลังทึบครอบทั้งหน้าจอ
         <div className="loading-overlay">
+          {/* กล่องเนื้อหา loading */}
           <div className="loading-content">
+            
+            {/* ===== Spinner แบบวงกลม 8 ส่วน ===== */}
             <div className="loading-animation">
               <div className="circular-spinner">
+                {/* 8 ส่วนของ spinner (แต่ละส่วนจะหมุนและเปลี่ยนสี) */}
                 <div className="spinner-segment segment-1"></div>
                 <div className="spinner-segment segment-2"></div>
                 <div className="spinner-segment segment-3"></div>
@@ -994,9 +1374,17 @@ function App() {
                 <div className="spinner-segment segment-8"></div>
               </div>
             </div>
+            
+            {/* หัวข้อหลัก */}
             <h3>กำลังดำเนินการ...</h3>
+            
+            {/* ข้อความหลัก - แสดง loadingMessage หรือข้อความ default */}
             <p className="loading-main">{loadingMessage || 'กำลังส่งข้อมูลไปยัง Blockchain'}</p>
+            
+            {/* ข้อความรอง */}
             <p className="loading-sub">ข้อมูลของคุณกำลังถูกบันทึกอย่างปลอดภัยและถาวร</p>
+            
+            {/* กล่องแสดงคำแนะนำ */}
             <div className="loading-tips">
               <p>💡 <strong>คำแนะนำ:</strong> กรุณารอสักครู่ อย่าปิดหน้าต่างนี้</p>
               <p>⏱️ การทำรายการอาจใช้เวลา 10-30 วินาที</p>
@@ -1008,4 +1396,5 @@ function App() {
   )
 }
 
+// Export component App เป็น default export
 export default App
