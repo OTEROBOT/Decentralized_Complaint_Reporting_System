@@ -1,67 +1,109 @@
+/**
+ * ============================================================
+ * ไฟล์: index.css
+ * หน้าที่: กำหนดสไตล์พื้นฐาน (Global Styles) ของทั้งแอปพลิเคชัน
+ * รวมถึงการตั้งค่าฟอนต์, การจัดวางเลย์เอาต์เบื้องต้น และการรองรับธีมสี
+ * ============================================================
+ */
+
+/* :root คือ Selector ที่หมายถึงระดับสูงสุด (มักใช้เก็บตัวแปรหรือค่าเริ่มต้น) 
+   ในที่นี้ใช้กำหนดค่ามาตรฐานที่ทุก Element ในหน้าเว็บจะดึงไปใช้
+*/
 :root {
+  /* กำหนดลำดับฟอนต์: ถ้าเครื่องมี system-ui ให้ใช้ก่อน ถ้าไม่มีให้ไล่ไปตามลำดับจนถึง sans-serif */
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  
+  /* ระยะห่างระหว่างบรรทัด (เพื่อให้ตัวอักษรไม่เบียดกันจนเกินไป) */
   line-height: 1.5;
+  
+  /* ความหนาของตัวอักษรมาตรฐาน (400 คือปกติ) */
   font-weight: 400;
 
+  /* color-scheme: ช่วยให้ Browser รู้ว่าเราทำเว็บที่รองรับทั้งโหมดสว่างและมืด */
   color-scheme: light dark;
+  
+  /* สีตัวอักษรเริ่มต้น (สีขาวเกือบใสเล็กน้อย เพื่อให้ดูนุ่มนวลกว่าขาวบริสุทธิ์) */
   color: rgba(255, 255, 255, 0.87);
+  
+  /* สีพื้นหลังเริ่มต้น (ในที่นี้ตั้งค่าสีเทาเข้มเป็นพื้นฐาน) */
   background-color: #242424;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* การจัดการด้านความสวยงามของตัวอักษร */
+  font-synthesis: none;             /* ป้องกันไม่ให้ Browser ฝืนสร้างฟอนต์ตัวหนา/เอียงเอง */
+  text-rendering: optimizeLegibility; /* ปรับการวาดตัวอักษรให้อ่านง่ายขึ้น */
+  -webkit-font-smoothing: antialiased; /* สำหรับ macOS/Safari ให้ขอบตัวหนังสือคมชัด */
+  -moz-osx-font-smoothing: grayscale;  /* สำหรับ Firefox บน macOS */
 }
 
+/* --- สไตล์สำหรับ Link (แท็ก <a>) --- */
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  font-weight: 500;       /* ให้ตัวอักษรใน Link หนาขึ้นเล็กน้อย */
+  color: #646cff;         /* สีน้ำเงินอมม่วงของ Link */
+  text-decoration: inherit; /* ไม่ขีดเส้นใต้ (ให้ดึงรูปแบบมาจากตัวแม่) */
 }
+
+/* เอฟเฟกต์เมื่อเอาเมาส์ไปชี้ที่ Link (Hover) */
 a:hover {
-  color: #535bf2;
+  color: #535bf2;         /* เปลี่ยนสีให้เข้มขึ้นเล็กน้อยเมื่อชี้ */
 }
 
+/* --- สไตล์สำหรับส่วนเนื้อหาทั้งหมด (แท็ก <body>) --- */
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  margin: 0;             /* ล้างค่าขอบขาวที่ Browser มักจะแถมมาให้ */
+  display: flex;         /* ใช้ระบบ Flexbox เพื่อจัดวางลูกๆ ให้อยู่กลางหน้าจอ */
+  place-items: center;   /* จัด Content ให้อยู่กึ่งกลางทั้งแนวตั้งและแนวนอน */
+  min-width: 320px;      /* กำหนดความกว้างขั้นต่ำ (เผื่อจอเล็กมาก) */
+  min-height: 100vh;     /* ให้ความสูงของเนื้อหาเต็มหน้าจอพอดี (100% Viewport Height) */
 }
 
+/* --- สไตล์สำหรับหัวข้อขนาดใหญ่ (แท็ก <h1>) --- */
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 3.2em;      /* ขนาดตัวอักษรใหญ่กว่าปกติ 3.2 เท่า */
+  line-height: 1.1;      /* ระยะบรรทัดสำหรับหัวข้อจะแคบกว่าปกติเพื่อให้ดูเป็นกลุ่มก้อน */
 }
 
+/* --- สไตล์สำหรับปุ่มกด (แท็ก <button>) --- */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+  border-radius: 8px;           /* ทำให้มุมปุ่มมีความโค้งมน 8 พิกเซล */
+  border: 1px solid transparent; /* ขอบปุ่มเริ่มต้นเป็นสีโปร่งใส */
+  padding: 0.6em 1.2em;         /* ระยะห่างภายในปุ่ม (บนล่าง 0.6, ซ้ายขวา 1.2) */
+  font-size: 1em;               /* ขนาดตัวอักษรปกติ */
+  font-weight: 500;             /* ตัวอักษรหนาระดับปานกลาง */
+  font-family: inherit;         /* ใช้ฟอนต์ตามที่เราตั้งไว้ใน :root */
+  background-color: #1a1a1a;    /* สีพื้นหลังของปุ่ม (สีดำสนิท) */
+  cursor: pointer;              /* เปลี่ยนรูปเมาส์เป็นรูปนิ้วมือเวลาชี้ */
+  transition: border-color 0.25s; /* เวลาเปลี่ยนสีขอบ ให้ค่อยๆ เปลี่ยนใน 0.25 วินาที */
 }
+
+/* เมื่อเอาเมาส์ชี้ปุ่ม */
 button:hover {
-  border-color: #646cff;
+  border-color: #646cff;        /* เปลี่ยนสีขอบให้เป็นสีน้ำเงินม่วง */
 }
+
+/* เมื่อกดปุ่ม หรือมีการ Focus (เช่นการกด Tab มาที่ปุ่ม) */
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 4px auto -webkit-focus-ring-color; /* สร้างเส้นขอบไฮไลท์เพื่อช่วยเรื่อง Accessibility */
 }
 
+/* ------------------------------------------------------------
+   @media (prefers-color-scheme: light)
+   ส่วนนี้คือการทำงานของ "โหมดสว่าง"
+   ถ้าเครื่องผู้ใช้งานตั้งค่าเป็น Light Mode โค้ดในนี้จะไปทับค่าข้างบนทันที
+   ------------------------------------------------------------
+*/
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: #213547;            /* เปลี่ยนตัวหนังสือเป็นสีเทาเข้มเกือบดำ */
+    background-color: #ffffff; /* เปลี่ยนพื้นหลังเป็นสีขาว */
   }
+  
+  /* เปลี่ยนสี Link ตอน Hover ในโหมดสว่าง */
   a:hover {
     color: #747bff;
   }
+  
+  /* เปลี่ยนสีปุ่มในโหมดสว่างให้เป็นสีขาวนวลๆ */
   button {
     background-color: #f9f9f9;
   }
