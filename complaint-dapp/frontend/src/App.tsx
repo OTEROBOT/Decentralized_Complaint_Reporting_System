@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ethers } from 'ethers'
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from './contractInfo'
 import './App.css'
+
+// ไฟล์ชื่อ: App.tsx
 
 interface Complaint {
   id: number;
@@ -36,7 +38,7 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [location, setLocation] = useState('')
+  // ลบ location และ setLocation ที่ไม่ได้ใช้
   const [selectedLocation, setSelectedLocation] = useState('')
   const [newOfficerAddress, setNewOfficerAddress] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
@@ -129,8 +131,8 @@ function App() {
         }
         setOfficerLocations(officerLocs)
       }
-    } catch (error) {
-      console.error('ตรวจสอบบทบาทล้มเหลว:', error)
+    } catch (err) {
+      console.error('ตรวจสอบบทบาทล้มเหลว:', err)
     }
   }
 
@@ -157,8 +159,8 @@ function App() {
         setShowWelcomeTour(true)
       }
       setLoadingMessage('')
-    } catch (error) {
-      console.error('เชื่อมต่อล้มเหลว:', error)
+    } catch (err) {
+      console.error('เชื่อมต่อล้มเหลว:', err)
       showStatus('❌ เชื่อมต่อล้มเหลว กรุณาลองใหม่อีกครั้ง', 'error')
       setLoadingMessage('')
     }
@@ -177,627 +179,696 @@ function App() {
           method: 'wallet_revokePermissions',
           params: [{ eth_accounts: {} }]
         })
-      } catch (error) {
-        console.error('ล้าง permission ล้มเหลว:', error)
-      }
+      } catch (err) {
+  console.error(err);
+  showStatus("Something went wrong while disconnecting wallet", "error");
+}
     }
-  }
-
-  const loadComplaints = async () => {
-    if (!window.ethereum) return
-    setLoading(true)
-    setLoadingMessage('กำลังโหลดข้อมูลจาก Blockchain...')
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
-
-      const count = await contract.complaintCount()
-      const list: Complaint[] = []
-
-      for (let i = 1; i <= Number(count); i++) {
-        setLoadingMessage(`กำลังโหลดเรื่องที่ ${i} จาก ${count}...`)
-        const c = await contract.getComplaint(i)
-        list.push({
-          id: i,
-          title: c.title,
-          description: c.description,
-          location: c.location,
-          reporter: c.reporter,
-          officerAssigned: c.officerAssigned,
-          actionRequired: c.actionRequired,
-          status: ['Submitted', 'UnderReview', 'Resolved', 'Reopened', 'Closed'][Number(c.status)],
-          timestamp: new Date(Number(c.timestamp) * 1000).toLocaleString('th-TH'),
-          expanded: false
-        })
-      }
-
-      setComplaints(list)
-      showStatus(`โหลดข้อมูลสำเร็จ พบเรื่องร้องเรียนทั้งหมด ${count} เรื่อง`, 'success')
-    } catch (error) {
-      console.error('โหลดข้อมูลล้มเหลว:', error)
-      showStatus('❌ ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่อ', 'error')
-    } finally {
-      setLoading(false)
-      setLoadingMessage('')
-    }
-  }
-
-  const toggleExpand = (id: number) => {
-    setComplaints(prev =>
-      prev.map(c => c.id === id ? { ...c, expanded: !c.expanded } : c)
-    )
   }
 
   const submitComplaint = async () => {
-    if (!account || !location) {
-      showStatus('⚠️ กรุณาเลือกหน่วยงานและกรอกข้อมูลให้ครบถ้วน', 'error')
+    if (!account) {
+      showStatus('กรุณาเชื่อมต่อ MetaMask ก่อนส่งเรื่อง', 'error')
       return
     }
 
-    if (!title.trim() || !description.trim()) {
-      showStatus('⚠️ กรุณากรอกหัวข้อและรายละเอียดเรื่องร้องเรียน', 'error')
+    if (!title.trim() || !description.trim() || !selectedLocation) {
+      showStatus('⚠️ กรุณากรอกข้อมูลให้ครบทุกช่อง', 'error')
       return
     }
-
-    setIsSubmitting(true)
-    setLoadingMessage('กำลังเตรียมข้อมูล...')
 
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum!)
+      setIsSubmitting(true)
+      setLoadingMessage('กำลังส่งเรื่องร้องเรียนไปยัง Blockchain...')
+
+      // แก้ไข: เพิ่มการตรวจสอบ window.ethereum
+      if (!window.ethereum) {
+        throw new Error('MetaMask not found')
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
 
-      setLoadingMessage('กำลังส่งเรื่องไปยัง Blockchain...')
-      const tx = await contract.submitComplaint(title, description, location)
-      
-      setLoadingMessage('กำลังรอการยืนยันจาก Network...')
+      const tx = await contract.submitComplaint(title, description, selectedLocation)
+      setLoadingMessage('กำลังรอการยืนยันจาก Blockchain...')
       await tx.wait()
-      
-      showStatus('✅ ส่งเรื่องร้องเรียนสำเร็จ! ข้อมูลได้ถูกบันทึกลง Blockchain แล้ว', 'success')
 
+      showStatus('✅ ส่งเรื่องร้องเรียนสำเร็จ! ข้อมูลถูกบันทึกบน Blockchain แล้ว', 'success')
       setTitle('')
       setDescription('')
-      setLocation('')
+      setSelectedLocation('')
       loadComplaints()
-    } catch (error) {
-      console.error('ส่งเรื่องล้มเหลว:', error)
-      showStatus('❌ ส่งเรื่องล้มเหลว กรุณาตรวจสอบ Gas Fee และลองใหม่อีกครั้ง', 'error')
+    } catch (err) {
+      console.error('ส่งเรื่องล้มเหลว:', err)
+      // แก้ไข: ระบุ type ของ error
+      const error = err as { code?: string }
+      if (error.code === 'ACTION_REJECTED') {
+        showStatus('❌ คุณปฏิเสธการทำรายการ', 'error')
+      } else {
+        showStatus('❌ ส่งเรื่องล้มเหลว กรุณาลองใหม่อีกครั้ง', 'error')
+      }
     } finally {
       setIsSubmitting(false)
       setLoadingMessage('')
     }
   }
 
-  const assignToOfficer = async (id: number) => {
-    setLoadingMessage('กำลังรับเรื่อง...')
+  // แก้ไข: ใช้ useCallback เพื่อแก้ปัญหา React Hook dependency
+  const loadComplaints = useCallback(async () => {
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum!)
-      const signer = await provider.getSigner()
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
-      const tx = await contract.assignToOfficer(id)
-      await tx.wait()
-      showStatus('✅ รับเรื่องสำเร็จ! เรื่องนี้ถูกมอบหมายให้คุณแล้ว', 'success')
-      loadComplaints()
-    } catch (error) {
-      console.error('รับเรื่องล้มเหลว:', error)
-      showStatus('❌ รับเรื่องล้มเหลว - คุณรับได้เฉพาะเรื่องของหน่วยงานตัวเองเท่านั้น', 'error')
-    } finally {
-      setLoadingMessage('')
-    }
-  }
+      setLoading(true)
+      
+      // แก้ไข: เพิ่มการตรวจสอบ window.ethereum
+      if (!window.ethereum) {
+        return
+      }
 
-  const setAction = async (id: number) => {
-    if (!actionInput) {
-      showStatus('⚠️ กรุณากรอกสิ่งที่ต้องแก้ไข', 'error')
-      return
-    }
-    setLoadingMessage('กำลังบันทึกข้อมูล...')
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum!)
-      const signer = await provider.getSigner()
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
-      const tx = await contract.setActionRequired(id, actionInput)
-      await tx.wait()
-      showStatus('✅ บันทึกสิ่งที่ต้องแก้ไขสำเร็จ', 'success')
-      setActionInput('')
-      loadComplaints()
-    } catch (error) {
-      console.error('บันทึกล้มเหลว:', error)
-      showStatus('❌ บันทึกล้มเหลว กรุณาลองใหม่อีกครั้ง', 'error')
-    } finally {
-      setLoadingMessage('')
-    }
-  }
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
 
-  const markResolved = async (id: number) => {
-    setLoadingMessage('กำลังอัปเดตสถานะ...')
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum!)
-      const signer = await provider.getSigner()
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
-      const tx = await contract.markAsResolved(id)
-      await tx.wait()
-      showStatus('✅ อัปเดตเป็น Resolved สำเร็จ รอการยืนยันจากผู้ร้องเรียน', 'success')
-      loadComplaints()
-    } catch (error) {
-      console.error('อัปเดตล้มเหลว:', error)
-      showStatus('❌ อัปเดตล้มเหลว', 'error')
-    } finally {
-      setLoadingMessage('')
-    }
-  }
+      const count = await contract.complaintCount()
+      const complaintsData: Complaint[] = []
 
-  const confirmResolution = async (id: number) => {
-    setLoadingMessage('กำลังยืนยัน...')
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum!)
-      const signer = await provider.getSigner()
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
-      const tx = await contract.confirmResolution(id)
-      await tx.wait()
-      showStatus('✅ ยืนยันรับการแก้ไขสำเร็จ ขอบคุณที่ใช้บริการ', 'success')
-      loadComplaints()
-    } catch (error) {
-      console.error('ยืนยันล้มเหลว:', error)
-      showStatus('❌ ยืนยันล้มเหลว', 'error')
-    } finally {
-      setLoadingMessage('')
-    }
-  }
+      for (let i = 1; i <= count; i++) {
+        const c = await contract.complaints(i)
+        const date = new Date(Number(c.timestamp) * 1000)
+        const thaiDate = date.toLocaleString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
 
-  const rejectResolution = async (id: number) => {
-    setLoadingMessage('กำลังส่งเรื่องซ้ำ...')
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum!)
-      const signer = await provider.getSigner()
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
-      const tx = await contract.rejectResolution(id)
-      await tx.wait()
-      showStatus('✅ ขอแก้ไขต่อ ส่งเรื่องซ้ำสำเร็จ', 'success')
-      loadComplaints()
-    } catch (error) {
-      console.error('ส่งซ้ำล้มเหลว:', error)
-      showStatus('❌ ส่งซ้ำล้มเหลว', 'error')
+        complaintsData.push({
+          id: Number(c.id),
+          title: c.title,
+          description: c.description,
+          location: c.location,
+          reporter: c.reporter,
+          officerAssigned: c.officerAssigned,
+          actionRequired: c.actionRequired,
+          status: c.status,
+          timestamp: thaiDate,
+          expanded: false
+        })
+      }
+
+      complaintsData.sort((a, b) => b.id - a.id)
+      setComplaints(complaintsData)
+    } catch (err) {
+      console.error('โหลดข้อมูลล้มเหลว:', err)
+      showStatus('⚠️ ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่', 'error')
     } finally {
-      setLoadingMessage('')
+      setLoading(false)
     }
-  }
+  }, []) // ไม่มี dependencies เพราะฟังก์ชันนี้ไม่ต้องพึ่งพา state ใดๆ
 
   const addOfficer = async () => {
-    if (!newOfficerAddress) {
-      showStatus('⚠️ กรุณาใส่ Address ของเจ้าหน้าที่', 'error')
+    if (!isAdmin) {
+      showStatus('❌ คุณไม่มีสิทธิ์ดำเนินการนี้', 'error')
       return
     }
-    setLoadingMessage('กำลังเพิ่มเจ้าหน้าที่...')
+
+    if (!newOfficerAddress.trim() || !selectedLocation) {
+      showStatus('⚠️ กรุณากรอกที่อยู่ Officer และเลือกสถานที่', 'error')
+      return
+    }
+
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum!)
+      setIsSubmitting(true)
+      setLoadingMessage('กำลังเพิ่ม Officer...')
+
+      // แก้ไข: เพิ่มการตรวจสอบ window.ethereum
+      if (!window.ethereum) {
+        throw new Error('MetaMask not found')
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
-      const tx = await contract.addOfficer(newOfficerAddress)
+
+      const tx = await contract.addOfficer(newOfficerAddress, selectedLocation)
+      setLoadingMessage('กำลังรอการยืนยัน...')
       await tx.wait()
-      showStatus('✅ เพิ่มเจ้าหน้าที่สำเร็จ', 'success')
+
+      showStatus('✅ เพิ่ม Officer สำเร็จแล้ว!', 'success')
       setNewOfficerAddress('')
-    } catch (error) {
-      console.error('เพิ่มเจ้าหน้าที่ล้มเหลว:', error)
-      showStatus('❌ เพิ่มเจ้าหน้าที่ล้มเหลว', 'error')
+      setSelectedLocation('')
+    } catch (err) {
+      console.error('เพิ่ม Officer ล้มเหลว:', err)
+      // แก้ไข: ระบุ type ของ error
+      const error = err as { code?: string }
+      if (error.code === 'ACTION_REJECTED') {
+        showStatus('❌ คุณปฏิเสธการทำรายการ', 'error')
+      } else {
+        showStatus('❌ เพิ่ม Officer ล้มเหลว', 'error')
+      }
     } finally {
+      setIsSubmitting(false)
       setLoadingMessage('')
     }
   }
 
-  const assignOfficerToLocationFunc = async () => {
-    if (!selectedLocation || !newOfficerAddress) {
-      showStatus('⚠️ กรุณาเลือกหน่วยงานและใส่ address Officer', 'error')
-      return
-    }
-    setLoadingMessage('กำลังผูก Officer กับหน่วยงาน...')
+  const assignToOfficer = async (complaintId: number) => {
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum!)
+      setIsSubmitting(true)
+      setLoadingMessage('กำลังรับเรื่อง...')
+
+      // แก้ไข: เพิ่มการตรวจสอบ window.ethereum
+      if (!window.ethereum) {
+        throw new Error('MetaMask not found')
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum)
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
-      const tx = await contract.assignOfficerToLocation(selectedLocation, newOfficerAddress)
+
+      const tx = await contract.assignToOfficer(complaintId)
+      setLoadingMessage('กำลังรอการยืนยัน...')
       await tx.wait()
-      showStatus('✅ ผูก Officer กับหน่วยงานสำเร็จ', 'success')
-    } catch (error) {
-      console.error('ผูกล้มเหลว:', error)
-      showStatus('❌ ผูกล้มเหลว', 'error')
+
+      showStatus('✅ รับเรื่องสำเร็จ! คุณสามารถเริ่มดำเนินการได้', 'success')
+      loadComplaints()
+    } catch (err) {
+      console.error('รับเรื่องล้มเหลว:', err)
+      // แก้ไข: ระบุ type ของ error
+      const error = err as { code?: string }
+      if (error.code === 'ACTION_REJECTED') {
+        showStatus('❌ คุณปฏิเสธการทำรายการ', 'error')
+      } else {
+        showStatus('❌ รับเรื่องล้มเหลว', 'error')
+      }
     } finally {
+      setIsSubmitting(false)
       setLoadingMessage('')
     }
   }
 
-  const closeTour = () => {
-    setShowWelcomeTour(false)
-    localStorage.setItem('hasSeenTour', 'true')
-  }
+  const setAction = async (complaintId: number) => {
+    if (!actionInput.trim()) {
+      showStatus('⚠️ กรุณาระบุสิ่งที่ต้องแก้ไข', 'error')
+      return
+    }
 
-  const nextTourStep = () => {
-    if (currentTourStep < tourSteps.length - 1) {
-      setCurrentTourStep(prev => prev + 1)
-    } else {
-      closeTour()
+    try {
+      setIsSubmitting(true)
+      setLoadingMessage('กำลังบันทึกข้อมูล...')
+
+      // แก้ไข: เพิ่มการตรวจสอบ window.ethereum
+      if (!window.ethereum) {
+        throw new Error('MetaMask not found')
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+
+      const tx = await contract.setAction(complaintId, actionInput)
+      setLoadingMessage('กำลังรอการยืนยัน...')
+      await tx.wait()
+
+      showStatus('✅ บันทึกสำเร็จแล้ว!', 'success')
+      setActionInput('')
+      loadComplaints()
+    } catch (err) {
+      console.error('บันทึกล้มเหลว:', err)
+      // แก้ไข: ระบุ type ของ error
+      const error = err as { code?: string }
+      if (error.code === 'ACTION_REJECTED') {
+        showStatus('❌ คุณปฏิเสธการทำรายการ', 'error')
+      } else {
+        showStatus('❌ บันทึกล้มเหลว', 'error')
+      }
+    } finally {
+      setIsSubmitting(false)
+      setLoadingMessage('')
     }
   }
 
-  const prevTourStep = () => {
-    if (currentTourStep > 0) {
-      setCurrentTourStep(prev => prev - 1)
+  const markResolved = async (complaintId: number) => {
+    try {
+      setIsSubmitting(true)
+      setLoadingMessage('กำลังบันทึกสถานะ...')
+
+      // แก้ไข: เพิ่มการตรวจสอบ window.ethereum
+      if (!window.ethereum) {
+        throw new Error('MetaMask not found')
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+
+      const tx = await contract.markResolved(complaintId)
+      setLoadingMessage('กำลังรอการยืนยัน...')
+      await tx.wait()
+
+      showStatus('✅ ทำเครื่องหมายเป็นแก้ไขแล้วสำเร็จ! รอผู้ร้องเรียนยืนยัน', 'success')
+      loadComplaints()
+    } catch (err) {
+      console.error('ทำเครื่องหมายล้มเหลว:', err)
+      // แก้ไข: ระบุ type ของ error
+      const error = err as { code?: string }
+      if (error.code === 'ACTION_REJECTED') {
+        showStatus('❌ คุณปฏิเสธการทำรายการ', 'error')
+      } else {
+        showStatus('❌ ทำเครื่องหมายล้มเหลว', 'error')
+      }
+    } finally {
+      setIsSubmitting(false)
+      setLoadingMessage('')
     }
   }
 
+  const confirmResolution = async (complaintId: number) => {
+    try {
+      setIsSubmitting(true)
+      setLoadingMessage('กำลังยืนยัน...')
+
+      // แก้ไข: เพิ่มการตรวจสอบ window.ethereum
+      if (!window.ethereum) {
+        throw new Error('MetaMask not found')
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+
+      const tx = await contract.confirmResolution(complaintId)
+      setLoadingMessage('กำลังรอการยืนยัน...')
+      await tx.wait()
+
+      showStatus('✅ ยืนยันรับเรียบร้อย! เรื่องนี้ปิดแล้ว', 'success')
+      loadComplaints()
+    } catch (err) {
+      console.error('ยืนยันล้มเหลว:', err)
+      // แก้ไข: ระบุ type ของ error
+      const error = err as { code?: string }
+      if (error.code === 'ACTION_REJECTED') {
+        showStatus('❌ คุณปฏิเสธการทำรายการ', 'error')
+      } else {
+        showStatus('❌ ยืนยันล้มเหลว', 'error')
+      }
+    } finally {
+      setIsSubmitting(false)
+      setLoadingMessage('')
+    }
+  }
+
+  const rejectResolution = async (complaintId: number) => {
+    try {
+      setIsSubmitting(true)
+      setLoadingMessage('กำลังส่งเรื่องซ้ำ...')
+
+      // แก้ไข: เพิ่มการตรวจสอบ window.ethereum
+      if (!window.ethereum) {
+        throw new Error('MetaMask not found')
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+
+      const tx = await contract.rejectResolution(complaintId)
+      setLoadingMessage('กำลังรอการยืนยัน...')
+      await tx.wait()
+
+      showStatus('✅ ส่งเรื่องซ้ำสำเร็จ! Officer จะได้รับเรื่องอีกครั้ง', 'success')
+      loadComplaints()
+    } catch (err) {
+      console.error('ส่งซ้ำล้มเหลว:', err)
+      // แก้ไข: ระบุ type ของ error
+      const error = err as { code?: string }
+      if (error.code === 'ACTION_REJECTED') {
+        showStatus('❌ คุณปฏิเสธการทำรายการ', 'error')
+      } else {
+        showStatus('❌ ส่งซ้ำล้มเหลว', 'error')
+      }
+    } finally {
+      setIsSubmitting(false)
+      setLoadingMessage('')
+    }
+  }
+
+  const toggleExpand = (id: number) => {
+    setFilteredComplaints(prev =>
+      prev.map(c => (c.id === id ? { ...c, expanded: !c.expanded } : c))
+    )
+  }
+
+  // แก้ไข: เพิ่ม loadComplaints ใน dependency array
   useEffect(() => {
-    loadComplaints()
-  }, [])
+    if (account) {
+      loadComplaints()
+    }
+  }, [account, loadComplaints])
 
   useEffect(() => {
     let filtered = complaints
 
     if (filterType === 'my') {
       filtered = filtered.filter(c => c.reporter.toLowerCase() === account?.toLowerCase())
-    } else if (filterType === 'my-location' && isOfficer && officerLocations.length > 0) {
+    } else if (filterType === 'my-location' && isOfficer) {
       filtered = filtered.filter(c => officerLocations.includes(c.location))
     } else if (filterType === 'selected-location' && selectedFilterLocation) {
       filtered = filtered.filter(c => c.location === selectedFilterLocation)
     }
 
-    if (searchQuery) {
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
       filtered = filtered.filter(c =>
-        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.location.toLowerCase().includes(searchQuery.toLowerCase())
+        c.title.toLowerCase().includes(query) ||
+        c.description.toLowerCase().includes(query) ||
+        c.location.toLowerCase().includes(query) ||
+        c.id.toString().includes(query)
       )
     }
 
     setFilteredComplaints(filtered)
-  }, [complaints, filterType, selectedFilterLocation, searchQuery, isOfficer, officerLocations, account])
+  }, [complaints, filterType, searchQuery, selectedFilterLocation, account, isOfficer, officerLocations])
 
   return (
-    <div className="app-wrapper">
-      <div className="container">
-        {/* Header */}
-        <div className="app-header">
-          <div className="header-icon">🏛️</div>
-          <h1>ระบบแจ้งร้องเรียนแบบกระจายศูนย์</h1>
-          <h2>จังหวัดอุดรธานี</h2>
-          <p className="header-subtitle">Blockchain-Powered Transparent Complaint System</p>
+    <div className="app-container">
+      {statusMessage && (
+        <div className={`status-banner status-${statusType}`}>
+          {statusMessage}
         </div>
+      )}
 
-        {/* Welcome Tour Modal */}
-        {showWelcomeTour && (
-          <div className="tour-overlay">
-            <div className="tour-modal">
-              <button className="tour-close" onClick={closeTour}>✕</button>
-              <div className="tour-icon">{tourSteps[currentTourStep].icon}</div>
-              <h3>{tourSteps[currentTourStep].title}</h3>
-              <p>{tourSteps[currentTourStep].content}</p>
-              <div className="tour-progress">
-                {tourSteps.map((_, index) => (
-                  <span 
-                    key={index} 
-                    className={`tour-dot ${index === currentTourStep ? 'active' : ''}`}
-                  />
-                ))}
+      <div className="header">
+        <div className="header-content">
+          <h1 className="app-title">
+            <span className="title-icon">📋</span>
+            ระบบร้องเรียน Blockchain
+          </h1>
+          {!account ? (
+            <button onClick={connectWallet} className="btn-connect">
+              <span>🔗</span> เชื่อมต่อ MetaMask
+            </button>
+          ) : (
+            <div className="account-info">
+              <div className="role-badges">
+                {isAdmin && <span className="role-badge admin">👑 Admin</span>}
+                {isOfficer && <span className="role-badge officer">👮 Officer</span>}
+                {!isAdmin && !isOfficer && <span className="role-badge user">👤 User</span>}
               </div>
-              <div className="tour-buttons">
-                {currentTourStep > 0 && (
-                  <button onClick={prevTourStep} className="tour-btn-secondary">ก่อนหน้า</button>
-                )}
-                <button onClick={nextTourStep} className="tour-btn-primary">
-                  {currentTourStep === tourSteps.length - 1 ? 'เริ่มใช้งาน' : 'ถัดไป'}
+              <span className="account-address">
+                {account.substring(0, 6)}...{account.substring(38)}
+              </span>
+              <button onClick={disconnectWallet} className="btn-disconnect">
+                ออกจากระบบ
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showWelcomeTour && (
+        <div className="tour-overlay">
+          <div className="tour-modal">
+            <div className="tour-icon">{tourSteps[currentTourStep].icon}</div>
+            <h2>{tourSteps[currentTourStep].title}</h2>
+            <p style={{ whiteSpace: 'pre-line' }}>{tourSteps[currentTourStep].content}</p>
+            <div className="tour-progress">
+              {tourSteps.map((_, index) => (
+                <div 
+                  key={index} 
+                  className={`progress-dot ${index === currentTourStep ? 'active' : ''} ${index < currentTourStep ? 'completed' : ''}`}
+                />
+              ))}
+            </div>
+            <div className="tour-actions">
+              {currentTourStep > 0 && (
+                <button 
+                  onClick={() => setCurrentTourStep(prev => prev - 1)}
+                  className="btn-tour btn-secondary"
+                >
+                  ← ย้อนกลับ
+                </button>
+              )}
+              {currentTourStep < tourSteps.length - 1 ? (
+                <button 
+                  onClick={() => setCurrentTourStep(prev => prev + 1)}
+                  className="btn-tour btn-primary"
+                >
+                  ถัดไป →
+                </button>
+              ) : (
+                <button 
+                  onClick={() => {
+                    setShowWelcomeTour(false)
+                    localStorage.setItem('hasSeenTour', 'true')
+                  }}
+                  className="btn-tour btn-success"
+                >
+                  ✓ เริ่มใช้งาน
+                </button>
+              )}
+            </div>
+            <button 
+              onClick={() => {
+                setShowWelcomeTour(false)
+                localStorage.setItem('hasSeenTour', 'true')
+              }}
+              className="tour-skip"
+            >
+              ข้าม
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="main-content">
+        {account ? (
+          <div className="panels-container">
+            <div className="panel submit-panel">
+              <div className="panel-header">
+                <h2>
+                  <span className="panel-icon">📝</span>
+                  ส่งเรื่องร้องเรียน
+                </h2>
+              </div>
+              <div className="form-container">
+                <div className="form-group">
+                  <label>
+                    <span className="label-icon">🏢</span>
+                    หน่วยงานที่ต้องการร้องเรียน
+                  </label>
+                  <select
+                    value={selectedLocation}
+                    onChange={(e) => setSelectedLocation(e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="">-- เลือกหน่วยงาน --</option>
+                    {locations.map((loc) => (
+                      <option key={loc} value={loc}>{loc}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>
+                    <span className="label-icon">📌</span>
+                    หัวข้อเรื่อง
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="ระบุหัวข้อสั้นๆ"
+                    className="form-input"
+                    maxLength={100}
+                  />
+                  <div className="char-count">{title.length}/100</div>
+                </div>
+
+                <div className="form-group">
+                  <label>
+                    <span className="label-icon">📄</span>
+                    รายละเอียด
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="อธิบายรายละเอียดเรื่องร้องเรียน"
+                    className="form-textarea"
+                    rows={6}
+                    maxLength={500}
+                  />
+                  <div className="char-count">{description.length}/500</div>
+                </div>
+
+                <button
+                  onClick={submitComplaint}
+                  disabled={isSubmitting || !title.trim() || !description.trim() || !selectedLocation}
+                  className="btn-submit"
+                >
+                  <span>📤</span> ส่งเรื่องร้องเรียน
                 </button>
               </div>
             </div>
-          </div>
-        )}
 
-        {!account ? (
-          <div className="login-screen">
-            <div className="login-icon">🔐</div>
-            <h3>ยินดีต้อนรับ</h3>
-            <p className="login-description">
-              เข้าสู่ระบบร้องเรียนที่โปร่งใส ปลอดภัย และไม่สามารถแก้ไขข้อมูลย้อนหลังได้
-              <br/>ด้วยเทคโนโลยี Blockchain
-            </p>
-            
-            <div className="feature-cards">
-              <div className="feature-card">
-                <div className="feature-icon">✅</div>
-                <h4>โปร่งใส</h4>
-                <p>ตรวจสอบได้ทุกขั้นตอน</p>
-              </div>
-              <div className="feature-card">
-                <div className="feature-icon">🔒</div>
-                <h4>ปลอดภัย</h4>
-                <p>ข้อมูลเข้ารหัสแบบ Blockchain</p>
-              </div>
-              <div className="feature-card">
-                <div className="feature-icon">⚡</div>
-                <h4>รวดเร็ว</h4>
-                <p>ติดตาม Real-time</p>
-              </div>
-            </div>
-
-            <button onClick={connectWallet} className="connect-btn">
-              <span className="btn-icon">🦊</span>
-              เชื่อมต่อ MetaMask
-            </button>
-            
-            <div className="help-section">
-              <p className="help-text">
-                <strong>💡 คำแนะนำ:</strong> หากยังไม่มี MetaMask 
-                <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer"> คลิกที่นี่เพื่อติดตั้ง</a>
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="main-content">
-            {/* Wallet Info Bar */}
-            <div className="wallet-info">
-              <div className="wallet-address">
-                <span className="wallet-label">กระเป๋าที่เชื่อม:</span>
-                <Tooltip text="คลิกเพื่อคัดลอก Address">
-                  <code 
-                    className="wallet-code"
-                    onClick={() => {
-                      navigator.clipboard.writeText(account)
-                      showStatus('✅ คัดลอก Address สำเร็จ', 'success')
-                    }}
-                  >
-                    {account.substring(0, 6)}...{account.substring(38)}
-                  </code>
-                </Tooltip>
-              </div>
-              
-              <button onClick={() => setShowWelcomeTour(true)} className="help-btn">
-                <span>❓</span> คู่มือการใช้งาน
-              </button>
-              
-              <button onClick={loadComplaints} className="refresh-btn" disabled={loading}>
-                <span>{loading ? '⏳' : '🔄'}</span>
-                {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
-              </button>
-              
-              <button onClick={disconnectWallet} className="logout-btn">
-                <span>🚪</span> ออกจากระบบ
-              </button>
-            </div>
-
-            {/* Officer Info */}
-            {isOfficer && officerLocations.length > 0 && (
-              <div className="officer-info">
-                <div className="officer-badge">👮 เจ้าหน้าที่</div>
-                <p>คุณรับผิดชอบหน่วยงาน: <strong>{officerLocations.join(', ')}</strong></p>
-                <p className="small-note">💡 คุณสามารถรับเรื่อง/จัดการได้เฉพาะเรื่องของหน่วยงานตัวเองเท่านั้น</p>
-              </div>
-            )}
-
-            {/* Admin Section */}
             {isAdmin && (
-              <div className="admin-section">
-                <h3>
-                  <span className="section-icon">⚙️</span>
-                  ส่วนผู้ดูแลระบบ: จัดการเจ้าหน้าที่
-                </h3>
-                
-                <div className="admin-grid">
-                  <div className="admin-card">
-                    <h4>เพิ่มเจ้าหน้าที่ใหม่</h4>
-                    <Tooltip text="ใส่ Ethereum Address ของเจ้าหน้าที่ที่ต้องการเพิ่ม">
-                      <input
-                        type="text"
-                        placeholder="0x... (Ethereum Address)"
-                        value={newOfficerAddress}
-                        onChange={(e) => setNewOfficerAddress(e.target.value)}
-                      />
-                    </Tooltip>
-                    <button onClick={addOfficer}>
-                      <span>➕</span> เพิ่มเจ้าหน้าที่
-                    </button>
-                  </div>
-
-                  <div className="admin-card">
-                    <h4>ผูก Officer กับหน่วยงาน</h4>
-                    <select 
+              <div className="panel admin-panel">
+                <div className="panel-header">
+                  <h2>
+                    <span className="panel-icon">👑</span>
+                    จัดการ Officer
+                  </h2>
+                </div>
+                <div className="form-container">
+                  <div className="form-group">
+                    <label>
+                      <span className="label-icon">🏢</span>
+                      หน่วยงาน
+                    </label>
+                    <select
                       value={selectedLocation}
                       onChange={(e) => setSelectedLocation(e.target.value)}
+                      className="form-select"
                     >
                       <option value="">-- เลือกหน่วยงาน --</option>
-                      {locations.map((loc, index) => (
-                        <option key={index} value={loc}>{loc}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="text"
-                      placeholder="0x... (Officer Address)"
-                      value={newOfficerAddress}
-                      onChange={(e) => setNewOfficerAddress(e.target.value)}
-                    />
-                    <button onClick={assignOfficerToLocationFunc}>
-                      <span>🔗</span> ผูกหน่วยงาน
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Submit Complaint Form */}
-            <div className="form-section">
-              <h3>
-                <span className="section-icon">📝</span>
-                ยื่นเรื่องร้องเรียนใหม่
-              </h3>
-              
-              <div className="form-steps">
-                <div className="step">
-                  <div className="step-number">1</div>
-                  <div className="step-content">
-                    <label>เลือกหน่วยงานที่ต้องการร้องเรียน</label>
-                    <Tooltip text="เลือกหน่วยงานที่เกี่ยวข้องกับเรื่องร้องเรียนของคุณ">
-                      <select 
-                        value={location} 
-                        onChange={(e) => setLocation(e.target.value)}
-                        className={location ? 'filled' : ''}
-                      >
-                        <option value="">-- กรุณาเลือกหน่วยงาน --</option>
-                        {locations.map((loc, index) => (
-                          <option key={index} value={loc}>{loc}</option>
-                        ))}
-                      </select>
-                    </Tooltip>
-                  </div>
-                </div>
-
-                <div className="step">
-                  <div className="step-number">2</div>
-                  <div className="step-content">
-                    <label>กรอกหัวข้อเรื่องร้องเรียน</label>
-                    <Tooltip text="ระบุหัวข้อสั้นๆ ที่สรุปเรื่องร้องเรียน">
-                      <input
-                        type="text"
-                        placeholder="เช่น: ถนนชำรุด, ไฟฟ้าดับบ่อย, เจ้าหน้าที่ให้บริการไม่ดี"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className={title ? 'filled' : ''}
-                      />
-                    </Tooltip>
-                  </div>
-                </div>
-
-                <div className="step">
-                  <div className="step-number">3</div>
-                  <div className="step-content">
-                    <label>รายละเอียดเรื่องร้องเรียน</label>
-                    <Tooltip text="โปรดระบุรายละเอียดให้ครบถ้วนและชัดเจนเพื่อให้เจ้าหน้าที่สามารถดำเนินการได้อย่างถูกต้อง">
-                      <textarea
-                        placeholder="กรุณาระบุรายละเอียดให้ครบถ้วน เช่น สถานที่, วันเวลาที่เกิดเหตุ, ผลกระทบที่ได้รับ และสิ่งที่ต้องการให้แก้ไข"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className={description ? 'filled' : ''}
-                        rows={6}
-                      />
-                    </Tooltip>
-                    <div className="char-count">
-                      {description.length} ตัวอักษร
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                onClick={submitComplaint} 
-                disabled={!account || isSubmitting || !location || !title || !description}
-                className="submit-btn"
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="spinner-small"></span>
-                    กำลังส่งไปยัง Blockchain...
-                  </>
-                ) : (
-                  <>
-                    <span>📤</span>
-                    ส่งเรื่องร้องเรียน
-                  </>
-                )}
-              </button>
-              
-              {!location && (
-                <p className="form-hint">💡 เริ่มต้นโดยเลือกหน่วยงานที่ต้องการร้องเรียน</p>
-              )}
-            </div>
-
-            {/* Status Message */}
-            {statusMessage && (
-              <div className={`status status-${statusType}`}>
-                <div className="status-icon">
-                  {statusType === 'success' && '✅'}
-                  {statusType === 'error' && '❌'}
-                  {statusType === 'info' && 'ℹ️'}
-                </div>
-                <p>{statusMessage}</p>
-              </div>
-            )}
-
-            {/* Complaints Section */}
-            <div className="complaints-section">
-              <h3>
-                <span className="section-icon">📊</span>
-                รายการเรื่องร้องเรียนทั้งหมด
-              </h3>
-
-              {/* Table Controls */}
-              <div className="table-controls">
-                <div className="search-wrapper">
-                  <span className="search-icon">🔍</span>
-                  <input
-                    type="text"
-                    placeholder="ค้นหาตามหัวข้อ, รายละเอียด, หน่วยงาน..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="search-input"
-                  />
-                </div>
-
-                {isOfficer && (
-                  <div className="officer-filters">
-                    <button
-                      className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
-                      onClick={() => setFilterType('all')}
-                    >
-                      📋 แสดงทั้งหมด
-                    </button>
-                    <button
-                      className={`filter-btn ${filterType === 'my' ? 'active' : ''}`}
-                      onClick={() => setFilterType('my')}
-                    >
-                      👤 เรื่องของฉัน
-                    </button>
-                    <button
-                      className={`filter-btn ${filterType === 'my-location' ? 'active' : ''}`}
-                      onClick={() => setFilterType('my-location')}
-                    >
-                      🏢 หน่วยงานของฉัน
-                    </button>
-                    <select
-                      value={selectedFilterLocation}
-                      onChange={(e) => {
-                        setSelectedFilterLocation(e.target.value)
-                        setFilterType('selected-location')
-                      }}
-                      className="location-filter"
-                    >
-                      <option value="">🔽 เลือกหน่วยงาน...</option>
                       {locations.map((loc) => (
                         <option key={loc} value={loc}>{loc}</option>
                       ))}
                     </select>
                   </div>
-                )}
+
+                  <div className="form-group">
+                    <label>
+                      <span className="label-icon">👮</span>
+                      ที่อยู่ Officer
+                    </label>
+                    <input
+                      type="text"
+                      value={newOfficerAddress}
+                      onChange={(e) => setNewOfficerAddress(e.target.value)}
+                      placeholder="0x..."
+                      className="form-input"
+                    />
+                  </div>
+
+                  <button
+                    onClick={addOfficer}
+                    disabled={isSubmitting || !newOfficerAddress.trim() || !selectedLocation}
+                    className="btn-submit"
+                  >
+                    <span>➕</span> เพิ่ม Officer
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="panel complaints-panel">
+              <div className="panel-header">
+                <h2>
+                  <span className="panel-icon">📊</span>
+                  รายการเรื่องร้องเรียน
+                </h2>
+                <button onClick={loadComplaints} className="btn-refresh" disabled={loading}>
+                  <span>{loading ? '⏳' : '🔄'}</span>
+                  {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
+                </button>
               </div>
 
-              {/* Results Summary */}
-              {!loading && (
-                <div className="results-summary">
-                  พบทั้งหมด <strong>{filteredComplaints.length}</strong> เรื่อง
-                  {searchQuery && ` จากการค้นหา "${searchQuery}"`}
+              <div className="filters-section">
+                <div className="search-box">
+                  <span className="search-icon">🔍</span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="ค้นหาจากหัวข้อ, รายละเอียด, หน่วยงาน หรือ ID..."
+                    className="search-input"
+                  />
+                  {searchQuery && (
+                    <button 
+                      onClick={() => setSearchQuery('')}
+                      className="clear-search"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
-              )}
 
-              {/* Table */}
+                <div className="filter-buttons">
+                  <button
+                    onClick={() => setFilterType('all')}
+                    className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
+                  >
+                    <span>📋</span> ทั้งหมด
+                  </button>
+                  <button
+                    onClick={() => setFilterType('my')}
+                    className={`filter-btn ${filterType === 'my' ? 'active' : ''}`}
+                  >
+                    <span>👤</span> เรื่องของฉัน
+                  </button>
+                  {isOfficer && officerLocations.length > 0 && (
+                    <button
+                      onClick={() => setFilterType('my-location')}
+                      className={`filter-btn ${filterType === 'my-location' ? 'active' : ''}`}
+                    >
+                      <span>📍</span> สถานที่ฉันดูแล
+                    </button>
+                  )}
+                </div>
+
+                <div className="location-filter">
+                  <select
+                    value={selectedFilterLocation}
+                    onChange={(e) => {
+                      setSelectedFilterLocation(e.target.value)
+                      setFilterType('selected-location')
+                    }}
+                    className="filter-select"
+                  >
+                    <option value="">🏢 กรองตามหน่วยงาน</option>
+                    {locations.map((loc) => (
+                      <option key={loc} value={loc}>{loc}</option>
+                    ))}
+                  </select>
+                  {selectedFilterLocation && (
+                    <button 
+                      onClick={() => {
+                        setSelectedFilterLocation('')
+                        setFilterType('all')
+                      }}
+                      className="clear-filter"
+                    >
+                      ✕ ล้างการกรอง
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="complaints-stats">
+                <div className="stat-item">
+                  <span className="stat-label">แสดง:</span>
+                  <span className="stat-value">{filteredComplaints.length}</span>
+                </div>
+                <div className="stat-divider">|</div>
+                <div className="stat-item">
+                  <span className="stat-label">ทั้งหมด:</span>
+                  <span className="stat-value">{complaints.length}</span>
+                </div>
+              </div>
+
               {loading ? (
-                <div className="table-loading">
-                  <div className="spinner-large"></div>
-                  <p>กำลังโหลดข้อมูลจาก Blockchain...</p>
-                  <p className="loading-detail">{loadingMessage}</p>
+                <div className="loading-state">
+                  <div className="loading-spinner"></div>
+                  <p>กำลังโหลดข้อมูล...</p>
                 </div>
               ) : filteredComplaints.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-icon">📭</div>
-                  <h4>ไม่พบเรื่องร้องเรียน</h4>
+                  <h3>ไม่พบข้อมูล</h3>
                   <p>
-                    {searchQuery 
-                      ? 'ลองค้นหาด้วยคำอื่น หรือเปลี่ยนตัวกรอง' 
-                      : 'เริ่มต้นโดยส่งเรื่องร้องเรียนของคุณ'}
+                    {searchQuery || selectedFilterLocation 
+                      ? 'ไม่พบเรื่องร้องเรียนที่ตรงกับเงื่อนไขการค้นหา' 
+                      : 'ยังไม่มีเรื่องร้องเรียนในระบบ'}
                   </p>
                 </div>
               ) : (
@@ -805,16 +876,16 @@ function App() {
                   <table className="complaints-table">
                     <thead>
                       <tr>
-                        <th>ลำดับ</th>
+                        <th>ID</th>
                         <th>หน่วยงาน</th>
                         <th>หัวข้อ</th>
                         <th>รายละเอียด</th>
                         <th>ผู้ส่ง</th>
                         <th>Officer</th>
-                        <th>สิ่งที่ต้องแก้</th>
+                        <th>สิ่งที่ต้องแก้ไข</th>
                         <th>สถานะ</th>
-                        <th>วันที่ส่ง</th>
-                        <th>การดำเนินการ</th>
+                        <th>วันที่</th>
+                        <th>จัดการ</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -822,8 +893,8 @@ function App() {
                         <>
                           <tr 
                             key={c.id} 
+                            className={`complaint-row ${c.expanded ? 'expanded' : ''}`}
                             onClick={() => toggleExpand(c.id)}
-                            className="expandable-row"
                           >
                             <td>
                               <div className="id-badge">#{c.id}</div>
@@ -971,6 +1042,39 @@ function App() {
                   </table>
                 </div>
               )}
+            </div>
+          </div>
+        ) : (
+          <div className="welcome-screen">
+            <div className="welcome-content">
+              <div className="welcome-icon">🔐</div>
+              <h2>ยินดีต้อนรับสู่ระบบร้องเรียนแบบ Blockchain</h2>
+              <p className="welcome-description">
+                ระบบร้องเรียนที่ใช้เทคโนโลยี Blockchain เพื่อความโปร่งใสและไม่สามารถแก้ไขข้อมูลย้อนหลังได้
+              </p>
+              <div className="features-grid">
+                <div className="feature-card">
+                  <div className="feature-icon">🔒</div>
+                  <h3>ปลอดภัย</h3>
+                  <p>ข้อมูลถูกเข้ารหัสและบันทึกบน Blockchain</p>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon">👁️</div>
+                  <h3>โปร่งใส</h3>
+                  <p>ติดตามความคืบหน้าได้แบบ Real-time</p>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon">⚡</div>
+                  <h3>รวดเร็ว</h3>
+                  <p>ส่งเรื่องและรับการตอบกลับอย่างทันท่วงที</p>
+                </div>
+              </div>
+              <button onClick={connectWallet} className="btn-connect-large">
+                <span>🔗</span> เชื่อมต่อ MetaMask เพื่อเริ่มใช้งาน
+              </button>
+              <p className="welcome-hint">
+                💡 <strong>คำแนะนำ:</strong> คุณจะต้องติดตั้ง MetaMask Extension ในเบราว์เซอร์ของคุณก่อนใช้งาน
+              </p>
             </div>
           </div>
         )}
