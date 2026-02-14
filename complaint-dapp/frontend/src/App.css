@@ -12,1650 +12,1910 @@
   - Allows zoom for accessibility
 */
 
+/* ===== CSS VARIABLES (ตัวแปรสี และค่าต่างๆ ที่ใช้ซ้ำทั้งไฟล์) ===== */
+/* :root = การกำหนดตัวแปรแบบ global ที่สามารถเรียกใช้ได้ทุกที่ในไฟล์ CSS */
 :root {
-  --primary: #3b82f6;
-  --primary-dark: #2563eb;
-  --primary-light: #60a5fa;
-  --success: #10b981;
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --info: #06b6d4;
+  /* สีหลักของระบบ (Primary Colors) - สีน้ำเงิน */
+  --primary: #3b82f6;           /* สีน้ำเงินหลัก */
+  --primary-dark: #2563eb;      /* สีน้ำเงินเข้ม */
+  --primary-light: #60a5fa;     /* สีน้ำเงินอ่อน */
   
-  --bg-dark: #0f172a;
-  --bg-darker: #020617;
-  --bg-card: rgba(30, 41, 59, 0.6);
-  --bg-card-hover: rgba(30, 41, 59, 0.8);
+  /* สีสถานะต่างๆ (Status Colors) */
+  --success: #10b981;   /* สีเขียว - ใช้แสดงความสำเร็จ */
+  --danger: #ef4444;    /* สีแดง - ใช้แสดงข้อผิดพลาดหรืออันตราย */
+  --warning: #f59e0b;   /* สีส้ม/เหลือง - ใช้แสดงคำเตือน */
+  --info: #06b6d4;      /* สีฟ้า - ใช้แสดงข้อมูล */
   
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
+  /* สีพื้นหลัง (Background Colors) */
+  --bg-dark: #0f172a;                       /* สีพื้นหลังมืด */
+  --bg-darker: #020617;                     /* สีพื้นหลังมืดกว่า */
+  --bg-card: rgba(30, 41, 59, 0.6);         /* สีพื้นหลังการ์ด แบบโปร่งใส 60% */
+  --bg-card-hover: rgba(30, 41, 59, 0.8);   /* สีพื้นหลังการ์ดตอน hover แบบโปร่งใส 80% */
   
-  --border-color: rgba(96, 165, 250, 0.2);
-  --border-hover: rgba(96, 165, 250, 0.4);
+  /* สีข้อความ (Text Colors) */
+  --text-primary: #f1f5f9;      /* สีข้อความหลัก - ขาวสว่าง */
+  --text-secondary: #cbd5e1;    /* สีข้อความรอง - เทาอ่อน */
+  --text-muted: #94a3b8;        /* สีข้อความจาง - เทา */
   
-  --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 15px 50px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 25px 80px rgba(0, 0, 0, 0.7);
-  --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.4);
+  /* สีขอบ (Border Colors) */
+  --border-color: rgba(96, 165, 250, 0.2);    /* สีขอบปกติ - โปร่งใส 20% */
+  --border-hover: rgba(96, 165, 250, 0.4);    /* สีขอบตอน hover - โปร่งใส 40% */
   
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
+  /* เงา (Shadow Effects) */
+  --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.3);     /* เงาขนาดเล็ก */
+  --shadow-md: 0 15px 50px rgba(0, 0, 0, 0.6);    /* เงาขนาดกลาง */
+  --shadow-lg: 0 25px 80px rgba(0, 0, 0, 0.7);    /* เงาขนาดใหญ่ */
+  --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.4); /* เงาแบบเรืองแสงสีน้ำเงิน */
   
-  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* มุมโค้ง (Border Radius) */
+  --radius-sm: 12px;    /* มุมโค้งเล็ก */
+  --radius-md: 16px;    /* มุมโค้งกลาง */
+  --radius-lg: 24px;    /* มุมโค้งใหญ่ */
+  --radius-xl: 32px;    /* มุมโค้งใหญ่มาก */
+  
+  /* ความเร็วของ Transition (Animation Speed) */
+  /* cubic-bezier = กำหนดลักษณะการเคลื่อนไหวให้นุ่มนวล */
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);   /* เร็ว 0.2 วินาที */
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);   /* ปกติ 0.3 วินาที */
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);   /* ช้า 0.4 วินาที */
 }
 
+/* ===== RESET พื้นฐาน (ล้างค่า default ของ browser) ===== */
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+  box-sizing: border-box;   /* ให้ padding และ border รวมอยู่ในความกว้าง/สูงของ element */
+  margin: 0;                /* ล้าง margin ทั้งหมด */
+  padding: 0;               /* ล้าง padding ทั้งหมด */
 }
 
+/* ===== BODY (ส่วนหลักของหน้าเว็บ) ===== */
 body {
+  /* พื้นหลังแบบ gradient จากมุมซ้ายบนไปขวาล่าง */
   background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-darker) 100%);
-  color: var(--text-primary);
+  color: var(--text-primary);   /* สีข้อความเป็นสีขาว */
+  
+  /* กำหนดฟอนต์ โดยลำดับความสำคัญจากซ้ายไปขวา */
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  min-height: 100vh;
-  min-height: 100dvh;
-  line-height: 1.6;
-  overflow-x: hidden;
-  /* Support for devices with notches (iPhone X+, etc.) */
+  
+  min-height: 100vh;      /* ความสูงขั้นต่ำ 100% ของ viewport */
+  min-height: 100dvh;     /* ความสูงแบบ dynamic สำหรับมือถือ (รองรับ address bar ที่หายไป) */
+  line-height: 1.6;       /* ระยะห่างระหว่างบรรทัด */
+  overflow-x: hidden;     /* ซ่อน scroll bar แนวนอน */
+  
+  /* รองรับหน้าจอที่มีรอยบากด้านข้าง (เช่น iPhone X) */
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
-  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
-  -webkit-touch-callout: none; /* Prevent callout on long press */
+  
+  -webkit-tap-highlight-color: transparent;   /* ปิดการไฮไลท์สีเมื่อแตะบนมือถือ */
+  -webkit-touch-callout: none;                /* ปิด popup เมื่อกดค้างบนมือถือ */
 }
 
 /* =====================================================
    LAYOUT - Universal Platform Support
    ===================================================== */
+/* ===== WRAPPER หลักของแอพ (ครอบทั้งหน้าเว็บ) ===== */
 .app-wrapper {
-  min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height for mobile */
-  display: flex;
-  justify-content: center;
-  align-items: center; /* Center vertically for all content */
+  min-height: 100vh;      /* ความสูงขั้นต่ำ 100% ของ viewport */
+  min-height: 100dvh;     /* ความสูงแบบ dynamic viewport สำหรับมือถือ */
+  display: flex;          /* ใช้ flexbox layout */
+  justify-content: center;  /* จัดกึ่งกลางแนวนอน */
+  align-items: center;      /* จัดกึ่งกลางแนวตั้ง (ทำให้เนื้อหาอยู่กลางจอ) */
+  
+  /* padding ที่ปรับตามขนาดหน้าจอ: ขั้นต่ำ 20px, ปกติ 4% ของ viewport, สูงสุด 40px */
   padding: clamp(20px, 4vw, 40px);
+  
+  /* พื้นหลังแบบ gradient วงกลม 2 จุด */
   background: radial-gradient(circle at top, rgba(59, 130, 246, 0.1), transparent 50%),
               radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.1), transparent 50%);
-  overflow-x: hidden;
+  overflow-x: hidden;   /* ซ่อน scroll แนวนอน */
 }
 
+/* ===== CONTAINER กลาง (จำกัดความกว้างสูงสุด) ===== */
 .container {
-  width: 100%;
-  max-width: min(1400px, 95vw); /* Responsive max-width */
-  margin: 0 auto;
+  width: 100%;          /* กว้าง 100% ของ parent */
+  /* ความกว้างสูงสุดเลือกค่าที่น้อยกว่าระหว่าง 1400px และ 95% ของ viewport */
+  max-width: min(1400px, 95vw);
+  margin: 0 auto;       /* จัดกลางแนวนอน */
 }
 
 /* =====================================================
    HEADER
    ===================================================== */
+/* ===== ส่วนหัวของแอพ ===== */
 .app-header {
-  text-align: center;
-  margin-bottom: 4rem;
-  animation: fadeInDown 0.6s ease;
+  text-align: center;       /* จัดข้อความกลาง */
+  margin-bottom: 4rem;      /* ระยะห่างด้านล่าง 4rem */
+  animation: fadeInDown 0.6s ease;  /* เล่น animation fadeInDown เป็นเวลา 0.6 วินาที */
 }
 
+/* ===== Animation: ค่อยๆ ปรากฏจากด้านบนลงมา ===== */
 @keyframes fadeInDown {
   from {
-    opacity: 0;
-    transform: translateY(-30px);
+    opacity: 0;                       /* เริ่มจาก โปร่งใสสนิท */
+    transform: translateY(-30px);     /* อยู่เหนือตำแหน่งจริง 30px */
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1;                 /* จบที่ ทึบ */
+    transform: translateY(0);   /* กลับมาตำแหน่งจริง */
   }
 }
 
+/* ===== ไอคอนในส่วนหัว ===== */
 .header-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  animation: bounce 2s infinite;
+  font-size: 4rem;              /* ขนาดตัวอักษร 4rem */
+  margin-bottom: 1rem;          /* ระยะห่างด้านล่าง */
+  animation: bounce 2s infinite;  /* เล่น animation bounce วนซ้ำทุก 2 วินาที */
 }
 
+/* ===== Animation: กระโดดขึ้นลงแบบวนซ้ำ ===== */
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(0); }      /* ตำแหน่งปกติที่จุดเริ่มและจุดจบ */
+  50% { transform: translateY(-10px); }       /* กระโดดขึ้น 10px ตอนกึ่งกลาง */
 }
 
+/* ===== หัวข้อหลัก H1 ===== */
 h1 {
+  /* ขนาดตัวอักษรที่ปรับตามหน้าจอ: ขั้นต่ำ 2.5rem, ปกติ 6% ของ viewport, สูงสุด 4rem */
   font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.5rem;
+  font-weight: 800;             /* ความหนาตัวอักษร (800 = หนามาก) */
+  letter-spacing: -0.02em;      /* ระยะห่างตัวอักษร (ติดกันนิดหน่อย) */
+  margin-bottom: 0.5rem;        /* ระยะห่างด้านล่าง */
+  
+  /* สร้างข้อความแบบ gradient 3 สี */
   background: linear-gradient(135deg, #60a5fa, #a78bfa, #c084fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.2;
+  -webkit-background-clip: text;          /* ใช้ background เป็น clip สำหรับข้อความ (WebKit) */
+  -webkit-text-fill-color: transparent;   /* ทำให้ตัวอักษรโปร่งใสเพื่อให้เห็น background (WebKit) */
+  background-clip: text;                  /* ใช้ background เป็น clip สำหรับข้อความ (Standard) */
+  line-height: 1.2;             /* ระยะห่างระหว่างบรรทัด */
 }
 
+/* ===== หัวข้อรอง H2 ===== */
 h2 {
+  /* ขนาดตัวอักษรปรับตามหน้าจอ: ขั้นต่ำ 1.2rem, ปกติ 3%, สูงสุด 1.6rem */
   font-size: clamp(1.2rem, 3vw, 1.6rem);
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
+  font-weight: 500;             /* ความหนาปานกลาง */
+  color: var(--text-secondary);   /* สีเทาอ่อน */
+  margin-bottom: 0.5rem;        /* ระยะห่างด้านล่าง */
 }
 
+/* ===== คำบรรยายใต้หัวข้อ ===== */
 .header-subtitle {
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  margin-top: 1rem;
+  font-size: 1.1rem;            /* ขนาดตัวอักษร */
+  color: var(--text-muted);     /* สีเทาจาง */
+  margin-top: 1rem;             /* ระยะห่างด้านบน */
 }
 
+/* ===== หัวข้อย่อย H3 ===== */
 h3 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 3rem 0 2rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--border-color);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  font-size: 2rem;              /* ขนาดตัวอักษร */
+  font-weight: 700;             /* ความหนา */
+  color: var(--text-primary);   /* สีขาว */
+  margin: 3rem 0 2rem;          /* ระยะห่าง: บน 3rem, ล่าง 2rem */
+  padding-bottom: 0.75rem;      /* padding ด้านล่าง */
+  border-bottom: 2px solid var(--border-color);   /* เส้นใต้หัวข้อ */
+  display: flex;                /* ใช้ flexbox */
+  align-items: center;          /* จัดแนวตั้งกลาง */
+  gap: 1rem;                    /* ระยะห่างระหว่าง elements ภายใน */
 }
 
+/* ===== ไอคอนในแต่ละ section ===== */
 .section-icon {
-  font-size: 2rem;
+  font-size: 2rem;   /* ขนาดไอคอน */
 }
 
 /* =====================================================
    TOOLTIP SYSTEM
    ===================================================== */
+/* ===== กล่องครอบ Tooltip (เมื่อ hover จะแสดงคำอธิบาย) ===== */
 .tooltip-wrapper {
-  position: relative;
-  display: inline-block;
-  width: 100%;
+  position: relative;       /* ตำแหน่งแบบ relative เพื่อให้ tooltip อ้างอิง */
+  display: inline-block;    /* แสดงแบบ inline-block */
+  width: 100%;              /* กว้าง 100% */
 }
 
+/* ===== ข้อความใน Tooltip ===== */
 .tooltip-text {
-  visibility: hidden;
-  opacity: 0;
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: rgba(15, 23, 42, 0.98);
-  color: var(--text-primary);
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  white-space: normal;
-  max-width: 300px;
-  width: max-content;
-  z-index: 1000;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-md);
-  pointer-events: none;
-  transition: all var(--transition-base);
-  text-align: center;
+  visibility: hidden;   /* ซ่อนไว้ตอนปกติ */
+  opacity: 0;           /* โปร่งใสสนิท */
+  position: absolute;   /* วางตำแหน่งแบบ absolute */
+  bottom: 125%;         /* อยู่เหนือ element 125% */
+  left: 50%;            /* เริ่มจากกลาง */
+  transform: translateX(-50%) translateY(10px);   /* จัดกลาง และขยับลง 10px */
+  background: rgba(15, 23, 42, 0.98);   /* พื้นหลังมืดทึบ 98% */
+  color: var(--text-primary);           /* สีข้อความขาว */
+  padding: 0.75rem 1rem;                /* padding ด้านใน */
+  border-radius: var(--radius-sm);      /* มุมโค้ง */
+  font-size: 0.9rem;                    /* ขนาดตัวอักษร */
+  white-space: normal;                  /* อนุญาตให้ขึ้นบรรทัดใหม่ได้ */
+  max-width: 300px;                     /* ความกว้างสูงสุด */
+  width: max-content;                   /* กว้างพอดีกับเนื้อหา */
+  z-index: 1000;                        /* ลำดับชั้นสูง (แสดงด้านหน้า) */
+  border: 1px solid var(--border-color);  /* ขอบบาง */
+  box-shadow: var(--shadow-md);         /* เงา */
+  pointer-events: none;                 /* ไม่สามารถคลิกได้ */
+  transition: all var(--transition-base);  /* animation การเปลี่ยนแปลงทั้งหมด */
+  text-align: center;                   /* จัดข้อความกลาง */
 }
 
+/* ===== ลูกศรชี้ของ Tooltip (สามเหลี่ยมชี้ลง) ===== */
 .tooltip-text::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: rgba(15, 23, 42, 0.98);
+  content: '';              /* สร้าง element เปล่า */
+  position: absolute;       /* ตำแหน่งแบบ absolute */
+  top: 100%;                /* อยู่ด้านล่างสุดของ tooltip */
+  left: 50%;                /* เริ่มจากกลาง */
+  transform: translateX(-50%);  /* จัดกลาง */
+  border: 6px solid transparent;  /* ขอบโปร่งใส (สร้างสามเหลี่ยม) */
+  border-top-color: rgba(15, 23, 42, 0.98);  /* สีขอบด้านบนเท่านั้น (ทำให้เป็นสามเหลี่ยมชี้ลง) */
 }
 
+/* ===== เมื่อ hover ที่ wrapper จะแสดง Tooltip ===== */
 .tooltip-wrapper:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  visibility: visible;                      /* แสดง tooltip */
+  opacity: 1;                               /* ทึบ 100% */
+  transform: translateX(-50%) translateY(0);  /* เลื่อนขึ้นมาตำแหน่งจริง */
 }
 
 /* =====================================================
    LOGIN SCREEN - Perfectly Centered
    ===================================================== */
+/* ===== หน้าจอ Login (จัดกึ่งกลางหน้าจอ) ===== */
 .login-screen {
-  background: var(--bg-card);
-  backdrop-filter: blur(24px);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
+  background: var(--bg-card);               /* พื้นหลังแบบโปร่งใส */
+  backdrop-filter: blur(24px);              /* เบลอพื้นหลังข้างหลัง 24px */
+  border: 1px solid var(--border-color);    /* ขอบบาง */
+  border-radius: var(--radius-xl);          /* มุมโค้งใหญ่มาก */
+  
+  /* padding ที่ปรับตามขนาดหน้าจอ */
   padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem);
+  
+  /* ความกว้างสูงสุดเลือกค่าน้อยกว่าระหว่าง 700px และ 90% ของ viewport */
   max-width: min(700px, 90vw);
-  width: 100%;
-  margin: auto;
+  width: 100%;              /* กว้าง 100% */
+  margin: auto;             /* จัดกลาง */
+  
+  /* เงาหลายชั้น + เงาด้านใน */
   box-shadow: var(--shadow-lg), inset 0 0 0 1px rgba(96, 165, 250, 0.1);
-  text-align: center;
-  animation: fadeInUp 0.6s ease;
-  position: relative;
+  text-align: center;       /* จัดข้อความกลาง */
+  animation: fadeInUp 0.6s ease;  /* animation เลื่อนขึ้นมา */
+  position: relative;       /* ตำแหน่งแบบ relative */
 }
 
+/* ===== Animation: ค่อยๆ เลื่อนขึ้นมาพร้อมปรากฏ ===== */
 @keyframes fadeInUp {
   from {
-    opacity: 0;
-    transform: translateY(30px);
+    opacity: 0;                     /* เริ่มจากโปร่งใส */
+    transform: translateY(30px);    /* อยู่ต่ำกว่าตำแหน่งจริง 30px */
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1;               /* จบที่ทึบ */
+    transform: translateY(0);   /* กลับมาตำแหน่งจริง */
   }
 }
 
+/* ===== ไอคอนใน Login Screen ===== */
 .login-icon {
-  font-size: 5rem;
-  margin-bottom: 2rem;
-  animation: pulse 2s infinite;
+  font-size: 5rem;              /* ขนาดใหญ่ 5rem */
+  margin-bottom: 2rem;          /* ระยะห่างด้านล่าง */
+  animation: pulse 2s infinite;   /* animation ขยับเล็กน้อยวนซ้ำทุก 2 วินาที */
 }
 
+/* ===== Animation: ขยายใหญ่-เล็กวนซ้ำ ===== */
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  0%, 100% { transform: scale(1); }     /* ขนาดปกติ */
+  50% { transform: scale(1.05); }       /* ขยายใหญ่ 5% ตอนกึ่งกลาง */
 }
 
+/* ===== หัวข้อ H3 ใน Login Screen ===== */
 .login-screen h3 {
-  margin-bottom: 1.5rem;
-  font-size: 3rem;
+  margin-bottom: 1.5rem;    /* ระยะห่างด้านล่าง */
+  font-size: 3rem;          /* ขนาดตัวอักษรใหญ่ */
+  
+  /* สร้างข้อความแบบ gradient 2 สี */
   background: linear-gradient(135deg, #60a5fa, #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  border: none;
-  padding: 0;
-  justify-content: center;
+  -webkit-background-clip: text;          /* clip background เป็นข้อความ */
+  -webkit-text-fill-color: transparent;   /* ทำให้ตัวอักษรโปร่งใส */
+  border: none;             /* ไม่มีขอบ */
+  padding: 0;               /* ไม่มี padding */
+  justify-content: center;  /* จัดกลาง */
 }
 
+/* ===== คำอธิบายใน Login Screen ===== */
 .login-description {
-  font-size: 1.15rem;
-  color: var(--text-secondary);
-  margin-bottom: 3rem;
-  line-height: 1.8;
+  font-size: 1.15rem;           /* ขนาดตัวอักษร */
+  color: var(--text-secondary);   /* สีเทาอ่อน */
+  margin-bottom: 3rem;          /* ระยะห่างด้านล่าง */
+  line-height: 1.8;             /* ระยะห่างบรรทัด */
 }
 
+/* ===== กริดของการ์ดฟีเจอร์ (แสดงคุณสมบัติต่างๆ) ===== */
 .feature-cards {
-  display: grid;
+  display: grid;    /* ใช้ CSS Grid Layout */
+  
+  /* สร้างคอลัมน์อัตโนมัติ ขั้นต่ำ 180px ต่อคอลัมน์ แบ่งเท่าๆ กันตามพื้นที่ว่าง */
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  margin: 3rem 0;
+  gap: 1.5rem;      /* ช่องว่างระหว่างการ์ด */
+  margin: 3rem 0;   /* ระยะห่างบนล่าง */
 }
 
+/* ===== การ์ดแต่ละใบ (แสดงฟีเจอร์หนึ่งอย่าง) ===== */
 .feature-card {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 2rem 1.5rem;
-  transition: all var(--transition-base);
+  background: rgba(15, 23, 42, 0.5);      /* พื้นหลังโปร่งใส 50% */
+  border: 1px solid var(--border-color);  /* ขอบบาง */
+  border-radius: var(--radius-md);        /* มุมโค้งกลาง */
+  padding: 2rem 1.5rem;                   /* padding ด้านใน */
+  transition: all var(--transition-base);  /* animation เมื่อมีการเปลี่ยนแปลง */
 }
 
+/* ===== เมื่อ hover ที่การ์ด ===== */
 .feature-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--primary-light);
-  box-shadow: var(--shadow-glow);
+  transform: translateY(-5px);          /* เลื่อนขึ้น 5px */
+  border-color: var(--primary-light);   /* เปลี่ยนสีขอบ */
+  box-shadow: var(--shadow-glow);       /* เพิ่มเงาแบบเรืองแสง */
 }
 
+/* ===== ไอคอนในการ์ดฟีเจอร์ ===== */
 .feature-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  font-size: 3rem;      /* ขนาดใหญ่ */
+  margin-bottom: 1rem;  /* ระยะห่างด้านล่าง */
 }
 
+/* ===== หัวข้อ H4 ในการ์ดฟีเจอร์ ===== */
 .feature-card h4 {
-  font-size: 1.3rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
+  font-size: 1.3rem;              /* ขนาดตัวอักษร */
+  margin-bottom: 0.5rem;          /* ระยะห่างด้านล่าง */
+  color: var(--text-primary);     /* สีขาว */
 }
 
+/* ===== คำอธิบายในการ์ดฟีเจอร์ ===== */
 .feature-card p {
-  font-size: 0.95rem;
-  color: var(--text-muted);
+  font-size: 0.95rem;       /* ขนาดตัวอักษร */
+  color: var(--text-muted);   /* สีเทาจาง */
 }
 
+/* ===== ปุ่ม Connect (ปุ่มหลักสำหรับเชื่อมต่อ Wallet) ===== */
 .connect-btn {
+  /* พื้นหลังแบบ gradient 3 สีน้ำเงิน */
   background: linear-gradient(135deg, #1d4ed8, #3b82f6, #60a5fa);
-  color: white;
-  padding: 1.5rem 5rem;
-  font-size: 1.3rem;
-  font-weight: 700;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all var(--transition-slow);
-  box-shadow: 0 15px 50px rgba(59, 130, 246, 0.6);
-  display: inline-flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 2rem 0;
+  color: white;             /* สีข้อความขาว */
+  padding: 1.5rem 5rem;     /* padding ด้านใน */
+  font-size: 1.3rem;        /* ขนาดตัวอักษร */
+  font-weight: 700;         /* ความหนา */
+  border: none;             /* ไม่มีขอบ */
+  border-radius: 999px;     /* มุมโค้งมาก (ทำให้เป็นรูปแคปซูล) */
+  cursor: pointer;          /* แสดง cursor แบบมือชี้ */
+  transition: all var(--transition-slow);  /* animation ช้า 0.4 วินาที */
+  box-shadow: 0 15px 50px rgba(59, 130, 246, 0.6);  /* เงาสีน้ำเงิน */
+  display: inline-flex;     /* แสดงแบบ flex แต่ inline */
+  align-items: center;      /* จัดแนวตั้งกลาง */
+  gap: 1rem;                /* ระยะห่างระหว่าง elements ภายใน */
+  margin: 2rem 0;           /* ระยะห่างบนล่าง */
 }
 
+/* ===== เมื่อ hover ที่ปุ่ม Connect ===== */
 .connect-btn:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 30px 80px rgba(59, 130, 246, 0.8);
+  transform: translateY(-6px) scale(1.03);  /* เลื่อนขึ้น 6px และขยาย 3% */
+  box-shadow: 0 30px 80px rgba(59, 130, 246, 0.8);  /* เงาเข้มขึ้น */
 }
 
+/* ===== ไอคอนในปุ่ม ===== */
 .connect-btn .btn-icon {
-  font-size: 1.5rem;
+  font-size: 1.5rem;  /* ขนาดไอคอน */
 }
 
+/* ===== ส่วนช่วยเหลือ ===== */
 .help-section {
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-color);
+  margin-top: 3rem;     /* ระยะห่างด้านบน */
+  padding-top: 2rem;    /* padding ด้านบน */
+  border-top: 1px solid var(--border-color);  /* เส้นบนบาง */
 }
 
+/* ===== ข้อความช่วยเหลือ ===== */
 .help-text {
-  color: var(--text-muted);
-  font-size: 1rem;
+  color: var(--text-muted);  /* สีเทาจาง */
+  font-size: 1rem;           /* ขนาดตัวอักษร */
 }
 
+/* ===== ลิงก์ในข้อความช่วยเหลือ ===== */
 .help-text a {
-  color: var(--primary-light);
-  text-decoration: none;
-  font-weight: 600;
-  transition: color var(--transition-fast);
+  color: var(--primary-light);        /* สีน้ำเงินอ่อน */
+  text-decoration: none;              /* ไม่มีขีดเส้นใต้ */
+  font-weight: 600;                   /* ความหนา */
+  transition: color var(--transition-fast);  /* animation เปลี่ยนสีเร็ว */
 }
 
+/* ===== เมื่อ hover ที่ลิงก์ ===== */
 .help-text a:hover {
-  color: var(--primary);
-  text-decoration: underline;
+  color: var(--primary);        /* เปลี่ยนเป็นสีน้ำเงินเข้ม */
+  text-decoration: underline;   /* แสดงขีดเส้นใต้ */
 }
 
 /* =====================================================
    WELCOME TOUR MODAL
    ===================================================== */
+/* ===== ฉากหลังทึบของ Modal (ปิดหน้าจอเดิม) ===== */
 .tour-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 3000;
-  animation: fadeIn 0.4s ease;
+  position: fixed;      /* ติดกับหน้าจอ */
+  inset: 0;             /* เต็มหน้าจอทุกด้าน (top, right, bottom, left = 0) */
+  background: rgba(0, 0, 0, 0.85);  /* พื้นหลังดำโปร่งใส 85% */
+  backdrop-filter: blur(12px);      /* เบลอพื้นหลังข้างหลัง 12px */
+  display: flex;        /* ใช้ flexbox */
+  align-items: center;  /* จัดแนวตั้งกลาง */
+  justify-content: center;  /* จัดแนวนอนกลาง */
+  z-index: 3000;        /* ลำดับชั้นสูงมาก (แสดงด้านหน้าสุด) */
+  animation: fadeIn 0.4s ease;  /* animation ค่อยๆ ปรากฏ */
 }
 
+/* ===== Animation: ค่อยๆ ปรากฏขึ้น ===== */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; }  /* เริ่มจากโปร่งใส */
+  to { opacity: 1; }    /* จบที่ทึบ */
 }
 
+/* ===== กล่อง Modal หลัก ===== */
 .tour-modal {
+  /* พื้นหลังแบบ gradient 2 สี แบบโปร่งใส 98% */
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
-  backdrop-filter: blur(24px);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 4rem 4.5rem;
-  max-width: 600px;
-  width: 90%;
-  box-shadow: var(--shadow-lg);
-  position: relative;
+  backdrop-filter: blur(24px);            /* เบลอพื้นหลังข้างหลัง */
+  border: 1px solid var(--border-color);  /* ขอบบาง */
+  border-radius: var(--radius-xl);        /* มุมโค้งใหญ่ */
+  padding: 4rem 4.5rem;                   /* padding ด้านใน */
+  max-width: 600px;                       /* ความกว้างสูงสุด */
+  width: 90%;                             /* กว้าง 90% */
+  box-shadow: var(--shadow-lg);           /* เงา */
+  position: relative;                     /* ตำแหน่งแบบ relative */
+  
+  /* animation เลื่อนขึ้นพร้อมขยาย (ใช้ cubic-bezier แบบพิเศษให้มี bounce effect) */
   animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* ===== Animation: เลื่อนขึ้นพร้อมขยายจากเล็กเป็นใหญ่ ===== */
 @keyframes slideIn {
   from {
-    opacity: 0;
-    transform: scale(0.8) translateY(30px);
+    opacity: 0;                         /* เริ่มจากโปร่งใส */
+    transform: scale(0.8) translateY(30px);  /* เล็กกว่าปกติ 20% และต่ำกว่า 30px */
   }
   to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
+    opacity: 1;                   /* จบที่ทึบ */
+    transform: scale(1) translateY(0);  /* ขนาดปกติและตำแหน่งจริง */
   }
 }
 
+/* ===== ปุ่มปิด Modal (X) ===== */
 .tour-close {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid var(--danger);
-  color: var(--danger);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-base);
+  position: absolute;   /* วางตำแหน่งแบบ absolute */
+  top: 1.5rem;          /* ห่างจากด้านบน */
+  right: 1.5rem;        /* ห่างจากด้านขวา */
+  background: rgba(239, 68, 68, 0.2);   /* พื้นหลังสีแดงโปร่งใส */
+  border: 1px solid var(--danger);      /* ขอบสีแดง */
+  color: var(--danger);                 /* สีข้อความแดง */
+  width: 40px;          /* กว้าง 40px */
+  height: 40px;         /* สูง 40px (เป็นวงกลม) */
+  border-radius: 50%;   /* มุมโค้ง 50% (ทำให้เป็นวงกลม) */
+  cursor: pointer;      /* แสดง cursor แบบมือชี้ */
+  font-size: 1.5rem;    /* ขนาดตัวอักษร */
+  display: flex;        /* ใช้ flexbox */
+  align-items: center;  /* จัดกลางแนวตั้ง */
+  justify-content: center;  /* จัดกลางแนวนอน */
+  transition: all var(--transition-base);  /* animation */
 }
 
+/* ===== เมื่อ hover ที่ปุ่มปิด ===== */
 .tour-close:hover {
-  background: var(--danger);
-  color: white;
-  transform: rotate(90deg);
+  background: var(--danger);      /* พื้นหลังเป็นสีแดงทึบ */
+  color: white;                   /* ข้อความเป็นสีขาว */
+  transform: rotate(90deg);       /* หมุน 90 องศา */
 }
 
+/* ===== ไอคอนใน Tour Modal ===== */
 .tour-icon {
-  font-size: 5rem;
-  text-align: center;
-  margin-bottom: 2rem;
-  animation: bounce 2s infinite;
+  font-size: 5rem;              /* ขนาดใหญ่ */
+  text-align: center;           /* จัดกลาง */
+  margin-bottom: 2rem;          /* ระยะห่างด้านล่าง */
+  animation: bounce 2s infinite;  /* animation กระโดดวนซ้ำ */
 }
 
+/* ===== หัวข้อ H3 ใน Tour Modal ===== */
 .tour-modal h3 {
-  font-size: 2rem;
-  text-align: center;
-  border: none;
-  margin-bottom: 1.5rem;
-  padding: 0;
-  justify-content: center;
+  font-size: 2rem;          /* ขนาดตัวอักษร */
+  text-align: center;       /* จัดกลาง */
+  border: none;             /* ไม่มีขอบ */
+  margin-bottom: 1.5rem;    /* ระยะห่างด้านล่าง */
+  padding: 0;               /* ไม่มี padding */
+  justify-content: center;  /* จัดกลาง */
 }
 
+/* ===== ข้อความใน Tour Modal ===== */
 .tour-modal p {
-  color: var(--text-secondary);
-  font-size: 1.1rem;
-  line-height: 1.8;
-  text-align: center;
-  white-space: pre-line;
-  margin-bottom: 2rem;
+  color: var(--text-secondary);   /* สีเทาอ่อน */
+  font-size: 1.1rem;              /* ขนาดตัวอักษร */
+  line-height: 1.8;               /* ระยะห่างบรรทัด */
+  text-align: center;             /* จัดกลาง */
+  white-space: pre-line;          /* รักษาการขึ้นบรรทัดใหม่จากข้อความ */
+  margin-bottom: 2rem;            /* ระยะห่างด้านล่าง */
 }
 
+/* ===== ตัวบอกความคืบหน้า (จุดเล็กๆ แสดงว่าอยู่หน้าไหน) ===== */
 .tour-progress {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-  margin: 2rem 0;
+  display: flex;            /* ใช้ flexbox */
+  gap: 0.75rem;             /* ช่องว่างระหว่างจุด */
+  justify-content: center;  /* จัดกลาง */
+  margin: 2rem 0;           /* ระยะห่างบนล่าง */
 }
 
+/* ===== จุดแต่ละจุด (แสดงหน้า Tour ที่เป็น) ===== */
 .tour-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: rgba(96, 165, 250, 0.3);
-  transition: all var(--transition-base);
+  width: 12px;              /* กว้าง 12px */
+  height: 12px;             /* สูง 12px */
+  border-radius: 50%;       /* เป็นวงกลม */
+  background: rgba(96, 165, 250, 0.3);  /* สีน้ำเงินจาง */
+  transition: all var(--transition-base);  /* animation */
 }
 
+/* ===== จุดที่กำลัง active (หน้าปัจจุบัน) ===== */
 .tour-dot.active {
-  background: var(--primary);
-  transform: scale(1.5);
+  background: var(--primary);   /* สีน้ำเงินสด */
+  transform: scale(1.5);        /* ขยายใหญ่ขึ้น 50% */
 }
 
+/* ===== กลุ่มปุ่มใน Tour Modal ===== */
 .tour-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 2rem;
+  display: flex;            /* ใช้ flexbox */
+  gap: 1rem;                /* ช่องว่างระหว่างปุ่ม */
+  justify-content: center;  /* จัดกลาง */
+  margin-top: 2rem;         /* ระยะห่างด้านบน */
 }
 
+/* ===== สไตล์พื้นฐานของปุ่มใน Tour (ทั้งปุ่มหลักและรอง) ===== */
 .tour-btn-primary,
 .tour-btn-secondary {
-  padding: 1rem 3rem;
-  font-size: 1.1rem;
-  font-weight: 700;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-base);
+  padding: 1rem 3rem;       /* padding ด้านใน */
+  font-size: 1.1rem;        /* ขนาดตัวอักษร */
+  font-weight: 700;         /* ความหนา */
+  border: none;             /* ไม่มีขอบ (ตั้งใหม่ในแต่ละ class) */
+  border-radius: var(--radius-md);  /* มุมโค้งกลาง */
+  cursor: pointer;          /* แสดง cursor แบบมือชี้ */
+  transition: all var(--transition-base);  /* animation */
 }
 
+/* ===== ปุ่มหลัก (Primary Button) ===== */
 .tour-btn-primary {
+  /* พื้นหลังแบบ gradient น้ำเงิน */
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  color: white;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+  color: white;             /* ข้อความสีขาว */
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);  /* เงาสีน้ำเงิน */
 }
 
+/* ===== เมื่อ hover ที่ปุ่มหลัก ===== */
 .tour-btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.6);
+  transform: translateY(-3px);  /* เลื่อนขึ้น 3px */
+  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.6);  /* เงาเข้มขึ้น */
 }
 
+/* ===== ปุ่มรอง (Secondary Button) ===== */
 .tour-btn-secondary {
-  background: rgba(96, 165, 250, 0.1);
-  color: var(--primary-light);
-  border: 1px solid var(--primary-light);
+  background: rgba(96, 165, 250, 0.1);    /* พื้นหลังน้ำเงินจางมาก */
+  color: var(--primary-light);            /* ข้อความสีน้ำเงินอ่อน */
+  border: 1px solid var(--primary-light);  /* ขอบสีน้ำเงินอ่อน */
 }
 
+/* ===== เมื่อ hover ที่ปุ่มรอง ===== */
 .tour-btn-secondary:hover {
-  background: rgba(96, 165, 250, 0.2);
+  background: rgba(96, 165, 250, 0.2);  /* พื้นหลังเข้มขึ้นนิดหน่อย */
 }
 
 /* =====================================================
    WALLET INFO BAR
    ===================================================== */
+/* ===== แถบแสดงข้อมูล Wallet ===== */
 .wallet-info {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem 2rem;
-  margin: 2rem auto;
-  padding: 1.75rem 3rem;
-  background: var(--bg-card);
-  backdrop-filter: blur(20px);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-md);
-  max-width: 1200px;
+  display: flex;            /* ใช้ flexbox */
+  flex-wrap: wrap;          /* อนุญาตให้ขึ้นบรรทัดใหม่ถ้าพื้นที่ไม่พอ */
+  justify-content: center;  /* จัดกลางแนวนอน */
+  align-items: center;      /* จัดกลางแนวตั้ง */
+  gap: 1rem 2rem;           /* ช่องว่าง: แนวตั้ง 1rem, แนวนอน 2rem */
+  margin: 2rem auto;        /* ระยะห่างบนล่าง และจัดกลาง */
+  padding: 1.75rem 3rem;    /* padding ด้านใน */
+  background: var(--bg-card);               /* พื้นหลังแบบการ์ด */
+  backdrop-filter: blur(20px);              /* เบลอพื้นหลังข้างหลัง */
+  border-radius: var(--radius-lg);          /* มุมโค้งใหญ่ */
+  border: 1px solid var(--border-color);    /* ขอบบาง */
+  box-shadow: var(--shadow-md);             /* เงา */
+  max-width: 1200px;        /* ความกว้างสูงสุด */
+  
+  /* animation เลื่อนขึ้นมา โดยดีเลย์ 0.2 วินาที และค้างไว้ที่ state สุดท้าย */
   animation: fadeInUp 0.6s ease 0.2s both;
 }
 
+/* ===== ส่วนแสดงที่อยู่ Wallet ===== */
 .wallet-address {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  display: flex;           /* ใช้ flexbox layout */
+  align-items: center;     /* จัดแนวตั้งกลาง */
+  gap: 1rem;               /* ช่องว่างระหว่าง elements ภายใน */
 }
 
+/* ===== ป้ายชื่อ (Label) ของ Wallet ===== */
 .wallet-label {
-  color: var(--text-muted);
-  font-size: 1rem;
+  color: var(--text-muted);   /* สีเทาจาง */
+  font-size: 1rem;            /* ขนาดตัวอักษร */
 }
 
+/* ===== โค้ดที่อยู่ Wallet (กล่องแสดงที่อยู่) ===== */
 .wallet-code {
-  background: rgba(15, 23, 42, 0.8);
-  color: var(--primary-light);
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--radius-sm);
-  font-family: 'Courier New', monospace;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  border: 1px solid var(--border-color);
+  background: rgba(15, 23, 42, 0.8);      /* พื้นหลังมืดโปร่งใส 80% */
+  color: var(--primary-light);            /* สีข้อความน้ำเงินอ่อน */
+  padding: 0.6rem 1.2rem;                 /* padding ด้านใน */
+  border-radius: var(--radius-sm);        /* มุมโค้งเล็ก */
+  font-family: 'Courier New', monospace;  /* ฟอนต์แบบโค้ด (ตัวอักษรเท่ากันหมด) */
+  font-size: 1rem;                        /* ขนาดตัวอักษร */
+  cursor: pointer;                        /* แสดง cursor แบบมือชี้ (คลิกได้) */
+  transition: all var(--transition-base); /* animation เมื่อมีการเปลี่ยนแปลง */
+  border: 1px solid var(--border-color);  /* ขอบบาง */
 }
 
+/* ===== เมื่อ hover ที่โค้ด Wallet ===== */
 .wallet-code:hover {
-  background: rgba(15, 23, 42, 0.95);
-  border-color: var(--primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
+  background: rgba(15, 23, 42, 0.95);   /* พื้นหลังเข้มขึ้น (ทึบ 95%) */
+  border-color: var(--primary);         /* เปลี่ยนสีขอบเป็นน้ำเงิน */
+  transform: translateY(-2px);          /* เลื่อนขึ้น 2px */
+  box-shadow: var(--shadow-glow);       /* เพิ่มเงาแบบเรืองแสง */
 }
 
+/* ===== สไตล์พื้นฐานของปุ่มทั้ง 3 ปุ่ม (Help, Refresh, Logout) ===== */
 .help-btn,
 .refresh-btn,
 .logout-btn {
-  padding: 0.9rem 2rem;
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  font-size: 1rem;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  padding: 0.9rem 2rem;                   /* padding ด้านใน */
+  font-weight: 600;                       /* ความหนาตัวอักษร */
+  border-radius: var(--radius-md);        /* มุมโค้งกลาง */
+  cursor: pointer;                        /* แสดง cursor แบบมือชี้ */
+  transition: all var(--transition-base); /* animation */
+  font-size: 1rem;                        /* ขนาดตัวอักษร */
+  border: none;                           /* ไม่มีขอบ */
+  display: inline-flex;                   /* แสดงแบบ flex แต่ inline */
+  align-items: center;                    /* จัดแนวตั้งกลาง */
+  gap: 0.5rem;                            /* ช่องว่างระหว่าง elements ภายใน (เช่น icon กับข้อความ) */
 }
 
+/* ===== ปุ่ม Help (สีม่วง) ===== */
 .help-btn {
+  /* พื้นหลังแบบ gradient สีม่วง 2 เฉด */
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+  color: white;   /* ข้อความสีขาว */
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);  /* เงาสีม่วง */
 }
 
+/* ===== เมื่อ hover ที่ปุ่ม Help ===== */
 .help-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(99, 102, 241, 0.6);
+  transform: translateY(-3px);  /* เลื่อนขึ้น 3px */
+  box-shadow: 0 12px 35px rgba(99, 102, 241, 0.6);  /* เงาเข้มขึ้น */
 }
 
+/* ===== ปุ่ม Refresh (สีฟ้า) ===== */
 .refresh-btn {
+  /* พื้นหลังแบบ gradient สีฟ้า 2 เฉด */
   background: linear-gradient(135deg, #06b6d4, #0891b2);
-  color: white;
-  box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+  color: white;   /* ข้อความสีขาว */
+  box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);  /* เงาสีฟ้า */
 }
 
+/* ===== เมื่อ hover ที่ปุ่ม Refresh (แต่ไม่ disabled) ===== */
 .refresh-btn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(6, 182, 212, 0.6);
+  transform: translateY(-3px);  /* เลื่อนขึ้น 3px */
+  box-shadow: 0 12px 35px rgba(6, 182, 212, 0.6);  /* เงาเข้มขึ้น */
 }
 
+/* ===== เมื่อปุ่ม Refresh ถูก disabled (ไม่สามารถใช้งานได้) ===== */
 .refresh-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  opacity: 0.6;         /* โปร่งใสนิดหน่อย (60% ทึบ) */
+  cursor: not-allowed;  /* แสดง cursor แบบห้ามใช้งาน */
 }
 
+/* ===== ปุ่ม Logout (สีแดง) ===== */
 .logout-btn {
+  /* พื้นหลังแบบ gradient สีแดง 2 เฉด */
   background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+  color: white;   /* ข้อความสีขาว */
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);  /* เงาสีแดง */
 }
 
+/* ===== เมื่อ hover ที่ปุ่ม Logout ===== */
 .logout-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(239, 68, 68, 0.6);
+  transform: translateY(-3px);  /* เลื่อนขึ้น 3px */
+  box-shadow: 0 12px 35px rgba(239, 68, 68, 0.6);  /* เงาเข้มขึ้น */
 }
 
 /* =====================================================
    OFFICER INFO
    ===================================================== */
+/* ===== กล่องแสดงข้อมูลเจ้าหน้าที่ ===== */
 .officer-info {
+  /* พื้นหลังแบบ gradient น้ำเงิน-ม่วง จางๆ */
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--primary-light);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem 2.5rem;
-  margin: 2rem auto;
-  max-width: 1000px;
-  text-align: center;
-  animation: fadeInUp 0.6s ease 0.3s both;
+  backdrop-filter: blur(12px);              /* เบลอพื้นหลังข้างหลัง */
+  border: 1px solid var(--primary-light);   /* ขอบสีน้ำเงินอ่อน */
+  border-radius: var(--radius-lg);          /* มุมโค้งใหญ่ */
+  padding: 1.5rem 2.5rem;                   /* padding ด้านใน */
+  margin: 2rem auto;                        /* ระยะห่างบนล่าง และจัดกลาง */
+  max-width: 1000px;                        /* ความกว้างสูงสุด */
+  text-align: center;                       /* จัดข้อความกลาง */
+  animation: fadeInUp 0.6s ease 0.3s both;  /* animation เลื่อนขึ้นมา ดีเลย์ 0.3 วินาที */
 }
 
+/* ===== ป้ายตรา (Badge) แสดงตำแหน่งเจ้าหน้าที่ ===== */
 .officer-badge {
-  display: inline-block;
+  display: inline-block;    /* แสดงแบบ inline-block */
+  /* พื้นหลังแบบ gradient น้ำเงิน */
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 999px;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+  color: white;             /* ข้อความสีขาว */
+  padding: 0.5rem 1.5rem;   /* padding ด้านใน */
+  border-radius: 999px;     /* มุมโค้งมาก (เป็นรูปแคปซูล) */
+  font-weight: 700;         /* ความหนาตัวอักษร */
+  margin-bottom: 1rem;      /* ระยะห่างด้านล่าง */
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);  /* เงาสีน้ำเงิน */
 }
 
+/* ===== ข้อความใน Officer Info ===== */
 .officer-info p {
-  margin: 0.75rem 0;
-  font-size: 1.1rem;
-  color: var(--text-secondary);
+  margin: 0.75rem 0;              /* ระยะห่างบนล่าง */
+  font-size: 1.1rem;              /* ขนาดตัวอักษร */
+  color: var(--text-secondary);   /* สีเทาอ่อน */
 }
 
+/* ===== ข้อความที่เน้น (Strong) ใน Officer Info ===== */
 .officer-info strong {
-  color: var(--primary-light);
+  color: var(--primary-light);  /* สีน้ำเงินอ่อน */
 }
 
+/* ===== หมายเหตุเล็กๆ ===== */
 .small-note {
-  font-size: 0.95rem;
-  color: var(--text-muted);
-  margin-top: 1rem;
+  font-size: 0.95rem;       /* ขนาดตัวอักษรเล็ก */
+  color: var(--text-muted);   /* สีเทาจาง */
+  margin-top: 1rem;         /* ระยะห่างด้านบน */
 }
 
 /* =====================================================
    FORM & ADMIN SECTIONS
    ===================================================== */
+/* ===== ส่วนฟอร์ม และส่วนแอดมิน ===== */
 .form-section,
 .admin-section {
-  background: var(--bg-card);
-  backdrop-filter: blur(24px);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 4rem;
-  margin: 3rem auto;
-  max-width: 1000px;
-  box-shadow: var(--shadow-lg);
-  animation: fadeInUp 0.6s ease 0.4s both;
+  background: var(--bg-card);               /* พื้นหลังแบบการ์ด */
+  backdrop-filter: blur(24px);              /* เบลอพื้นหลังข้างหลัง */
+  border: 1px solid var(--border-color);    /* ขอบบาง */
+  border-radius: var(--radius-xl);          /* มุมโค้งใหญ่มาก */
+  padding: 4rem;                            /* padding ด้านใน */
+  margin: 3rem auto;                        /* ระยะห่างบนล่าง และจัดกลาง */
+  max-width: 1000px;                        /* ความกว้างสูงสุด */
+  box-shadow: var(--shadow-lg);             /* เงาใหญ่ */
+  animation: fadeInUp 0.6s ease 0.4s both;  /* animation เลื่อนขึ้นมา ดีเลย์ 0.4 วินาที */
 }
 
+/* ===== กริดสำหรับส่วนแอดมิน (จัดเรียงการ์ดหลายใบ) ===== */
 .admin-grid {
-  display: grid;
+  display: grid;    /* ใช้ CSS Grid Layout */
+  /* สร้างคอลัมน์อัตโนมัติ ขั้นต่ำ 400px ต่อคอลัมน์ แบ่งเท่าๆ กัน */
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+  gap: 2rem;        /* ช่องว่างระหว่างการ์ด */
+  margin-top: 2rem; /* ระยะห่างด้านบน */
 }
 
+/* ===== การ์ดแอดมินแต่ละใบ ===== */
 .admin-card {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
+  background: rgba(15, 23, 42, 0.5);      /* พื้นหลังโปร่งใส 50% */
+  border: 1px solid var(--border-color);  /* ขอบบาง */
+  border-radius: var(--radius-lg);        /* มุมโค้งใหญ่ */
+  padding: 2rem;                          /* padding ด้านใน */
 }
 
+/* ===== หัวข้อ H4 ในการ์ดแอดมิน ===== */
 .admin-card h4 {
-  font-size: 1.4rem;
-  color: var(--text-primary);
-  margin-bottom: 1.5rem;
+  font-size: 1.4rem;              /* ขนาดตัวอักษร */
+  color: var(--text-primary);     /* สีขาว */
+  margin-bottom: 1.5rem;          /* ระยะห่างด้านล่าง */
 }
 
-/* Form Steps */
+/* ===== ส่วนขั้นตอนของฟอร์ม (Form Steps) ===== */
 .form-steps {
-  margin: 2rem 0;
+  margin: 2rem 0;   /* ระยะห่างบนล่าง */
 }
 
+/* ===== แต่ละขั้นตอน (Step) ในฟอร์ม ===== */
 .step {
-  display: flex;
-  gap: 2rem;
-  margin-bottom: 2.5rem;
-  align-items: flex-start;
+  display: flex;            /* ใช้ flexbox */
+  gap: 2rem;                /* ช่องว่างระหว่าง elements */
+  margin-bottom: 2.5rem;    /* ระยะห่างด้านล่าง */
+  align-items: flex-start;  /* จัดแนวตั้งที่ด้านบน */
 }
 
+/* ===== ตัวเลขขั้นตอน (วงกลมแสดงหมายเลข) ===== */
 .step-number {
-  flex-shrink: 0;
-  width: 50px;
-  height: 50px;
+  flex-shrink: 0;   /* ไม่ให้ย่อขนาด (คงขนาดตายตัว) */
+  width: 50px;      /* กว้าง 50px */
+  height: 50px;     /* สูง 50px (เป็นวงกลม) */
+  /* พื้นหลังแบบ gradient น้ำเงิน */
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+  color: white;             /* ข้อความสีขาว */
+  border-radius: 50%;       /* มุมโค้ง 50% (เป็นวงกลม) */
+  display: flex;            /* ใช้ flexbox */
+  align-items: center;      /* จัดกลางแนวตั้ง */
+  justify-content: center;  /* จัดกลางแนวนอน */
+  font-size: 1.5rem;        /* ขนาดตัวเลข */
+  font-weight: 700;         /* ความหนา */
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);  /* เงาสีน้ำเงิน */
 }
 
+/* ===== เนื้อหาของขั้นตอน (ส่วนที่แสดง input field) ===== */
 .step-content {
-  flex: 1;
+  flex: 1;  /* ขยายเต็มพื้นที่ที่เหลือ */
 }
 
+/* ===== ป้ายชื่อ (Label) ของ input ในขั้นตอน ===== */
 .step-content label {
-  display: block;
-  color: var(--text-secondary);
-  font-weight: 600;
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
+  display: block;                 /* แสดงแบบ block (ขึ้นบรรทัดใหม่) */
+  color: var(--text-secondary);   /* สีเทาอ่อน */
+  font-weight: 600;               /* ความหนา */
+  margin-bottom: 1rem;            /* ระยะห่างด้านล่าง */
+  font-size: 1.1rem;              /* ขนาดตัวอักษร */
 }
 
-/* Inputs */
+/* ===== ช่อง Input ทั้งหมด (Text, Textarea, Select) ===== */
 input,
 textarea,
 select {
-  width: 100%;
-  background: rgba(15, 23, 42, 0.85);
-  border: 2px solid var(--border-color);
-  color: var(--text-primary);
-  padding: 1.2rem 1.6rem;
-  margin-bottom: 0.5rem;
-  border-radius: var(--radius-md);
-  font-size: 1.05rem;
-  transition: all var(--transition-base);
-  font-family: inherit;
+  width: 100%;                            /* กว้าง 100% */
+  background: rgba(15, 23, 42, 0.85);     /* พื้นหลังมืดโปร่งใส 85% */
+  border: 2px solid var(--border-color);  /* ขอบหนา 2px */
+  color: var(--text-primary);             /* สีข้อความขาว */
+  padding: 1.2rem 1.6rem;                 /* padding ด้านใน */
+  margin-bottom: 0.5rem;                  /* ระยะห่างด้านล่าง */
+  border-radius: var(--radius-md);        /* มุมโค้งกลาง */
+  font-size: 1.05rem;                     /* ขนาดตัวอักษร */
+  transition: all var(--transition-base); /* animation */
+  font-family: inherit;                   /* ใช้ฟอนต์เดียวกับ parent */
 }
 
+/* ===== เมื่อ Focus ที่ช่อง Input (กำลังพิมพ์) ===== */
 input:focus,
 textarea:focus,
 select:focus {
-  outline: none;
-  border-color: var(--primary);
-  background: rgba(15, 23, 42, 0.95);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-  transform: translateY(-2px);
+  outline: none;                                      /* ลบ outline default ของ browser */
+  border-color: var(--primary);                       /* เปลี่ยนสีขอบเป็นน้ำเงิน */
+  background: rgba(15, 23, 42, 0.95);                 /* พื้นหลังเข้มขึ้น (ทึบ 95%) */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);      /* เงาแบบเรืองแสงรอบๆ */
+  transform: translateY(-2px);                        /* เลื่อนขึ้น 2px */
 }
 
+/* ===== เมื่อช่อง Input ถูกกรอกแล้ว (มี class "filled") ===== */
 input.filled,
 textarea.filled,
 select.filled {
-  border-color: var(--success);
+  border-color: var(--success);  /* เปลี่ยนสีขอบเป็นสีเขียว */
 }
 
+/* ===== ช่อง Textarea (สำหรับข้อความยาว) ===== */
 textarea {
-  min-height: 150px;
-  resize: vertical;
-  line-height: 1.6;
+  min-height: 150px;  /* ความสูงขั้นต่ำ 150px */
+  resize: vertical;   /* อนุญาตให้ปรับขนาดแนวตั้งเท่านั้น */
+  line-height: 1.6;   /* ระยะห่างบรรทัด */
 }
 
+/* ===== ช่อง Select (Dropdown) ===== */
 select {
-  cursor: pointer;
-  appearance: none;
+  cursor: pointer;      /* แสดง cursor แบบมือชี้ */
+  appearance: none;     /* ลบรูปแบบ default ของ browser */
+  /* เพิ่มลูกศรชี้ลงเอง (ใช้ SVG แบบ inline) */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%2360a5fa' d='M7 10.5L2 5.5h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1.6rem center;
-  padding-right: 3.5rem;
+  background-repeat: no-repeat;                   /* ไม่ซ้ำภาพ */
+  background-position: right 1.6rem center;       /* วางลูกศรที่ด้านขวา */
+  padding-right: 3.5rem;                          /* padding ขวา เพื่อให้มีที่สำหรับลูกศร */
 }
 
+/* ===== ตัวนับจำนวนตัวอักษร (Character Count) ===== */
 .char-count {
-  text-align: right;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin-top: 0.5rem;
+  text-align: right;        /* จัดข้อความชิดขวา */
+  font-size: 0.9rem;        /* ขนาดตัวอักษรเล็ก */
+  color: var(--text-muted);   /* สีเทาจาง */
+  margin-top: 0.5rem;       /* ระยะห่างด้านบน */
 }
 
+/* ===== คำแนะนำในฟอร์ม (Form Hint) ===== */
 .form-hint {
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 1rem;
-  margin-top: 1.5rem;
+  text-align: center;       /* จัดข้อความกลาง */
+  color: var(--text-muted);   /* สีเทาจาง */
+  font-size: 1rem;          /* ขนาดตัวอักษร */
+  margin-top: 1.5rem;       /* ระยะห่างด้านบน */
 }
 
-/* Submit Button */
+/* ===== ปุ่ม Submit (ปุ่มส่งฟอร์ม) ===== */
 .submit-btn {
+  /* พื้นหลังแบบ gradient สีเขียว 2 เฉด */
   background: linear-gradient(135deg, var(--success), #059669);
-  color: white;
-  padding: 1.4rem 4rem;
-  font-size: 1.2rem;
-  font-weight: 700;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-slow);
-  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.5);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
-  width: 100%;
-  max-width: 400px;
+  color: white;             /* ข้อความสีขาว */
+  padding: 1.4rem 4rem;     /* padding ด้านใน */
+  font-size: 1.2rem;        /* ขนาดตัวอักษร */
+  font-weight: 700;         /* ความหนา */
+  border: none;             /* ไม่มีขอบ */
+  border-radius: var(--radius-md);        /* มุมโค้งกลาง */
+  cursor: pointer;                        /* แสดง cursor แบบมือชี้ */
+  transition: all var(--transition-slow); /* animation ช้า 0.4 วินาที */
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.5);  /* เงาสีเขียว */
+  display: inline-flex;     /* แสดงแบบ flex แต่ inline */
+  align-items: center;      /* จัดแนวตั้งกลาง */
+  justify-content: center;  /* จัดแนวนอนกลาง */
+  gap: 1rem;                /* ช่องว่างระหว่าง elements ภายใน */
+  margin-top: 2rem;         /* ระยะห่างด้านบน */
+  width: 100%;              /* กว้าง 100% */
+  max-width: 400px;         /* ความกว้างสูงสุด */
 }
 
+/* ===== เมื่อ hover ที่ปุ่ม Submit (แต่ไม่ disabled) ===== */
 .submit-btn:hover:not(:disabled) {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 60px rgba(16, 185, 129, 0.7);
+  transform: translateY(-5px);  /* เลื่อนขึ้น 5px */
+  box-shadow: 0 20px 60px rgba(16, 185, 129, 0.7);  /* เงาเข้มขึ้น */
 }
 
+/* ===== เมื่อปุ่ม Submit ถูก disabled (ไม่สามารถใช้งานได้) ===== */
 .submit-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+  opacity: 0.6;         /* โปร่งใสนิดหน่อย (60% ทึบ) */
+  cursor: not-allowed;  /* แสดง cursor แบบห้ามใช้งาน */
+  transform: none;      /* ไม่มีการขยับ */
 }
 
+/* ===== ไอคอนโหลด (Spinner) ขนาดเล็ก ===== */
 .spinner-small {
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  width: 20px;      /* กว้าง 20px */
+  height: 20px;     /* สูง 20px */
+  border: 3px solid rgba(255, 255, 255, 0.3);  /* ขอบโปร่งใส 30% */
+  border-top-color: white;                      /* ขอบด้านบนเป็นสีขาวทึบ */
+  border-radius: 50%;                           /* เป็นวงกลม */
+  animation: spin 0.8s linear infinite;         /* animation หมุนวนซ้ำทุก 0.8 วินาที */
 }
 
+/* ===== Animation: หมุนรอบตัวเอง 360 องศา ===== */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }  /* หมุนไป 360 องศา */
 }
 
-/* Other Buttons */
+/* ===== ปุ่มอื่นๆ ที่เหลือ (ไม่ใช่ปุ่มพิเศษที่กำหนดไว้) ===== */
+/* การเลือกแบบยกเว้น - เลือกปุ่มทั้งหมดยกเว้นปุ่มที่มี class เหล่านี้ */
 button:not(.help-btn):not(.refresh-btn):not(.logout-btn):not(.submit-btn):not(.tour-btn-primary):not(.tour-btn-secondary):not(.tour-close):not(.filter-btn) {
+  /* พื้นหลังแบบ gradient น้ำเงิน */
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  color: white;
-  padding: 1rem 2.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  color: white;                           /* ข้อความสีขาว */
+  padding: 1rem 2.5rem;                   /* padding ด้านใน */
+  font-size: 1rem;                        /* ขนาดตัวอักษร */
+  font-weight: 600;                       /* ความหนา */
+  border: none;                           /* ไม่มีขอบ */
+  border-radius: var(--radius-md);        /* มุมโค้งกลาง */
+  cursor: pointer;                        /* แสดง cursor แบบมือชี้ */
+  transition: all var(--transition-base); /* animation */
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);  /* เงาสีน้ำเงิน */
+  display: inline-flex;                   /* แสดงแบบ flex แต่ inline */
+  align-items: center;                    /* จัดแนวตั้งกลาง */
+  gap: 0.5rem;                            /* ช่องว่างระหว่าง elements ภายใน */
 }
 
+/* ===== เมื่อ hover ที่ปุ่มอื่นๆ (แต่ไม่ disabled) ===== */
 button:not(.help-btn):not(.refresh-btn):not(.logout-btn):not(.submit-btn):not(.tour-btn-primary):not(.tour-btn-secondary):not(.tour-close):not(.filter-btn):hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(59, 130, 246, 0.6);
+  transform: translateY(-3px);  /* เลื่อนขึ้น 3px */
+  box-shadow: 0 12px 35px rgba(59, 130, 246, 0.6);  /* เงาเข้มขึ้น */
 }
 
 /* =====================================================
    STATUS MESSAGE
    ===================================================== */
+/* ===== กล่องแสดงสถานะ (Status Message) ===== */
 .status {
-  margin: 2.5rem auto;
-  padding: 1.75rem 2.5rem;
-  max-width: 1000px;
-  background: var(--bg-card);
-  backdrop-filter: blur(20px);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  animation: slideInRight 0.5s ease;
-  border-left: 5px solid;
+  margin: 2.5rem auto;                    /* ระยะห่างบนล่าง และจัดกลาง */
+  padding: 1.75rem 2.5rem;                /* padding ด้านใน */
+  max-width: 1000px;                      /* ความกว้างสูงสุด */
+  background: var(--bg-card);             /* พื้นหลังแบบการ์ด */
+  backdrop-filter: blur(20px);            /* เบลอพื้นหลังข้างหลัง */
+  border-radius: var(--radius-lg);        /* มุมโค้งใหญ่ */
+  box-shadow: var(--shadow-md);           /* เงา */
+  display: flex;                          /* ใช้ flexbox */
+  align-items: center;                    /* จัดแนวตั้งกลาง */
+  gap: 1.5rem;                            /* ช่องว่างระหว่าง elements ภายใน */
+  animation: slideInRight 0.5s ease;      /* animation เลื่อนเข้ามาจากด้านขวา */
+  border-left: 5px solid;                 /* ขอบซ้ายหนา 5px (สีกำหนดโดย class ย่อย) */
 }
 
+/* ===== Animation: เลื่อนเข้ามาจากด้านขวา ===== */
 @keyframes slideInRight {
   from {
-    opacity: 0;
-    transform: translateX(30px);
+    opacity: 0;                     /* เริ่มจากโปร่งใส */
+    transform: translateX(30px);    /* อยู่ขวาของตำแหน่งจริง 30px */
   }
   to {
-    opacity: 1;
-    transform: translateX(0);
+    opacity: 1;               /* จบที่ทึบ */
+    transform: translateX(0);   /* กลับมาตำแหน่งจริง */
   }
 }
 
+/* ===== สถานะสำเร็จ (Success) - สีเขียว ===== */
 .status.status-success {
-  border-color: var(--success);
+  border-color: var(--success);  /* ขอบซ้ายสีเขียว */
+  /* พื้นหลังแบบ gradient เขียวจางๆ */
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
 }
 
+/* ===== สถานะผิดพลาด (Error) - สีแดง ===== */
 .status.status-error {
-  border-color: var(--danger);
+  border-color: var(--danger);  /* ขอบซ้ายสีแดง */
+  /* พื้นหลังแบบ gradient แดงจางๆ */
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
 }
 
+/* ===== สถานะข้อมูล (Info) - สีฟ้า ===== */
 .status.status-info {
-  border-color: var(--info);
+  border-color: var(--info);  /* ขอบซ้ายสีฟ้า */
+  /* พื้นหลังแบบ gradient ฟ้าจางๆ */
   background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.1));
 }
 
+/* ===== ไอคอนในกล่องสถานะ ===== */
 .status-icon {
-  font-size: 2rem;
-  flex-shrink: 0;
+  font-size: 2rem;    /* ขนาดไอคอนใหญ่ */
+  flex-shrink: 0;     /* ไม่ให้ย่อขนาด (คงขนาดตายตัว) */
 }
 
+/* ===== ข้อความในกล่องสถานะ ===== */
 .status p {
-  margin: 0;
-  font-size: 1.1rem;
-  color: var(--text-primary);
-  flex: 1;
+  margin: 0;                      /* ไม่มีระยะห่าง */
+  font-size: 1.1rem;              /* ขนาดตัวอักษร */
+  color: var(--text-primary);     /* สีขาว */
+  flex: 1;                        /* ขยายเต็มพื้นที่ที่เหลือ */
 }
 
 /* =====================================================
    COMPLAINTS SECTION
    ===================================================== */
+/* ===== ส่วนแสดงรายการร้องเรียน (Complaints) ===== */
 .complaints-section {
-  background: var(--bg-card);
-  backdrop-filter: blur(24px);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 4rem;
-  margin: 4rem auto;
-  max-width: 1400px;
-  box-shadow: var(--shadow-lg);
-  animation: fadeInUp 0.6s ease 0.5s both;
+  background: var(--bg-card);               /* พื้นหลังแบบการ์ด */
+  backdrop-filter: blur(24px);              /* เบลอพื้นหลังข้างหลัง */
+  border: 1px solid var(--border-color);    /* ขอบบาง */
+  border-radius: var(--radius-xl);          /* มุมโค้งใหญ่มาก */
+  padding: 4rem;                            /* padding ด้านใน */
+  margin: 4rem auto;                        /* ระยะห่างบนล่าง และจัดกลาง */
+  max-width: 1400px;                        /* ความกว้างสูงสุด */
+  box-shadow: var(--shadow-lg);             /* เงาใหญ่ */
+  animation: fadeInUp 0.6s ease 0.5s both;  /* animation เลื่อนขึ้นมา ดีเลย์ 0.5 วินาที */
 }
 
-/* Table Controls */
+/* ===== ส่วนควบคุมตาราง (ค้นหา + ฟิลเตอร์) ===== */
 .table-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  align-items: center;
+  display: flex;            /* ใช้ flexbox */
+  flex-wrap: wrap;          /* อนุญาตให้ขึ้นบรรทัดใหม่ถ้าพื้นที่ไม่พอ */
+  gap: 1.5rem;              /* ช่องว่างระหว่าง elements */
+  margin-bottom: 2rem;      /* ระยะห่างด้านล่าง */
+  align-items: center;      /* จัดแนวตั้งกลาง */
 }
 
+/* ===== กล่องครอบช่องค้นหา ===== */
 .search-wrapper {
-  flex: 1;
-  min-width: 300px;
-  position: relative;
+  flex: 1;            /* ขยายเต็มพื้นที่ที่เหลือ */
+  min-width: 300px;   /* ความกว้างขั้นต่ำ */
+  position: relative; /* ตำแหน่งแบบ relative เพื่อให้ไอคอนอ้างอิง */
 }
 
+/* ===== ไอคอนแว่นขยาย (ในช่องค้นหา) ===== */
 .search-icon {
-  position: absolute;
-  left: 1.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1.3rem;
-  color: var(--text-muted);
-  pointer-events: none;
+  position: absolute;               /* วางตำแหน่งแบบ absolute */
+  left: 1.5rem;                     /* ห่างจากด้านซ้าย */
+  top: 50%;                         /* อยู่กึ่งกลางแนวตั้ง */
+  transform: translateY(-50%);      /* ปรับให้อยู่กึ่งกลางจริงๆ */
+  font-size: 1.3rem;                /* ขนาดไอคอน */
+  color: var(--text-muted);         /* สีเทาจาง */
+  pointer-events: none;             /* ไม่สามารถคลิกได้ (ให้คลิกช่อง input ได้) */
 }
 
+/* ===== ช่องค้นหา ===== */
 .search-input {
-  width: 100%;
-  padding: 1.1rem 1.5rem 1.1rem 3.5rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  background: rgba(15, 23, 42, 0.7);
-  color: var(--text-primary);
-  font-size: 1rem;
-  transition: all var(--transition-base);
+  width: 100%;                            /* กว้าง 100% */
+  padding: 1.1rem 1.5rem 1.1rem 3.5rem;   /* padding: บน ขวา ล่าง ซ้าย (ซ้ายเยอะเพื่อให้พื้นที่ไอคอน) */
+  border-radius: var(--radius-md);        /* มุมโค้งกลาง */
+  border: 1px solid var(--border-color);  /* ขอบบาง */
+  background: rgba(15, 23, 42, 0.7);      /* พื้นหลังโปร่งใส 70% */
+  color: var(--text-primary);             /* สีข้อความขาว */
+  font-size: 1rem;                        /* ขนาดตัวอักษร */
+  transition: all var(--transition-base); /* animation */
 }
 
+/* ===== เมื่อ Focus ที่ช่องค้นหา ===== */
 .search-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+  border-color: var(--primary);                   /* เปลี่ยนสีขอบเป็นน้ำเงิน */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);  /* เงาเรืองแสงรอบๆ */
 }
 
+/* ===== ข้อความ Placeholder ในช่องค้นหา ===== */
 .search-input::placeholder {
-  color: var(--text-muted);
+  color: var(--text-muted);  /* สีเทาจาง */
 }
 
+/* ===== กลุ่มปุ่มฟิลเตอร์ (สำหรับเจ้าหน้าที่) ===== */
 .officer-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: center;
+  display: flex;        /* ใช้ flexbox */
+  flex-wrap: wrap;      /* อนุญาตให้ขึ้นบรรทัดใหม่ */
+  gap: 1rem;            /* ช่องว่างระหว่าง elements */
+  align-items: center;  /* จัดแนวตั้งกลาง */
 }
 
+/* ===== ปุ่มฟิลเตอร์แต่ละปุ่ม ===== */
 .filter-btn {
-  padding: 0.7rem 1.5rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--primary-light);
-  border: 1px solid var(--border-color);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;                   /* padding ด้านใน */
+  font-size: 0.95rem;                       /* ขนาดตัวอักษร */
+  font-weight: 600;                         /* ความหนา */
+  border-radius: var(--radius-md);          /* มุมโค้งกลาง */
+  background: rgba(59, 130, 246, 0.1);      /* พื้นหลังน้ำเงินจาง */
+  color: var(--primary-light);              /* สีข้อความน้ำเงินอ่อน */
+  border: 1px solid var(--border-color);    /* ขอบบาง */
+  cursor: pointer;                          /* แสดง cursor แบบมือชี้ */
+  transition: all var(--transition-base);   /* animation */
+  display: inline-flex;                     /* แสดงแบบ flex แต่ inline */
+  align-items: center;                      /* จัดแนวตั้งกลาง */
+  gap: 0.5rem;                              /* ช่องว่างระหว่าง elements ภายใน */
 }
 
+/* ===== เมื่อ hover หรือปุ่มฟิลเตอร์ถูกเลือก (active) ===== */
 .filter-btn:hover,
 .filter-btn.active {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+  background: var(--primary);                       /* พื้นหลังน้ำเงินทึบ */
+  color: white;                                     /* ข้อความสีขาว */
+  border-color: var(--primary);                     /* ขอบน้ำเงิน */
+  transform: translateY(-2px);                      /* เลื่อนขึ้น 2px */
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);  /* เงาสีน้ำเงิน */
 }
 
+/* ===== ฟิลเตอร์สถานที่ (Dropdown) ===== */
 .location-filter {
-  padding: 0.7rem 1.5rem;
-  border-radius: var(--radius-md);
-  background: rgba(15, 23, 42, 0.7);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  font-size: 0.95rem;
-  min-width: 200px;
+  padding: 0.7rem 1.5rem;                   /* padding ด้านใน */
+  border-radius: var(--radius-md);          /* มุมโค้งกลาง */
+  background: rgba(15, 23, 42, 0.7);        /* พื้นหลังโปร่งใส 70% */
+  color: var(--text-primary);               /* สีข้อความขาว */
+  border: 1px solid var(--border-color);    /* ขอบบาง */
+  font-size: 0.95rem;                       /* ขนาดตัวอักษร */
+  min-width: 200px;                         /* ความกว้างขั้นต่ำ */
 }
 
-/* Results Summary */
+/* ===== สรุปผลการค้นหา (แสดงจำนวนรายการที่พบ) ===== */
 .results-summary {
-  text-align: center;
-  font-size: 1rem;
-  color: var(--text-muted);
-  margin-bottom: 1.5rem;
-  padding: 0.75rem;
-  background: rgba(59, 130, 246, 0.05);
-  border-radius: var(--radius-sm);
+  text-align: center;                       /* จัดข้อความกลาง */
+  font-size: 1rem;                          /* ขนาดตัวอักษร */
+  color: var(--text-muted);                 /* สีเทาจาง */
+  margin-bottom: 1.5rem;                    /* ระยะห่างด้านล่าง */
+  padding: 0.75rem;                         /* padding ด้านใน */
+  background: rgba(59, 130, 246, 0.05);     /* พื้นหลังน้ำเงินจางมากๆ */
+  border-radius: var(--radius-sm);          /* มุมโค้งเล็ก */
 }
 
+/* ===== ตัวเลขที่เน้น (Strong) ในสรุปผล ===== */
 .results-summary strong {
-  color: var(--primary-light);
-  font-weight: 700;
+  color: var(--primary-light);  /* สีน้ำเงินอ่อน */
+  font-weight: 700;             /* ความหนา */
 }
 
-/* Table Loading */
+/* ===== ตารางกำลังโหลด (Loading State) ===== */
 .table-loading {
-  text-align: center;
-  padding: 5rem 2rem;
+  text-align: center;   /* จัดข้อความกลาง */
+  padding: 5rem 2rem;   /* padding ด้านใน */
 }
 
+/* ===== ไอคอนโหลด (Spinner) ขนาดใหญ่ ===== */
 .spinner-large {
-  width: 80px;
-  height: 80px;
-  border: 8px solid rgba(59, 130, 246, 0.2);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 2rem;
+  width: 80px;          /* กว้าง 80px */
+  height: 80px;         /* สูง 80px */
+  border: 8px solid rgba(59, 130, 246, 0.2);  /* ขอบโปร่งใส 20% */
+  border-top-color: var(--primary);           /* ขอบด้านบนเป็นสีน้ำเงินทึบ */
+  border-radius: 50%;                         /* เป็นวงกลม */
+  animation: spin 1s linear infinite;         /* animation หมุนวนซ้ำทุก 1 วินาที */
+  margin: 0 auto 2rem;                        /* จัดกลางและมีระยะห่างด้านล่าง */
 }
 
+/* ===== ข้อความตอนโหลด ===== */
 .table-loading p {
-  color: var(--text-secondary);
-  font-size: 1.2rem;
-  margin: 0.75rem 0;
+  color: var(--text-secondary);   /* สีเทาอ่อน */
+  font-size: 1.2rem;              /* ขนาดตัวอักษร */
+  margin: 0.75rem 0;              /* ระยะห่างบนล่าง */
 }
 
+/* ===== รายละเอียดเพิ่มเติมตอนโหลด ===== */
 .loading-detail {
-  color: var(--text-muted);
-  font-size: 1rem;
+  color: var(--text-muted);  /* สีเทาจาง */
+  font-size: 1rem;           /* ขนาดตัวอักษร */
 }
 
-/* Empty State */
+/* ===== สถานะว่างเปล่า (ไม่มีข้อมูล) ===== */
 .empty-state {
-  text-align: center;
-  padding: 5rem 2rem;
+  text-align: center;   /* จัดข้อความกลาง */
+  padding: 5rem 2rem;   /* padding ด้านใน */
 }
 
+/* ===== ไอคอนตอนว่าง ===== */
 .empty-icon {
-  font-size: 6rem;
-  margin-bottom: 2rem;
-  opacity: 0.5;
+  font-size: 6rem;      /* ขนาดใหญ่มาก */
+  margin-bottom: 2rem;  /* ระยะห่างด้านล่าง */
+  opacity: 0.5;         /* โปร่งใสนิดหน่อย (50%) */
 }
 
+/* ===== หัวข้อ H4 ตอนว่าง ===== */
 .empty-state h4 {
-  font-size: 1.8rem;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
+  font-size: 1.8rem;              /* ขนาดตัวอักษร */
+  color: var(--text-secondary);   /* สีเทาอ่อน */
+  margin-bottom: 1rem;            /* ระยะห่างด้านล่าง */
 }
 
+/* ===== ข้อความตอนว่าง ===== */
 .empty-state p {
-  color: var(--text-muted);
-  font-size: 1.1rem;
+  color: var(--text-muted);  /* สีเทาจาง */
+  font-size: 1.1rem;         /* ขนาดตัวอักษร */
 }
 
-/* Table Wrapper */
+/* ===== กล่องครอบตาราง (รองรับการ Scroll แนวนอน) ===== */
 .table-wrapper {
-  overflow-x: auto;
-  border-radius: var(--radius-lg);
-  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+  overflow-x: auto;                                 /* แสดง scroll bar แนวนอนเมื่อจำเป็น */
+  border-radius: var(--radius-lg);                  /* มุมโค้งใหญ่ */
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3); /* เงาด้านใน (ทำให้ดูลึก) */
 }
 
-/* Table */
+/* ===== ตารางรายการร้องเรียน ===== */
 .complaints-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  width: 100%;                /* กว้าง 100% */
+  border-collapse: separate;  /* ไม่ให้ขอบติดกัน */
+  border-spacing: 0;          /* ไม่มีช่องว่างระหว่างเซลล์ */
 }
 
+/* ===== ส่วนหัวตาราง (Header) ===== */
 .complaints-table thead {
+  /* พื้นหลังแบบ gradient น้ำเงิน-ม่วง */
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(99, 102, 241, 0.25));
-  backdrop-filter: blur(12px);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  backdrop-filter: blur(12px);  /* เบลอพื้นหลังข้างหลัง */
+  position: sticky;             /* ติดด้านบนเมื่อ scroll */
+  top: 0;                       /* ติดที่ด้านบนสุด */
+  z-index: 10;                  /* ลำดับชั้นสูง (แสดงด้านหน้า) */
 }
 
+/* ===== เซลล์หัวตาราง (TH) ===== */
 .complaints-table th {
-  padding: 1.5rem 1.25rem;
-  text-align: center;
-  font-weight: 700;
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 2px solid var(--border-hover);
-  white-space: nowrap;
+  padding: 1.5rem 1.25rem;      /* padding ด้านใน */
+  text-align: center;           /* จัดข้อความกลาง */
+  font-weight: 700;             /* ความหนา */
+  color: var(--text-primary);   /* สีขาว */
+  font-size: 0.95rem;           /* ขนาดตัวอักษร */
+  text-transform: uppercase;    /* เปลี่ยนเป็นตัวพิมพ์ใหญ่ */
+  letter-spacing: 0.05em;       /* ระยะห่างตัวอักษร */
+  border-bottom: 2px solid var(--border-hover);  /* เส้นใต้หนา 2px */
+  white-space: nowrap;          /* ไม่ขึ้นบรรทัดใหม่ */
 }
 
+/* ===== แถวข้อมูลในตาราง (Body Rows) ===== */
 .complaints-table tbody tr {
-  transition: all var(--transition-base);
-  cursor: pointer;
+  transition: all var(--transition-base);  /* animation เมื่อมีการเปลี่ยนแปลง */
+  cursor: pointer;                         /* แสดง cursor แบบมือชี้ (คลิกได้) */
 }
 
+/* ===== เซลล์ข้อมูลในตาราง (TD) ===== */
 .complaints-table td {
-  padding: 1.5rem 1.25rem;
-  text-align: center;
-  background: rgba(15, 23, 42, 0.4);
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  border-bottom: 1px solid rgba(30, 41, 59, 0.5);
-  vertical-align: middle;
+  padding: 1.5rem 1.25rem;              /* padding ด้านใน */
+  text-align: center;                   /* จัดข้อความกลาง */
+  background: rgba(15, 23, 42, 0.4);    /* พื้นหลังโปร่งใส 40% */
+  color: var(--text-secondary);         /* สีเทาอ่อน */
+  font-size: 0.95rem;                   /* ขนาดตัวอักษร */
+  border-bottom: 1px solid rgba(30, 41, 59, 0.5);  /* เส้นใต้บางๆ */
+  vertical-align: middle;               /* จัดแนวตั้งกลาง */
 }
 
+/* ===== เมื่อ hover ที่แถว (ไฮไลท์แถวทั้งแถว) ===== */
 .complaints-table tbody tr:hover td {
-  background: var(--bg-card-hover);
-  box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1);
+  background: var(--bg-card-hover);                       /* พื้นหลังเข้มขึ้น */
+  box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1);    /* เงาด้านใน (เรืองแสงเล็กน้อย) */
 }
 
-/* Table Cell Components */
+/* ===== ป้ายแสดง ID (เลขที่รายการ) ===== */
 .id-badge {
-  display: inline-block;
+  display: inline-block;    /* แสดงแบบ inline-block */
+  /* พื้นหลังแบบ gradient น้ำเงิน */
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  color: white;
-  padding: 0.4rem 1rem;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.9rem;
+  color: white;             /* ข้อความสีขาว */
+  padding: 0.4rem 1rem;     /* padding ด้านใน */
+  border-radius: 999px;     /* มุมโค้งมาก (เป็นรูปแคปซูล) */
+  font-weight: 700;         /* ความหนา */
+  font-size: 0.9rem;        /* ขนาดตัวอักษร */
 }
 
+/* ===== เซลล์แสดงสถานที่ ===== */
 .location-cell {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.9rem;          /* ขนาดตัวอักษร */
+  color: var(--text-muted);   /* สีเทาจาง */
+  max-width: 200px;           /* ความกว้างสูงสุด */
+  overflow: hidden;           /* ซ่อนส่วนที่เกิน */
+  text-overflow: ellipsis;    /* แสดง ... เมื่อข้อความยาวเกิน */
+  white-space: nowrap;        /* ไม่ขึ้นบรรทัดใหม่ */
 }
 
+/* ===== เซลล์แสดงคำอธิบาย ===== */
 .description-cell {
-  text-align: left;
-  max-width: 300px;
+  text-align: left;   /* จัดข้อความชิดซ้าย */
+  max-width: 300px;   /* ความกว้างสูงสุด */
 }
 
+/* ===== คำแนะนำให้คลิกเพื่อขยาย ===== */
 .expand-hint {
-  display: block;
-  color: var(--primary-light);
-  font-size: 0.85rem;
-  font-style: italic;
-  margin-top: 0.5rem;
+  display: block;                 /* แสดงแบบ block (ขึ้นบรรทัดใหม่) */
+  color: var(--primary-light);    /* สีน้ำเงินอ่อน */
+  font-size: 0.85rem;             /* ขนาดตัวอักษรเล็ก */
+  font-style: italic;             /* ตัวเอียง */
+  margin-top: 0.5rem;             /* ระยะห่างด้านบน */
 }
 
+/* ===== ที่อยู่ Wallet แบบย่อ ===== */
 .address-short {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--primary-light);
-  padding: 0.4rem 0.8rem;
-  border-radius: var(--radius-sm);
-  font-family: 'Courier New', monospace;
-  font-size: 0.85rem;
-  border: 1px solid var(--border-color);
+  background: rgba(59, 130, 246, 0.1);    /* พื้นหลังน้ำเงินจาง */
+  color: var(--primary-light);            /* สีข้อความน้ำเงินอ่อน */
+  padding: 0.4rem 0.8rem;                 /* padding ด้านใน */
+  border-radius: var(--radius-sm);        /* มุมโค้งเล็ก */
+  font-family: 'Courier New', monospace;  /* ฟอนต์แบบโค้ด */
+  font-size: 0.85rem;                     /* ขนาดตัวอักษรเล็ก */
+  border: 1px solid var(--border-color);  /* ขอบบาง */
 }
 
+/* ===== ข้อความยังไม่ได้มอบหมาย ===== */
 .not-assigned {
-  color: var(--text-muted);
-  font-style: italic;
+  color: var(--text-muted);  /* สีเทาจาง */
+  font-style: italic;        /* ตัวเอียง */
 }
 
+/* ===== เซลล์แสดงการดำเนินการที่ต้องทำ ===== */
 .action-required {
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.9rem;
+  max-width: 200px;         /* ความกว้างสูงสุด */
+  overflow: hidden;         /* ซ่อนส่วนที่เกิน */
+  text-overflow: ellipsis;  /* แสดง ... เมื่อข้อความยาวเกิน */
+  white-space: nowrap;      /* ไม่ขึ้นบรรทัดใหม่ */
+  font-size: 0.9rem;        /* ขนาดตัวอักษร */
 }
 
-/* Status Badges */
+/* ===== ป้ายแสดงสถานะ (Status Badge) ===== */
 .status-badge {
-  display: inline-block;
-  padding: 0.6rem 1.2rem;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.85rem;
-  white-space: nowrap;
+  display: inline-block;  /* แสดงแบบ inline-block */
+  padding: 0.6rem 1.2rem; /* padding ด้านใน */
+  border-radius: 999px;   /* มุมโค้งมาก (เป็นรูปแคปซูล) */
+  font-weight: 700;       /* ความหนา */
+  font-size: 0.85rem;     /* ขนาดตัวอักษรเล็ก */
+  white-space: nowrap;    /* ไม่ขึ้นบรรทัดใหม่ */
 }
 
+/* ===== สถานะ: ส่งแล้ว (Submitted) - สีเหลือง ===== */
 .status-submitted {
-  background: rgba(251, 191, 36, 0.2);
-  color: #fbbf24;
-  border: 1px solid #fbbf24;
+  background: rgba(251, 191, 36, 0.2);  /* พื้นหลังเหลืองโปร่งใส */
+  color: #fbbf24;                       /* ข้อความสีเหลือง */
+  border: 1px solid #fbbf24;            /* ขอบสีเหลือง */
 }
 
+/* ===== สถานะ: กำลังตรวจสอบ (Under Review) - สีน้ำเงิน ===== */
 .status-underreview {
-  background: rgba(96, 165, 250, 0.2);
-  color: #60a5fa;
-  border: 1px solid #60a5fa;
+  background: rgba(96, 165, 250, 0.2);  /* พื้นหลังน้ำเงินโปร่งใส */
+  color: #60a5fa;                       /* ข้อความสีน้ำเงิน */
+  border: 1px solid #60a5fa;            /* ขอบสีน้ำเงิน */
 }
 
+/* ===== สถานะ: แก้ไขแล้ว (Resolved) - สีเขียว ===== */
 .status-resolved {
-  background: rgba(52, 211, 153, 0.2);
-  color: #34d399;
-  border: 1px solid #34d399;
+  background: rgba(52, 211, 153, 0.2);  /* พื้นหลังเขียวโปร่งใส */
+  color: #34d399;                       /* ข้อความสีเขียว */
+  border: 1px solid #34d399;            /* ขอบสีเขียว */
 }
 
+/* ===== สถานะ: เปิดใหม่ (Reopened) - สีส้ม ===== */
 .status-reopened {
-  background: rgba(249, 115, 22, 0.2);
-  color: #f97316;
-  border: 1px solid #f97316;
+  background: rgba(249, 115, 22, 0.2);  /* พื้นหลังส้มโปร่งใส */
+  color: #f97316;                       /* ข้อความสีส้ม */
+  border: 1px solid #f97316;            /* ขอบสีส้ม */
 }
 
+/* ===== สถานะ: ปิดแล้ว (Closed) - สีเทา ===== */
 .status-closed {
-  background: rgba(148, 163, 184, 0.2);
-  color: #94a3b8;
-  border: 1px solid #94a3b8;
+  background: rgba(148, 163, 184, 0.2);  /* พื้นหลังเทาโปร่งใส */
+  color: #94a3b8;                        /* ข้อความสีเทา */
+  border: 1px solid #94a3b8;             /* ขอบสีเทา */
 }
 
+/* ===== วันที่และเวลา (Timestamp) ===== */
 .timestamp {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  white-space: nowrap;
+  font-size: 0.85rem;       /* ขนาดตัวอักษรเล็ก */
+  color: var(--text-muted);   /* สีเทาจาง */
+  white-space: nowrap;      /* ไม่ขึ้นบรรทัดใหม่ */
 }
 
-/* Action Cell */
+/* ===== เซลล์ปุ่มดำเนินการ (Action Cell) ===== */
 .action-cell {
-  min-width: 200px;
+  min-width: 200px;  /* ความกว้างขั้นต่ำ */
 }
 
+/* ===== กลุ่มปุ่มดำเนินการ (เรียงแนวตั้ง) ===== */
 .action-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: center;
+  display: flex;            /* ใช้ flexbox */
+  flex-direction: column;   /* เรียงแนวตั้ง */
+  gap: 0.5rem;              /* ช่องว่างระหว่าง elements */
+  align-items: center;      /* จัดกลางแนวนอน */
 }
 
+/* ===== ช่อง Input ในเซลล์ปุ่ม ===== */
 .action-input {
-  width: 100%;
-  padding: 0.6rem 0.8rem;
-  margin: 0;
-  font-size: 0.9rem;
+  width: 100%;          /* กว้าง 100% */
+  padding: 0.6rem 0.8rem;  /* padding ด้านใน */
+  margin: 0;            /* ไม่มีระยะห่าง */
+  font-size: 0.9rem;    /* ขนาดตัวอักษร */
 }
 
+/* ===== ปุ่มดำเนินการ (ปุ่มในตาราง) ===== */
 .btn-action {
-  padding: 0.6rem 1.2rem;
-  font-size: 0.85rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
+  padding: 0.6rem 1.2rem;                 /* padding ด้านใน */
+  font-size: 0.85rem;                     /* ขนาดตัวอักษรเล็ก */
+  border-radius: var(--radius-sm);        /* มุมโค้งเล็ก */
+  font-weight: 600;                       /* ความหนา */
+  border: none;                           /* ไม่มีขอบ */
+  cursor: pointer;                        /* แสดง cursor แบบมือชี้ */
+  transition: all var(--transition-base); /* animation */
+  display: inline-flex;                   /* แสดงแบบ flex แต่ inline */
+  align-items: center;                    /* จัดแนวตั้งกลาง */
+  gap: 0.4rem;                            /* ช่องว่างระหว่าง elements ภายใน */
+  white-space: nowrap;                    /* ไม่ขึ้นบรรทัดใหม่ */
 }
 
+/* ===== ปุ่มหลัก (Primary) - สีน้ำเงิน ===== */
 .btn-primary {
+  /* พื้นหลังแบบ gradient น้ำเงิน */
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  color: white;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  color: white;   /* ข้อความสีขาว */
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);  /* เงาสีน้ำเงิน */
 }
 
+/* ===== เมื่อ hover ที่ปุ่มหลัก ===== */
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px);  /* เลื่อนขึ้น 2px */
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);  /* เงาเข้มขึ้น */
 }
 
+/* ===== ปุ่มรอง (Secondary) - สีม่วง ===== */
 .btn-secondary {
+  /* พื้นหลังแบบ gradient ม่วง */
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  color: white;   /* ข้อความสีขาว */
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);  /* เงาสีม่วง */
 }
 
+/* ===== เมื่อ hover ที่ปุ่มรอง ===== */
 .btn-secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  transform: translateY(-2px);  /* เลื่อนขึ้น 2px */
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);  /* เงาเข้มขึ้น */
 }
 
+/* ===== ปุ่มสำเร็จ (Success) - สีเขียว ===== */
 .btn-success {
+  /* พื้นหลังแบบ gradient เขียว */
   background: linear-gradient(135deg, var(--success), #059669);
-  color: white;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  color: white;   /* ข้อความสีขาว */
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);  /* เงาสีเขียว */
 }
 
+/* ===== เมื่อ hover ที่ปุ่มสำเร็จ ===== */
 .btn-success:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+  transform: translateY(-2px);  /* เลื่อนขึ้น 2px */
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);  /* เงาเข้มขึ้น */
 }
 
+/* ===== ปุ่มอันตราย (Danger) - สีแดง ===== */
 .btn-danger {
+  /* พื้นหลังแบบ gradient แดง */
   background: linear-gradient(135deg, var(--danger), #dc2626);
-  color: white;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  color: white;   /* ข้อความสีขาว */
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);  /* เงาสีแดง */
 }
 
+/* ===== เมื่อ hover ที่ปุ่มอันตราย ===== */
 .btn-danger:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+  transform: translateY(-2px);  /* เลื่อนขึ้น 2px */
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);  /* เงาเข้มขึ้น */
 }
 
-/* Expanded Row */
+/* ===== แถวที่ถูกขยาย (Expanded Row) - แสดงรายละเอียดเต็ม ===== */
 .expanded-row td {
-  background: rgba(15, 23, 42, 0.95) !important;
-  padding: 3rem !important;
-  text-align: left;
-  border-bottom: 2px solid var(--border-hover);
+  background: rgba(15, 23, 42, 0.95) !important;  /* พื้นหลังเข้มมาก (ทึบ 95%) */
+  padding: 3rem !important;                       /* padding เยอะ */
+  text-align: left;                               /* จัดข้อความชิดซ้าย */
+  border-bottom: 2px solid var(--border-hover);   /* เส้นใต้หนา 2px */
 }
 
+/* ===== เนื้อหาในแถวที่ขยาย ===== */
 .expanded-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  display: flex;            /* ใช้ flexbox */
+  flex-direction: column;   /* เรียงแนวตั้ง */
+  gap: 2rem;                /* ช่องว่างระหว่าง sections */
 }
 
+/* ===== หัวข้อ (Strong) ในแต่ละ Section ที่ขยาย ===== */
 .expanded-section strong {
-  display: block;
-  color: var(--primary-light);
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
+  display: block;                 /* แสดงแบบ block (ขึ้นบรรทัดใหม่) */
+  color: var(--primary-light);    /* สีน้ำเงินอ่อน */
+  font-size: 1.2rem;              /* ขนาดตัวอักษร */
+  margin-bottom: 1rem;            /* ระยะห่างด้านล่าง */
 }
 
+/* ===== ข้อความในแต่ละ Section ที่ขยาย ===== */
 .expanded-section p {
-  color: var(--text-secondary);
-  line-height: 1.8;
-  padding-left: 1.5rem;
-  border-left: 4px solid var(--border-hover);
-  margin: 0;
+  color: var(--text-secondary);             /* สีเทาอ่อน */
+  line-height: 1.8;                         /* ระยะห่างบรรทัด */
+  padding-left: 1.5rem;                     /* padding ซ้าย */
+  border-left: 4px solid var(--border-hover);  /* เส้นซ้ายหนา 4px */
+  margin: 0;                                /* ไม่มีระยะห่าง */
 }
 
+/* ===== กริดแสดงข้อมูล (ในแถวที่ขยาย) ===== */
 .info-grid {
-  display: grid;
+  display: grid;    /* ใช้ CSS Grid Layout */
+  /* สร้างคอลัมน์อัตโนมัติ ขั้นต่ำ 300px ต่อคอลัมน์ แบ่งเท่าๆ กัน */
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+  gap: 1.5rem;      /* ช่องว่างระหว่างรายการ */
 }
 
+/* ===== กล่องข้อมูลแต่ละรายการ ===== */
 .info-item {
-  background: rgba(15, 23, 42, 0.5);
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  background: rgba(15, 23, 42, 0.5);      /* พื้นหลังโปร่งใส 50% */
+  padding: 1.5rem;                        /* padding ด้านใน */
+  border-radius: var(--radius-md);        /* มุมโค้งกลาง */
+  border: 1px solid var(--border-color);  /* ขอบบาง */
 }
 
+/* ===== ป้ายชื่อ (Label) ของข้อมูล ===== */
 .info-label {
-  display: block;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+  display: block;             /* แสดงแบบ block (ขึ้นบรรทัดใหม่) */
+  color: var(--text-muted);   /* สีเทาจาง */
+  font-size: 0.9rem;          /* ขนาดตัวอักษรเล็ก */
+  margin-bottom: 0.5rem;      /* ระยะห่างด้านล่าง */
 }
 
+/* ===== โค้ด (Code) ในกล่องข้อมูล ===== */
 .info-item code {
-  display: block;
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--primary-light);
-  padding: 0.75rem;
-  border-radius: var(--radius-sm);
-  font-family: 'Courier New', monospace;
-  font-size: 0.9rem;
-  word-break: break-all;
-  border: 1px solid var(--border-color);
-  margin-top: 0.5rem;
+  display: block;                         /* แสดงแบบ block (ขึ้นบรรทัดใหม่) */
+  background: rgba(59, 130, 246, 0.1);    /* พื้นหลังน้ำเงินจาง */
+  color: var(--primary-light);            /* สีข้อความน้ำเงินอ่อน */
+  padding: 0.75rem;                       /* padding ด้านใน */
+  border-radius: var(--radius-sm);        /* มุมโค้งเล็ก */
+  font-family: 'Courier New', monospace;  /* ฟอนต์แบบโค้ด (ตัวอักษรเท่ากันหมด) */
+  font-size: 0.9rem;                      /* ขนาดตัวอักษร */
+  word-break: break-all;                  /* ตัดคำยาวๆ ขึ้นบรรทัดใหม่ */
+  border: 1px solid var(--border-color);  /* ขอบบาง */
+  margin-top: 0.5rem;                     /* ระยะห่างด้านบน */
 }
 
 /* =====================================================
    LOADING OVERLAY
    ===================================================== */
+/* ===== ฉากหลังทึบตอนโหลด (ครอบทั้งหน้าจอ) ===== */
 .loading-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(16px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 4000;
-  animation: fadeIn 0.4s ease;
+  position: fixed;                  /* ติดกับหน้าจอ */
+  inset: 0;                         /* เต็มหน้าจอทุกด้าน (top, right, bottom, left = 0) */
+  background: rgba(0, 0, 0, 0.9);   /* พื้นหลังดำทึบมาก (90%) */
+  backdrop-filter: blur(16px);      /* เบลอพื้นหลังข้างหลัง 16px */
+  display: flex;                    /* ใช้ flexbox */
+  align-items: center;              /* จัดแนวตั้งกลาง */
+  justify-content: center;          /* จัดแนวนอนกลาง */
+  z-index: 4000;                    /* ลำดับชั้นสูงมาก (แสดงด้านหน้าสุด) */
+  animation: fadeIn 0.4s ease;      /* animation ค่อยๆ ปรากฏ */
 }
 
+/* ===== กล่องเนื้อหาหลักตอนโหลด ===== */
 .loading-content {
+  /* พื้นหลังแบบ gradient 2 สี แบบโปร่งใส 98% */
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
-  backdrop-filter: blur(24px);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
+  backdrop-filter: blur(24px);              /* เบลอพื้นหลังข้างหลัง */
+  border: 1px solid var(--border-color);    /* ขอบบาง */
+  border-radius: var(--radius-xl);          /* มุมโค้งใหญ่มาก */
+  /* padding ที่ปรับตามขนาดหน้าจอ */
   padding: clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 5.5rem);
-  text-align: center;
+  text-align: center;                       /* จัดข้อความกลาง */
+  /* ความกว้างสูงสุดเลือกค่าน้อยกว่าระหว่าง 600px และ 90% ของ viewport */
   max-width: min(600px, 90vw);
-  width: 90%;
-  box-shadow: var(--shadow-lg);
+  width: 90%;                               /* กว้าง 90% */
+  box-shadow: var(--shadow-lg);             /* เงาใหญ่ */
+  /* animation เลื่อนขึ้นพร้อมขยาย (มี bounce effect) */
   animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  margin: auto;
+  margin: auto;                             /* จัดกลาง */
 }
 
+/* ===== ส่วนแสดง Animation ตอนโหลด ===== */
 .loading-animation {
-  margin-bottom: 3rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  margin-bottom: 3rem;      /* ระยะห่างด้านล่าง */
+  display: flex;            /* ใช้ flexbox */
+  justify-content: center;  /* จัดกลางแนวนอน */
+  align-items: center;      /* จัดกลางแนวตั้ง */
 }
 
+/* ===== วงกลมหมุน (Circular Spinner) ===== */
 .circular-spinner {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  animation: rotate 2s linear infinite;
+  position: relative;                   /* ตำแหน่งแบบ relative เพื่อให้ segments อ้างอิง */
+  width: 120px;                         /* กว้าง 120px */
+  height: 120px;                        /* สูง 120px (เป็นวงกลม) */
+  animation: rotate 2s linear infinite;   /* animation หมุนวนซ้ำทุก 2 วินาที */
 }
 
+/* ===== Animation: หมุนรอบตัวเอง 360 องศา ===== */
 @keyframes rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }       /* เริ่มที่ 0 องศา */
+  100% { transform: rotate(360deg); }   /* จบที่ 360 องศา (หมุนรอบ) */
 }
 
+/* ===== ส่วนย่อยของ Spinner (แต่ละจุดสี) ===== */
 .spinner-segment {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
+  position: absolute;   /* วางตำแหน่งแบบ absolute */
+  width: 100%;          /* กว้าง 100% ของ parent */
+  height: 100%;         /* สูง 100% ของ parent */
+  border-radius: 50%;   /* มุมโค้ง 50% (เป็นวงกลม) */
 }
 
+/* ===== จุดสีของแต่ละ Segment (ใช้ ::before pseudo-element) ===== */
 .spinner-segment::before {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: segmentPulse 1.5s ease-in-out infinite;
+  content: '';              /* สร้าง element เปล่า */
+  position: absolute;       /* วางตำแหน่งแบบ absolute */
+  width: 20px;              /* กว้าง 20px */
+  height: 20px;             /* สูง 20px (เป็นวงกลม) */
+  border-radius: 50%;       /* มุมโค้ง 50% (เป็นวงกลม) */
+  top: 0;                   /* อยู่ด้านบนสุด */
+  left: 50%;                /* เริ่มจากกลาง */
+  transform: translateX(-50%);  /* ปรับให้อยู่กลางจริงๆ */
+  animation: segmentPulse 1.5s ease-in-out infinite;  /* animation เต้นวนซ้ำทุก 1.5 วินาที */
 }
 
-/* Colorful segments with different delays */
+/* ===== Segment 1: สีแดง ===== */
 .segment-1::before {
-  background: linear-gradient(135deg, #ef4444, #f87171);
-  box-shadow: 0 0 20px #ef4444;
-  animation-delay: 0s;
+  background: linear-gradient(135deg, #ef4444, #f87171);  /* พื้นหลัง gradient แดง */
+  box-shadow: 0 0 20px #ef4444;                           /* เงาเรืองแสงสีแดง */
+  animation-delay: 0s;                                    /* ไม่มีดีเลย์ (เริ่มทันที) */
 }
 
+/* ===== Segment 2: สีส้ม/เหลือง ===== */
 .segment-2::before {
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-  box-shadow: 0 0 20px #f59e0b;
-  animation-delay: 0.2s;
-  transform: translateX(-50%) rotate(45deg);
-  transform-origin: center 60px;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);  /* พื้นหลัง gradient ส้ม */
+  box-shadow: 0 0 20px #f59e0b;                           /* เงาเรืองแสงสีส้ม */
+  animation-delay: 0.2s;                                  /* ดีเลย์ 0.2 วินาที */
+  transform: translateX(-50%) rotate(45deg);              /* หมุน 45 องศา */
+  transform-origin: center 60px;                          /* จุดหมุนอยู่ห่างจากกลาง 60px */
 }
 
+/* ===== Segment 3: สีเขียว ===== */
 .segment-3::before {
-  background: linear-gradient(135deg, #10b981, #34d399);
-  box-shadow: 0 0 20px #10b981;
-  animation-delay: 0.4s;
-  transform: translateX(-50%) rotate(90deg);
-  transform-origin: center 60px;
+  background: linear-gradient(135deg, #10b981, #34d399);  /* พื้นหลัง gradient เขียว */
+  box-shadow: 0 0 20px #10b981;                           /* เงาเรืองแสงสีเขียว */
+  animation-delay: 0.4s;                                  /* ดีเลย์ 0.4 วินาที */
+  transform: translateX(-50%) rotate(90deg);              /* หมุน 90 องศา */
+  transform-origin: center 60px;                          /* จุดหมุนอยู่ห่างจากกลาง 60px */
 }
 
+/* ===== Segment 4: สีฟ้า ===== */
 .segment-4::before {
-  background: linear-gradient(135deg, #06b6d4, #22d3ee);
-  box-shadow: 0 0 20px #06b6d4;
-  animation-delay: 0.6s;
-  transform: translateX(-50%) rotate(135deg);
-  transform-origin: center 60px;
+  background: linear-gradient(135deg, #06b6d4, #22d3ee);  /* พื้นหลัง gradient ฟ้า */
+  box-shadow: 0 0 20px #06b6d4;                           /* เงาเรืองแสงสีฟ้า */
+  animation-delay: 0.6s;                                  /* ดีเลย์ 0.6 วินาที */
+  transform: translateX(-50%) rotate(135deg);             /* หมุน 135 องศา */
+  transform-origin: center 60px;                          /* จุดหมุนอยู่ห่างจากกลาง 60px */
 }
 
+/* ===== Segment 5: สีน้ำเงิน ===== */
 .segment-5::before {
-  background: linear-gradient(135deg, #3b82f6, #60a5fa);
-  box-shadow: 0 0 20px #3b82f6;
-  animation-delay: 0.8s;
-  transform: translateX(-50%) rotate(180deg);
-  transform-origin: center 60px;
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);  /* พื้นหลัง gradient น้ำเงิน */
+  box-shadow: 0 0 20px #3b82f6;                           /* เงาเรืองแสงสีน้ำเงิน */
+  animation-delay: 0.8s;                                  /* ดีเลย์ 0.8 วินาที */
+  transform: translateX(-50%) rotate(180deg);             /* หมุน 180 องศา */
+  transform-origin: center 60px;                          /* จุดหมุนอยู่ห่างจากกลาง 60px */
 }
 
+/* ===== Segment 6: สีม่วงน้ำเงิน (Indigo) ===== */
 .segment-6::before {
-  background: linear-gradient(135deg, #6366f1, #818cf8);
-  box-shadow: 0 0 20px #6366f1;
-  animation-delay: 1s;
-  transform: translateX(-50%) rotate(225deg);
-  transform-origin: center 60px;
+  background: linear-gradient(135deg, #6366f1, #818cf8);  /* พื้นหลัง gradient ม่วงน้ำเงิน */
+  box-shadow: 0 0 20px #6366f1;                           /* เงาเรืองแสงสีม่วงน้ำเงิน */
+  animation-delay: 1s;                                    /* ดีเลย์ 1 วินาที */
+  transform: translateX(-50%) rotate(225deg);             /* หมุน 225 องศา */
+  transform-origin: center 60px;                          /* จุดหมุนอยู่ห่างจากกลาง 60px */
 }
 
+/* ===== Segment 7: สีม่วง (Purple) ===== */
 .segment-7::before {
-  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
-  box-shadow: 0 0 20px #8b5cf6;
-  animation-delay: 1.2s;
-  transform: translateX(-50%) rotate(270deg);
-  transform-origin: center 60px;
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);  /* พื้นหลัง gradient ม่วง */
+  box-shadow: 0 0 20px #8b5cf6;                           /* เงาเรืองแสงสีม่วง */
+  animation-delay: 1.2s;                                  /* ดีเลย์ 1.2 วินาที */
+  transform: translateX(-50%) rotate(270deg);             /* หมุน 270 องศา */
+  transform-origin: center 60px;                          /* จุดหมุนอยู่ห่างจากกลาง 60px */
 }
 
+/* ===== Segment 8: สีชมพู (Pink) ===== */
 .segment-8::before {
-  background: linear-gradient(135deg, #ec4899, #f472b6);
-  box-shadow: 0 0 20px #ec4899;
-  animation-delay: 1.4s;
-  transform: translateX(-50%) rotate(315deg);
-  transform-origin: center 60px;
+  background: linear-gradient(135deg, #ec4899, #f472b6);  /* พื้นหลัง gradient ชมพู */
+  box-shadow: 0 0 20px #ec4899;                           /* เงาเรืองแสงสีชมพู */
+  animation-delay: 1.4s;                                  /* ดีเลย์ 1.4 วินาที */
+  transform: translateX(-50%) rotate(315deg);             /* หมุน 315 องศา */
+  transform-origin: center 60px;                          /* จุดหมุนอยู่ห่างจากกลาง 60px */
 }
 
+/* ===== Animation: จุดสีเต้นขึ้นลง (Pulse Effect) ===== */
 @keyframes segmentPulse {
   0%, 100% {
-    transform: translateX(-50%) scale(1);
-    opacity: 1;
+    transform: translateX(-50%) scale(1);  /* ขนาดปกติ ที่จุดเริ่มและจุดจบ */
+    opacity: 1;                            /* ทึบ 100% */
   }
   50% {
-    transform: translateX(-50%) scale(1.5);
-    opacity: 0.6;
+    transform: translateX(-50%) scale(1.5);  /* ขยายใหญ่ 50% ตอนกึ่งกลาง */
+    opacity: 0.6;                            /* โปร่งใสนิดหน่อย (60% ทึบ) */
   }
 }
 
+/* ===== หัวข้อ H3 ในหน้าจอโหลด ===== */
 .loading-content h3 {
-  font-size: 2rem;
-  color: var(--primary-light);
-  margin-bottom: 1.5rem;
-  border: none;
-  padding: 0;
+  font-size: 2rem;                  /* ขนาดตัวอักษร */
+  color: var(--primary-light);      /* สีน้ำเงินอ่อน */
+  margin-bottom: 1.5rem;            /* ระยะห่างด้านล่าง */
+  border: none;                     /* ไม่มีขอบ */
+  padding: 0;                       /* ไม่มี padding */
 }
 
+/* ===== ข้อความหลักตอนโหลด ===== */
 .loading-main {
-  font-size: 1.2rem;
-  color: var(--text-primary);
-  margin: 1rem 0;
-  font-weight: 600;
+  font-size: 1.2rem;              /* ขนาดตัวอักษร */
+  color: var(--text-primary);     /* สีขาว */
+  margin: 1rem 0;                 /* ระยะห่างบนล่าง */
+  font-weight: 600;               /* ความหนา */
 }
 
+/* ===== ข้อความรองตอนโหลด ===== */
 .loading-sub {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin: 1rem 0;
+  font-size: 1rem;                  /* ขนาดตัวอักษร */
+  color: var(--text-secondary);     /* สีเทาอ่อน */
+  margin: 1rem 0;                   /* ระยะห่างบนล่าง */
 }
 
+/* ===== ส่วนคำแนะนำตอนโหลด ===== */
 .loading-tips {
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-color);
+  margin-top: 3rem;                         /* ระยะห่างด้านบน */
+  padding-top: 2rem;                        /* padding ด้านบน */
+  border-top: 1px solid var(--border-color);  /* เส้นบนบาง */
 }
 
+/* ===== ข้อความคำแนะนำ ===== */
 .loading-tips p {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  margin: 0.75rem 0;
+  color: var(--text-muted);  /* สีเทาจาง */
+  font-size: 0.95rem;        /* ขนาดตัวอักษร */
+  margin: 0.75rem 0;         /* ระยะห่างบนล่าง */
 }
 
+/* ===== ข้อความที่เน้น (Strong) ในคำแนะนำ ===== */
 .loading-tips strong {
-  color: var(--text-secondary);
+  color: var(--text-secondary);  /* สีเทาอ่อน */
 }
 
 /* =====================================================
    RESPONSIVE DESIGN - Universal Platform Support
    ===================================================== */
 
-/* Extra Large Screens (4K, Large Monitors) */
+/* ===== จอขนาดใหญ่มาก (4K, จอ Monitor ขนาดใหญ่) ===== */
+/* หน้าจอกว้างตั้งแต่ 2560px ขึ้นไป */
 @media (min-width: 2560px) {
   html {
-    font-size: 18px;
+    font-size: 18px;  /* เพิ่มขนาดฟอนต์พื้นฐานเป็น 18px */
   }
   
   .container {
-    max-width: 1600px;
+    max-width: 1600px;  /* ความกว้างสูงสุด 1600px */
   }
 }
 
-/* Large Screens (Desktop, TV) */
+/* ===== จอขนาดใหญ่ (Desktop, TV) ===== */
+/* หน้าจอกว้าง 1920px - 2559px */
 @media (min-width: 1920px) and (max-width: 2559px) {
   html {
-    font-size: 17px;
+    font-size: 17px;  /* เพิ่มขนาดฟอนต์พื้นฐานเป็น 17px */
   }
 }
 
-/* Desktop & Laptop */
+/* ===== Desktop & Laptop ===== */
+/* หน้าจอกว้างไม่เกิน 1200px */
 @media (max-width: 1200px) {
   .container {
-    max-width: 95%;
+    max-width: 95%;  /* ความกว้างสูงสุด 95% ของ viewport */
   }
   
+  /* Admin Grid เปลี่ยนเป็น 1 คอลัมน์ */
   .admin-grid {
     grid-template-columns: 1fr;
   }
   
+  /* Feature Cards ปรับขนาดขั้นต่ำของแต่ละการ์ด */
   .feature-cards {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
 }
 
-/* Tablet Landscape & Small Desktop */
+/* ===== Tablet แนวนอน & Desktop ขนาดเล็ก ===== */
+/* หน้าจอกว้างไม่เกิน 1024px */
 @media (max-width: 1024px) {
   html {
-    font-size: 15px;
+    font-size: 15px;  /* ลดขนาดฟอนต์พื้นฐานเป็น 15px */
   }
   
+  /* ลด padding ของส่วนหลักๆ */
   .form-section,
   .admin-section,
   .complaints-section {
     padding: 3rem 2rem;
   }
   
+  /* ลดขนาดฟอนต์ของตาราง */
   .complaints-table {
     font-size: 0.9rem;
   }
   
+  /* ลด padding ของเซลล์ในตาราง */
   .complaints-table th,
   .complaints-table td {
     padding: 1rem 0.75rem;
   }
   
+  /* ลดช่องว่างของ Wallet Info */
   .wallet-info {
     gap: 1rem 1.5rem;
   }
 }
 
-/* Tablet Portrait & iPad */
+/* ===== Tablet แนวตั้ง & iPad ===== */
+/* หน้าจอกว้างไม่เกิน 768px */
 @media (max-width: 768px) {
   html {
-    font-size: 14px;
+    font-size: 14px;  /* ลดขนาดฟอนต์พื้นฐานเป็น 14px */
   }
   
+  /* App Wrapper ปรับให้เริ่มจากด้านบน (ไม่ center แนวตั้ง) */
   .app-wrapper {
     padding: 20px 15px;
     align-items: flex-start;
   }
   
+  /* ลดขนาด H1 */
   h1 {
     font-size: clamp(2rem, 8vw, 2.5rem);
   }
   
+  /* ลดขนาดไอคอนในหัวข้อ */
   .header-icon {
     font-size: 3rem;
   }
   
+  /* ลด padding ของหน้าจอ Login */
   .login-screen {
     padding: 3rem 2rem;
   }
   
+  /* ลดขนาดไอคอน Login */
   .login-icon {
     font-size: 4rem;
   }
   
+  /* Feature Cards เปลี่ยนเป็น 1 คอลัมน์ */
   .feature-cards {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
   
+  /* Wallet Info เรียงแนวตั้ง */
   .wallet-info {
     flex-direction: column;
     gap: 1.5rem;
     padding: 1.5rem 2rem;
   }
   
+  /* Wallet Address เรียงแนวตั้ง */
   .wallet-address {
     flex-direction: column;
     gap: 0.5rem;
   }
   
+  /* ปุ่มต่างๆ กว้างเต็มที่ */
   .help-btn,
   .refresh-btn,
   .logout-btn {
@@ -1663,356 +1923,427 @@ button:not(.help-btn):not(.refresh-btn):not(.logout-btn):not(.submit-btn):not(.t
     justify-content: center;
   }
   
+  /* ลด padding ของส่วนฟอร์มและตาราง */
   .form-section,
   .admin-section,
   .complaints-section {
     padding: 2.5rem 1.5rem;
   }
   
+  /* Step ในฟอร์มเรียงแนวตั้ง */
   .step {
     flex-direction: column;
     gap: 1rem;
   }
   
+  /* ลดขนาดตัวเลข Step */
   .step-number {
     width: 40px;
     height: 40px;
     font-size: 1.2rem;
   }
   
+  /* Table Controls เรียงแนวตั้ง */
   .table-controls {
     flex-direction: column;
   }
   
+  /* Search Wrapper กว้างเต็มที่ */
   .search-wrapper {
     width: 100%;
   }
   
+  /* Officer Filters เรียงแนวตั้ง */
   .officer-filters {
     flex-direction: column;
     width: 100%;
   }
   
+  /* ปุ่ม Filter กว้างเต็มที่ */
   .filter-btn,
   .location-filter {
     width: 100%;
   }
   
-  /* Make table scrollable on tablets */
+  /* ทำให้ตาราง Scroll ได้แนวนอน บน Tablet */
   .table-wrapper {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch;  /* Smooth scrolling บน iOS */
   }
   
+  /* กำหนดความกว้างขั้นต่ำของตาราง */
   .complaints-table {
     min-width: 1000px;
   }
   
+  /* ลด padding ของหน้าจอโหลด */
   .loading-content {
     padding: 3rem 2.5rem;
   }
   
+  /* ลดขนาด Spinner */
   .circular-spinner {
     width: 100px;
     height: 100px;
   }
   
+  /* ลด padding ของ Tour Modal */
   .tour-modal {
     padding: 3rem 2.5rem;
   }
 }
 
-/* Mobile Landscape & Small Tablets */
+/* ===== มือถือแนวนอน & Tablet ขนาดเล็ก ===== */
+/* หน้าจอกว้างไม่เกิน 640px */
 @media (max-width: 640px) {
   html {
-    font-size: 14px;
+    font-size: 14px;  /* ขนาดฟอนต์พื้นฐาน 14px */
   }
   
+  /* ลด padding ของ Admin Card */
   .admin-card {
     padding: 1.5rem;
   }
   
+  /* ลด padding ของ Tour Modal */
   .tour-modal {
     padding: 2.5rem 2rem;
     max-width: 95vw;
   }
   
+  /* ลดขนาดไอคอน Tour */
   .tour-icon {
     font-size: 4rem;
   }
 }
 
-/* Mobile Portrait */
+/* ===== มือถือแนวตั้ง (Mobile Portrait) ===== */
+/* หน้าจอกว้างไม่เกิน 480px */
 @media (max-width: 480px) {
   html {
-    font-size: 13px;
+    font-size: 13px;  /* ลดขนาดฟอนต์พื้นฐานเป็น 13px */
   }
   
+  /* ลด padding ของ App Wrapper */
   .app-wrapper {
     padding: 15px 10px;
   }
   
+  /* ลดขนาด H1 สำหรับมือถือ */
   h1 {
     font-size: 1.8rem;
   }
   
+  /* ลดขนาด H2 */
   h2 {
     font-size: 1rem;
   }
   
+  /* ลดขนาด H3 */
   h3 {
     font-size: 1.4rem;
   }
   
+  /* ลดขนาดไอคอนในหัวข้อ */
   .header-icon {
     font-size: 2.5rem;
   }
   
+  /* ลด padding ของหน้าจอ Login */
   .login-screen {
     padding: 2.5rem 1.5rem;
   }
   
+  /* ลดขนาดไอคอน Login */
   .login-icon {
     font-size: 3.5rem;
   }
   
+  /* ลดขนาด H3 ในหน้าจอ Login */
   .login-screen h3 {
     font-size: 2rem;
   }
   
+  /* ลดขนาดและ padding ของปุ่ม Connect */
   .connect-btn {
     padding: 1.2rem 2.5rem;
     font-size: 1rem;
   }
-  
-  .feature-card {
-    padding: 1.5rem 1rem;
+
+  /* ===== ลด padding ของการ์ดฟีเจอร์ (สำหรับมือถือ) ===== */
+.feature-card {
+    padding: 1.5rem 1rem;  /* padding: บนล่าง 1.5rem, ซ้ายขวา 1rem */
   }
   
+  /* ===== ลดขนาดไอคอนฟีเจอร์ ===== */
   .feature-icon {
-    font-size: 2.5rem;
+    font-size: 2.5rem;  /* ขนาดไอคอน */
   }
   
+  /* ===== ลด padding ของส่วนหลักๆ ===== */
   .form-section,
   .admin-section,
   .complaints-section {
-    padding: 2rem 1.25rem;
+    padding: 2rem 1.25rem;  /* padding: บนล่าง 2rem, ซ้ายขวา 1.25rem */
   }
   
+  /* ===== ลด padding ของแถบ Wallet Info ===== */
   .wallet-info {
-    padding: 1.25rem 1.5rem;
+    padding: 1.25rem 1.5rem;  /* padding ด้านใน */
   }
   
+  /* ===== ลดขนาดและ padding ของโค้ด Wallet ===== */
   .wallet-code {
-    font-size: 0.85rem;
-    padding: 0.5rem 1rem;
+    font-size: 0.85rem;       /* ขนาดตัวอักษรเล็กลง */
+    padding: 0.5rem 1rem;     /* padding ด้านใน */
   }
   
+  /* ===== ลด padding และกว้างของหน้าจอโหลด ===== */
   .loading-content {
-    padding: 2.5rem 1.75rem;
-    max-width: 95vw;
+    padding: 2.5rem 1.75rem;  /* padding ด้านใน */
+    max-width: 95vw;          /* ความกว้างสูงสุด 95% ของ viewport */
   }
   
+  /* ===== ลดขนาดหัวข้อในหน้าจอโหลด ===== */
   .loading-content h3 {
-    font-size: 1.5rem;
+    font-size: 1.5rem;  /* ขนาดตัวอักษร */
   }
   
+  /* ===== ลดขนาด Circular Spinner ===== */
   .circular-spinner {
-    width: 80px;
-    height: 80px;
+    width: 80px;   /* กว้าง 80px */
+    height: 80px;  /* สูง 80px */
   }
   
+  /* ===== ลดขนาดจุดสีของ Spinner ===== */
   .spinner-segment::before {
-    width: 16px;
-    height: 16px;
+    width: 16px;   /* กว้าง 16px */
+    height: 16px;  /* สูง 16px */
   }
   
+  /* ===== ลด padding และขนาดตัวอักษรของ Input ทั้งหมด ===== */
   input,
   textarea,
   select {
-    padding: 1rem 1.2rem;
-    font-size: 1rem;
+    padding: 1rem 1.2rem;  /* padding ด้านใน */
+    font-size: 1rem;       /* ขนาดตัวอักษร */
   }
   
+  /* ===== ลด padding และขนาดตัวอักษรของปุ่ม Submit ===== */
   .submit-btn {
-    padding: 1.2rem 2rem;
-    font-size: 1rem;
+    padding: 1.2rem 2rem;  /* padding ด้านใน */
+    font-size: 1rem;       /* ขนาดตัวอักษร */
   }
   
+  /* ===== ปรับกล่องสถานะให้เรียงแนวตั้ง ===== */
   .status {
-    padding: 1.25rem 1.5rem;
-    flex-direction: column;
-    text-align: center;
+    padding: 1.25rem 1.5rem;    /* padding ด้านใน */
+    flex-direction: column;     /* เรียงแนวตั้ง */
+    text-align: center;         /* จัดข้อความกลาง */
   }
   
+  /* ===== ลดความกว้างขั้นต่ำของตาราง ===== */
   .complaints-table {
-    min-width: 900px;
+    min-width: 900px;  /* ความกว้างขั้นต่ำ 900px */
   }
 }
 
-/* Small Mobile (iPhone SE, etc.) */
+/* ===== มือถือขนาดเล็ก (iPhone SE, etc.) ===== */
+/* หน้าจอกว้างไม่เกิน 375px */
 @media (max-width: 375px) {
   html {
-    font-size: 12px;
+    font-size: 12px;  /* ลดขนาดฟอนต์พื้นฐานเป็น 12px (เล็กสุด) */
   }
   
+  /* ลด padding ของ App Wrapper ให้น้อยที่สุด */
   .app-wrapper {
     padding: 10px 8px;
   }
   
+  /* ลด padding ของหน้าจอ Login */
   .login-screen {
     padding: 2rem 1.25rem;
   }
   
+  /* ลด padding ของส่วนหลักๆ */
   .form-section,
   .admin-section,
   .complaints-section {
     padding: 1.75rem 1rem;
   }
   
+  /* ลดขนาด Spinner ให้เล็กที่สุด */
   .circular-spinner {
-    width: 70px;
-    height: 70px;
+    width: 70px;   /* กว้าง 70px */
+    height: 70px;  /* สูง 70px */
   }
   
+  /* ลดขนาดจุดสี Spinner */
   .spinner-segment::before {
-    width: 14px;
-    height: 14px;
+    width: 14px;   /* กว้าง 14px */
+    height: 14px;  /* สูง 14px */
   }
 }
 
-/* Landscape Mode for Mobile */
+/* ===== โหมดแนวนอนสำหรับมือถือ (Landscape Mode) ===== */
+/* หน้าจอสูงไม่เกิน 500px และอยู่ในโหมดแนวนอน */
 @media (max-height: 500px) and (orientation: landscape) {
+  /* App Wrapper เริ่มจากด้านบน (ไม่ center แนวตั้ง) */
   .app-wrapper {
     align-items: flex-start;
     padding: 20px 15px;
   }
   
+  /* ลด padding ของหน้าจอ Login */
   .login-screen {
     padding: 2rem;
   }
   
+  /* ลดขนาดไอคอนให้เล็กมาก (เพราะจอสูงน้อย) */
   .header-icon,
   .login-icon {
     font-size: 2rem;
     margin-bottom: 0.5rem;
   }
   
+  /* ซ่อนการ์ดฟีเจอร์ (เพื่อประหยัดพื้นที่แนวตั้ง) */
   .feature-cards {
     display: none;
   }
   
+  /* Tour Modal สามารถ Scroll ได้ */
   .tour-modal {
     padding: 2rem;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-height: 90vh;  /* ความสูงสูงสุด 90% ของ viewport */
+    overflow-y: auto;  /* แสดง scroll bar แนวตั้งเมื่อจำเป็น */
   }
   
+  /* ลด padding ของหน้าจอโหลด */
   .loading-content {
     padding: 2rem;
   }
   
+  /* ลดขนาด Spinner */
   .circular-spinner {
-    width: 60px;
-    height: 60px;
+    width: 60px;   /* กว้าง 60px */
+    height: 60px;  /* สูง 60px */
   }
 }
 
-/* TV and Large Displays */
+/* ===== TV และจอแสดงผลขนาดใหญ่ ===== */
+/* หน้าจอกว้างตั้งแต่ 1920px ขึ้นไป */
 @media (min-width: 1920px) {
+  /* เพิ่มความกว้างสูงสุดของ Container */
   .container {
     max-width: 1600px;
   }
   
+  /* เพิ่ม padding ของเซลล์ในตาราง (จอใหญ่มีพื้นที่เหลือ) */
   .complaints-table th,
   .complaints-table td {
     padding: 1.75rem 1.5rem;
   }
 }
 
-/* High DPI Displays (Retina) */
+/* ===== จอ High DPI (Retina Display) ===== */
+/* จอที่มีความละเอียดสูง เช่น Retina Display ของ Apple */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   * {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;      /* ทำให้ตัวอักษรเรียบขึ้นบน WebKit (Safari, Chrome) */
+    -moz-osx-font-smoothing: grayscale;       /* ทำให้ตัวอักษรเรียบขึ้นบน macOS Firefox */
   }
 }
 
-/* Touch Device Optimizations */
+/* ===== การปรับแต่งสำหรับอุปกรณ์ Touch (มือถือ, แท็บเล็ต) ===== */
+/* อุปกรณ์ที่ไม่มี hover และใช้สัมผัส (touch) */
 @media (hover: none) and (pointer: coarse) {
-  /* Larger touch targets for mobile */
+  /* เพิ่มขนาดขั้นต่ำของปุ่มเพื่อให้แตะง่าย (44x44px ตามมาตรฐาน) */
   button,
   input,
   select,
   .filter-btn,
   .btn-action {
-    min-height: 44px;
-    min-width: 44px;
+    min-height: 44px;  /* ความสูงขั้นต่ำ 44px */
+    min-width: 44px;   /* ความกว้างขั้นต่ำ 44px */
   }
   
+  /* เปลี่ยน cursor ของแถวในตารางเป็นปกติ (ไม่ใช่มือชี้) */
   .complaints-table tbody tr {
     cursor: default;
   }
   
-  /* Remove hover effects on touch devices */
+  /* ยกเลิก hover effect บนอุปกรณ์ touch (เพราะไม่มี hover) */
   .complaints-table tbody tr:hover td {
-    background: rgba(15, 23, 42, 0.4);
+    background: rgba(15, 23, 42, 0.4);  /* คงสีเดิม */
   }
   
-  /* Improve scrolling on mobile */
+  /* ปรับปรุงการ Scroll บนมือถือ */
   .table-wrapper {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;  /* Smooth scrolling บน iOS */
+    scroll-behavior: smooth;            /* Smooth scrolling แบบปกติ */
   }
 }
 
 /* =====================================================
    ACCESSIBILITY & PRINT
    ===================================================== */
+/* ===== การเข้าถึง: ลด Animation สำหรับผู้ที่ไวต่อความเคลื่อนไหว ===== */
+/* เมื่อผู้ใช้เปิดการตั้งค่า "Reduce Motion" ในระบบปฏิบัติการ */
 @media (prefers-reduced-motion: reduce) {
+  /* ลดความเร็ว Animation ให้น้อยมากๆ และเล่นแค่ครั้งเดียว */
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;          /* ระยะเวลา Animation แทบไม่มี */
+    animation-iteration-count: 1 !important;        /* เล่นแค่ 1 ครั้ง */
+    transition-duration: 0.01ms !important;         /* ระยะเวลา Transition แทบไม่มี */
   }
 }
 
+/* ===== การตั้งค่าสำหรับการพิมพ์ (Print) ===== */
 @media print {
+  /* ซ่อนส่วนที่ไม่จำเป็นเมื่อพิมพ์ */
   .wallet-info,
   .form-section,
   .admin-section,
   button,
   .loading-overlay,
   .tour-overlay {
-    display: none !important;
+    display: none !important;  /* ซ่อนทั้งหมด */
   }
   
+  /* ป้องกันตารางแตกข้ามหน้า */
   .complaints-table {
-    page-break-inside: avoid;
+    page-break-inside: avoid;  /* พยายามไม่ให้ตารางแตกเป็น 2 หน้า */
   }
 }
 
 /* =====================================================
    UTILITY CLASSES
    ===================================================== */
+/* ===== Class เสริมต่างๆ ที่ใช้บ่อย (Utility Classes) ===== */
+
+/* ===== จัดข้อความกลาง ===== */
 .text-center {
   text-align: center;
 }
 
+/* ===== ไม่มี Margin ด้านล่าง ===== */
 .mb-0 {
   margin-bottom: 0;
 }
 
+/* ===== Margin ด้านบน 2rem ===== */
 .mt-2 {
   margin-top: 2rem;
 }
 
+/* ===== ซ่อน Element ===== */
 .hidden {
   display: none;
 }
 
+/* ===== แสดง Element ===== */
 .visible {
   display: block;
 }
